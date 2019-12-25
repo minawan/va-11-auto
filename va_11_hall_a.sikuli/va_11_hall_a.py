@@ -492,13 +492,15 @@ class Recipe:
         self.recipe = recipe
         self.add_opt = add_opt
         self.dry_run = dry_run
-    def apply(self, ingredient, button, slot, blender):
+    def apply(self, ingredient, button, slot, blender, double=False):
         slot.click()
+        button[RESET].click()
         for name, screen_element in ingredient.items():
             if self.recipe[name] < 0 and self.add_opt:
                 screen_element.dragDrop(blender)
             else:
-                for _ in range(self.recipe[name]):
+                max_count = 2 * self.recipe[name] if double else self.recipe[name] 
+                for _ in range(max_count):
                     screen_element.dragDrop(blender)
         if self.recipe[ICE]:
             button[ICE].click()
@@ -508,7 +510,8 @@ class Recipe:
         wait(5 if self.recipe[BLEND] else 1)
         button[MIX].click()
         if self.dry_run:
-            button[RESET].click()
+            pass
+            #button[RESET].click()
         else:
             button[MIX].click()
 
@@ -542,17 +545,17 @@ button = {
 blender = ScreenElement(OTHER, BLENDER)
 
 add_opt = True
-dry_run = True
+#add_opt = False
+#dry_run = True
+dry_run = False
 slot = left_slot
 #slot = right_slot
+#double = True
+double = False
 Settings.MoveMouseDelay = 0.1
 Settings.DelayBeforeMouseDown = 0.1
 Settings.DelayBeforeDrag = 0.1
 Settings.DelayBeforeDrop = 0.1
-
-drink_recipe = dict()
-for name, attr in drink.items():
-    drink_recipe[name] = Recipe(attr[RECIPE], add_opt, dry_run)
 
 #drink_name = BAD_TOUCH
 #drink_name = BEER
@@ -565,7 +568,7 @@ for name, attr in drink.items():
 #drink_name = FLUFFY_DREAM
 #drink_name = FRINGE_WEAVER
 #drink_name = FROTHY_WATER
-drink_name = GRIZZLY_TEMPLE
+#drink_name = GRIZZLY_TEMPLE
 #drink_name = GUT_PUNCH
 #drink_name = MARSBLAST
 #drink_name = MERCURYBLAST
@@ -579,6 +582,18 @@ drink_name = GRIZZLY_TEMPLE
 #drink_name = SUPLEX
 #drink_name = ZEN_STAR
 
-drink_recipe[drink_name].apply(ingredient, button, slot, blender)
+if double and drink_name in [MARSBLAST, PIANO_MAN, PIANO_WOMAN, ZEN_STAR]:
+    print('{} is already big.'.format(drink_name))
+    double = False
+
+if double and not add_opt and drink_name == CREVICE_SPIKE:
+    print('Adding karmotrine to big crevice spike.')
+    add_opt = True
+
+drink_recipe = dict()
+for name, attr in drink.items():
+    drink_recipe[name] = Recipe(attr[RECIPE], add_opt, dry_run)
+
+drink_recipe[drink_name].apply(ingredient, button, slot, blender, double=double)
 #wait(5)
 
