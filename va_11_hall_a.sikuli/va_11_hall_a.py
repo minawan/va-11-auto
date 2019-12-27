@@ -20,6 +20,7 @@ KARMOTRINE = 'karmotrine'
 
 # Other
 BLENDER = 'blender'
+SHORTCUT = 'shortcut'
 
 # Coordinate
 X = 'x'
@@ -96,10 +97,12 @@ centroid = {
             ICE: {
                 X: 759,
                 Y: 340,
+                SHORTCUT: 'a'
                 },
             AGE: {
                 X: 760,
                 Y: 473,
+                SHORTCUT: 's',
                 },
             LEFT_SLOT: {
                 X: 1026,
@@ -116,28 +119,34 @@ centroid = {
             MIX: {
                 X: 1180,
                 Y: 542,
+                SHORTCUT: Key.SPACE,
                 },
             },
         INGREDIENT: {
             ADELHYDE: {
                 X: 834,
                 Y: 345,
+                SHORTCUT: 'q',
                 },
             BRONSON_EXTRACT: {
                 X: 984,
                 Y: 345,
+                SHORTCUT: 'w',
                 },
             POWDERED_DELTA: {
                 X: 1133,
                 Y: 345,
+                SHORTCUT: 'e',
                 },
             FLANERGIDE: {
                 X: 835,
                 Y: 467,
+                SHORTCUT: 'r',
                 },
             KARMOTRINE: {
                 X: 1135,
                 Y: 466,
+                SHORTCUT: 't',
                 },
             },
         OTHER: {
@@ -475,17 +484,34 @@ drink = {A_FEDORA_WITH_PERFUME_AND_A_PLUM: {FLAVOR: NONE,
               TRAIT: BLAND}}
 
 class ScreenElement:
-    def __init__(self, category, name):
-        coord = centroid[category][name]
-        x = coord[X]
-        y = coord[Y]
+    def __init__(self, category, name, use_shortcut=False):
+        entry = centroid[category][name]
+        x = entry[X]
+        y = entry[Y]
         self.centroid = (x, y)
+        self.use_shortcut = use_shortcut
+        try:
+            self.shortcut = entry[SHORTCUT]
+        except KeyError:
+            print('Shortcut not available for {name} of type {category}'.format(name=name, category=category))
+            self.shortcut = 'l'
     def click(self):
         self.dragDrop(self)
     def dragDrop(self, element):
         dragDrop(Location(*self.centroid), Location(*element.centroid))
-
-
+    def trigger(self):
+        if self.use_shortcut:
+            wait(0.3)
+            type(self.shortcut)
+        else:
+            self.click()
+    # jython pls why no overload
+    def trigger_with_arg(self, element):
+        if self.use_shortcut:
+            wait(0.3)
+            type(self.shortcut)
+        else:
+            self.dragDrop(element)
 
 class Recipe:
     def __init__(self, recipe, add_opt, dry_run):
@@ -493,40 +519,40 @@ class Recipe:
         self.add_opt = add_opt
         self.dry_run = dry_run
     def apply(self, ingredient, button, slot, blender, double=False):
-        slot.click()
-        button[RESET].click()
+        #slot.trigger()
+        button[RESET].trigger()
         for name, screen_element in ingredient.items():
             if self.recipe[name] < 0 and self.add_opt:
-                screen_element.dragDrop(blender)
+                screen_element.trigger_with_arg(blender)
             else:
                 max_count = 2 * self.recipe[name] if double else self.recipe[name] 
                 for _ in range(max_count):
-                    screen_element.dragDrop(blender)
+                    screen_element.trigger_with_arg(blender)
         if self.recipe[ICE]:
-            button[ICE].click()
+            button[ICE].trigger()
         if self.recipe[AGE]:
-            button[AGE].click()
-        button[MIX].click()
+            button[AGE].trigger()
+        button[MIX].trigger()
         wait(5 if self.recipe[BLEND] else 1)
-        button[MIX].click()
+        button[MIX].trigger()
         if self.dry_run:
             pass
-            #button[RESET].click()
+            #button[RESET].trigger()
         else:
-            button[MIX].click()
+            button[MIX].trigger()
 
-adelhyde = ScreenElement(INGREDIENT, ADELHYDE)
-bronson_extract = ScreenElement(INGREDIENT, BRONSON_EXTRACT)
-powdered_delta = ScreenElement(INGREDIENT, POWDERED_DELTA)
-flanergide = ScreenElement(INGREDIENT, FLANERGIDE)
-karmotrine = ScreenElement(INGREDIENT, KARMOTRINE)
+adelhyde = ScreenElement(INGREDIENT, ADELHYDE, use_shortcut=False)
+bronson_extract = ScreenElement(INGREDIENT, BRONSON_EXTRACT, use_shortcut=False)
+powdered_delta = ScreenElement(INGREDIENT, POWDERED_DELTA, use_shortcut=False)
+flanergide = ScreenElement(INGREDIENT, FLANERGIDE, use_shortcut=False)
+karmotrine = ScreenElement(INGREDIENT, KARMOTRINE, use_shortcut=False)
 
-ice = ScreenElement(BUTTON, ICE)
-age = ScreenElement(BUTTON, AGE)
+ice = ScreenElement(BUTTON, ICE, use_shortcut=False)
+age = ScreenElement(BUTTON, AGE, use_shortcut=False)
 left_slot = ScreenElement(BUTTON, LEFT_SLOT)
 right_slot = ScreenElement(BUTTON, RIGHT_SLOT)
 reset = ScreenElement(BUTTON, RESET)
-mix = ScreenElement(BUTTON, MIX)
+mix = ScreenElement(BUTTON, MIX, use_shortcut=False)
 
 ingredient = {
         ADELHYDE: adelhyde,
@@ -546,12 +572,12 @@ blender = ScreenElement(OTHER, BLENDER)
 
 add_opt = True
 #add_opt = False
-#dry_run = True
-dry_run = False
+dry_run = True
+#dry_run = False
 slot = left_slot
 #slot = right_slot
-#double = True
-double = False
+double = True
+#double = False
 Settings.MoveMouseDelay = 0.1
 Settings.DelayBeforeMouseDown = 0.1
 Settings.DelayBeforeDrag = 0.1
@@ -577,7 +603,7 @@ Settings.DelayBeforeDrop = 0.1
 #drink_name = PIANO_WOMAN
 #drink_name = PILEDRIVER
 #drink_name = SPARKLE_STAR
-#drink_name = SUGAR_RUSH
+drink_name = SUGAR_RUSH
 #drink_name = SUNSHINE_CLOUD
 #drink_name = SUPLEX
 #drink_name = ZEN_STAR
