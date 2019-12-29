@@ -67,33 +67,11 @@ class Recipe:
         else:
             button[MIX].trigger()
 
-adelhyde = ScreenElement(INGREDIENT, ADELHYDE, use_shortcut=False)
-bronson_extract = ScreenElement(INGREDIENT, BRONSON_EXTRACT, use_shortcut=False)
-powdered_delta = ScreenElement(INGREDIENT, POWDERED_DELTA, use_shortcut=False)
-flanergide = ScreenElement(INGREDIENT, FLANERGIDE, use_shortcut=False)
-karmotrine = ScreenElement(INGREDIENT, KARMOTRINE, use_shortcut=False)
+ingredients = [ADELHYDE, BRONSON_EXTRACT, POWDERED_DELTA, FLANERGIDE, KARMOTRINE]
+buttons = [ICE, AGE, RESET, MIX]
 
-ice = ScreenElement(BUTTON, ICE, use_shortcut=False)
-age = ScreenElement(BUTTON, AGE, use_shortcut=False)
-left_slot = ScreenElement(BUTTON, LEFT_SLOT)
-right_slot = ScreenElement(BUTTON, RIGHT_SLOT)
-reset = ScreenElement(BUTTON, RESET)
-mix = ScreenElement(BUTTON, MIX, use_shortcut=False)
-
-ingredient = {
-        ADELHYDE: adelhyde,
-        BRONSON_EXTRACT: bronson_extract,
-        POWDERED_DELTA: powdered_delta,
-        FLANERGIDE: flanergide,
-        KARMOTRINE: karmotrine,
-        }
-button = {
-        ICE: ice,
-        AGE: age,
-        RESET: reset,
-        MIX: mix,
-        }
-
+ingredient_element = dict([(name, ScreenElement(INGREDIENT, name)) for name in ingredients])
+button_element = dict([(name, ScreenElement(BUTTON, name)) for name in buttons])
 blender = ScreenElement(OTHER, BLENDER)
 
 add_opt = True
@@ -142,10 +120,8 @@ if double and not add_opt and drink_name == CREVICE_SPIKE:
     print('Adding karmotrine to big crevice spike.')
     add_opt = True
 
-drink_recipe = dict()
-for name, attr in drink.items():
-    drink_recipe[name] = Recipe(attr[RECIPE], add_opt, dry_run)
+drink_recipe = dict([(name, Recipe(attr[RECIPE], add_opt, dry_run)) for name, attr in drink.items()])
 
-drink_recipe[drink_name].apply(ingredient, button, slot, blender, double=double)
+drink_recipe[drink_name].apply(ingredient_element, button_element, slot, blender, double=double)
 #wait(5)
 
