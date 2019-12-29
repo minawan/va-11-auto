@@ -1,8 +1,20 @@
 import csv
+import pathlib
 import pprint
+import subprocess
+
+REFERENCE_SHEET_BASENAME = 'VA-11_Cheat_Sheet'
+REFERENCE_SHEET_FILENAME_ODS = REFERENCE_SHEET_BASENAME + '.ods'
+
+# Convert reference sheet from ods to csv.
+ods_path = pathlib.Path(REFERENCE_SHEET_FILENAME_ODS)
+if not ods_path.exists():
+  print('{filename} not found!'.format(filename=REFERENCE_SHEET_FILENAME_ODS))
+  exit()
+subprocess.run(['libreoffice', '--headless', '--convert-to', 'csv', REFERENCE_SHEET_FILENAME_ODS])
 
 items = dict()
-with open('VA-11_Cheat_Sheet.csv') as csv_file:
+with open(REFERENCE_SHEET_BASENAME + '.csv') as csv_file:
   reader = csv.DictReader(csv_file)
   for row in reader:
     drink = dict()
