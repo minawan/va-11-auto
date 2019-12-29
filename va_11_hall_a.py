@@ -15,11 +15,12 @@ if not ods_path.exists():
   exit()
 subprocess.run(['libreoffice', '--headless', '--convert-to', 'csv', REFERENCE_SHEET_FILENAME_ODS])
 
-items = dict()
+items = []
 with open(REFERENCE_SHEET_BASENAME + '.csv') as csv_file:
   reader = csv.DictReader(csv_file)
   for row in reader:
     drink = dict()
+    drink['name'] = row['name']
     drink['flavor'] = row['flavor']
     drink['kind'] = row['kind']
     drink['trait'] = row['trait']
@@ -35,7 +36,7 @@ with open(REFERENCE_SHEET_BASENAME + '.csv') as csv_file:
     recipe['mix'] = row['mix'] == 'Y'
     recipe['blend'] = row['blend'] == 'Y'
     drink['recipe'] = recipe
-    items[row['name']] = drink
+    items.append(drink)
 
 with open(OUTPUT_FILENAME, 'w') as output_file:
-  output_file.write(json.dumps(items))
+  output_file.write(json.dumps(items, indent=2))
