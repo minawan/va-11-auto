@@ -1,10 +1,12 @@
 import csv
+import json
 import pathlib
 import pprint
 import subprocess
 
 REFERENCE_SHEET_BASENAME = 'VA-11_Cheat_Sheet'
 REFERENCE_SHEET_FILENAME_ODS = REFERENCE_SHEET_BASENAME + '.ods'
+OUTPUT_FILENAME = REFERENCE_SHEET_BASENAME + '.json'
 
 # Convert reference sheet from ods to csv.
 ods_path = pathlib.Path(REFERENCE_SHEET_FILENAME_ODS)
@@ -34,4 +36,6 @@ with open(REFERENCE_SHEET_BASENAME + '.csv') as csv_file:
     recipe['blend'] = row['blend'] == 'Y'
     drink['recipe'] = recipe
     items[row['name']] = drink
-pprint.pprint(items)
+
+with open(OUTPUT_FILENAME, 'w') as output_file:
+  output_file.write(json.dumps(items))
