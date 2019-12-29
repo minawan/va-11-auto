@@ -45,7 +45,7 @@ class Recipe:
         self.add_opt = add_opt
         self.dry_run = dry_run
     def apply(self, ingredient, button, slot, blender, double=False):
-        #slot.trigger()
+        button[slot].trigger()
         button[RESET].trigger()
         for name, screen_element in ingredient.items():
             if self.recipe[name] < 0 and self.add_opt:
@@ -68,18 +68,18 @@ class Recipe:
             button[MIX].trigger()
 
 ingredients = [ADELHYDE, BRONSON_EXTRACT, POWDERED_DELTA, FLANERGIDE, KARMOTRINE]
-buttons = [ICE, AGE, RESET, MIX]
+buttons = [ICE, AGE, LEFT_SLOT, RIGHT_SLOT, RESET, MIX]
 
-ingredient_element = dict([(name, ScreenElement(INGREDIENT, name)) for name in ingredients])
-button_element = dict([(name, ScreenElement(BUTTON, name)) for name in buttons])
+ingredient_element = { name: ScreenElement(INGREDIENT, name) for name in ingredients }
+button_element = { name: ScreenElement(BUTTON, name) for name in buttons }
 blender = ScreenElement(OTHER, BLENDER)
 
 add_opt = True
 #add_opt = False
 dry_run = True
 #dry_run = False
-slot = left_slot
-#slot = right_slot
+slot = LEFT_SLOT
+#slot = RIGHT_SLOT
 #double = True
 double = False
 Settings.MoveMouseDelay = 0.1
@@ -120,7 +120,7 @@ if double and not add_opt and drink_name == CREVICE_SPIKE:
     print('Adding karmotrine to big crevice spike.')
     add_opt = True
 
-drink_recipe = dict([(name, Recipe(attr[RECIPE], add_opt, dry_run)) for name, attr in drink.items()])
+drink_recipe = { name: Recipe(attr[RECIPE], add_opt, dry_run) for name, attr in drink.items() }
 
 drink_recipe[drink_name].apply(ingredient_element, button_element, slot, blender, double=double)
 #wait(5)
