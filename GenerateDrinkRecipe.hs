@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
 
@@ -9,6 +10,7 @@ import qualified Data.Text as Text
 import Data.Text (Text)
 import Data.Text.Encoding (decodeUtf8)
 import Data.Text.IO as I hiding (putStrLn)
+import GHC.Generics
 
 jsonFile :: FilePath
 jsonFile = "VA-11_Cheat_Sheet.json"
@@ -66,7 +68,7 @@ data Drink =
         , trait :: !Text
         , price :: Int
         , recipe :: DrinkRecipe
-        } deriving Show
+        } deriving (Generic, Show)
 
 data DrinkRecipe =
   DrinkRecipe { adelhyde :: Int
@@ -78,7 +80,7 @@ data DrinkRecipe =
               , age :: Bool
               , mix :: Bool
               , blend :: Bool
-              } deriving Show
+              } deriving (Generic, Show)
 
 instance Show DrinkAttribute where
   show Flavor = "flavor"
@@ -100,51 +102,8 @@ instance Show RecipeAction where
   show Mix = "mix"
   show Blend = "blend"
 
-instance FromJSON Drink where
-  parseJSON (Object v) =
-    Drink <$> v .: "name"
-          <*> v .: "flavor"
-          <*> v .: "kind"
-          <*> v .: "trait"
-          <*> v .: "price"
-          <*> v .: "recipe"
-  parseJSON _ = mzero
-
-instance ToJSON Drink where
-  toJSON (Drink name flavor kind trait price recipe) =
-    object [ "name" .= name
-           , "flavor" .= flavor
-           , "kind" .= kind
-           , "trait" .= trait
-           , "price" .= price
-           , "recipe" .= recipe
-           ]
-
-instance FromJSON DrinkRecipe where
-  parseJSON (Object v) =
-    DrinkRecipe <$> v .: "adelhyde"
-                <*> v .: "bronson_extract"
-                <*> v .: "powdered_delta"
-                <*> v .: "flanergide"
-                <*> v .: "karmotrine"
-                <*> v .: "ice"
-                <*> v .: "age"
-                <*> v .: "mix"
-                <*> v .: "blend"
-  parseJSON _ = mzero
-
-instance ToJSON DrinkRecipe where
-  toJSON (DrinkRecipe adelhyde bronsonExtract powderedDelta flanergide karmotrine addIce age mix blend) =
-    object [ "adelhyde" .= adelhyde
-           , "bronson_extract" .= bronsonExtract
-           , "powdered_delta" .= powderedDelta
-           , "flanergide" .= flanergide
-           , "karmotrine" .= karmotrine
-           , "ice" .= addIce
-           , "age" .= age
-           , "mix" .= mix
-           , "blend" .= blend
-           ]
+instance FromJSON Drink
+instance FromJSON DrinkRecipe
 
 getRawJSON :: FilePath -> IO B.ByteString
 getRawJSON = B.readFile
