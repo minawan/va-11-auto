@@ -23,21 +23,21 @@ data DrinkAttribute = Flavor
                     | Trait
                     | Price
                     | Recipe
-                    deriving (Enum)
+                    deriving (Bounded, Enum)
 
 data DrinkFlavor = Bitter
                  | Bubbly
                  | Sour
                  | Spicy
                  | Sweet
-                 deriving (Enum, Show)
+                 deriving (Bounded, Enum, Show)
 
 data DrinkKind = Classic
                | Classy
                | Girly
                | Manly
                | Promo
-               deriving (Enum, Show)
+               deriving (Bounded, Enum, Show)
 
 data DrinkTrait = Bland
                 | Burning
@@ -46,20 +46,20 @@ data DrinkTrait = Bland
                 | Soft
                 | Strong
                 | Vintage
-                deriving (Enum, Show)
+                deriving (Bounded, Enum, Show)
 
 data Ingredient = Adelhyde
                 | BronsonExtract
                 | PowderedDelta
                 | Flanergide
                 | Karmotrine
-                deriving (Enum)
+                deriving (Bounded, Enum)
 
 data RecipeAction = AddIce
                   | Age
                   | Mix
                   | Blend
-                  deriving (Enum)
+                  deriving (Bounded, Enum)
 
 data Drink =
   Drink { name :: !Text
@@ -105,6 +105,24 @@ instance Show RecipeAction where
 instance FromJSON Drink
 instance FromJSON DrinkRecipe
 
+drinkAttributeConstants :: [DrinkAttribute]
+drinkAttributeConstants = [minBound..maxBound]
+
+drinkFlavorConstants :: [DrinkFlavor]
+drinkFlavorConstants = [minBound..maxBound]
+
+drinkKindConstants :: [DrinkKind]
+drinkKindConstants = [minBound..maxBound]
+
+drinkTraitConstants :: [DrinkTrait]
+drinkTraitConstants = [minBound..maxBound]
+
+ingredientConstants :: [Ingredient]
+ingredientConstants = [minBound..maxBound]
+
+recipeActionConstants :: [RecipeAction]
+recipeActionConstants = [minBound..maxBound]
+
 getRawJSON :: FilePath -> IO B.ByteString
 getRawJSON = B.readFile
 
@@ -112,13 +130,7 @@ toText :: Show a => a -> Text
 toText = Text.pack . show
 
 constantsFromDrink :: [Text]
-constantsFromDrink = map (Text.pack . show)
-  [ Flavor
-  , Kind
-  , Trait
-  , Price
-  , Recipe
-  ]
+constantsFromDrink = map (Text.pack . show) drinkAttributeConstants
 
 constantsFromRecipe :: [Text]
 constantsFromRecipe =
@@ -129,42 +141,6 @@ constantsFromRecipe =
            , map toText drinkTraitConstants
            ]
   where
-    ingredientConstants =
-      [ Adelhyde
-      , BronsonExtract
-      , PowderedDelta
-      , Flanergide
-      , Karmotrine
-      ]
-    recipeActionConstants =
-      [ AddIce
-      , Age
-      , Mix
-      , Blend
-      ]
-    drinkFlavorConstants =
-      [ Bitter
-      , Bubbly
-      , Sour
-      , Spicy
-      , Sweet
-      ]
-    drinkKindConstants =
-      [ Classic
-      , Classy
-      , Girly
-      , Manly
-      , Promo
-      ]
-    drinkTraitConstants =
-      [ Bland
-      , Burning
-      , Happy
-      , Sobering
-      , Soft
-      , Strong
-      , Vintage
-      ]
 
 convertConstantToSymbol :: Text -> Text
 convertConstantToSymbol "" = "NONE"
