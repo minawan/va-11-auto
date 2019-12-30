@@ -1,1 +1,7 @@
+GenerateDrinkRecipe
+*.csv
+*.dyn_hi
+*.dyn_o
+*.hi
 *.json
+*.o
