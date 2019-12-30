@@ -54,8 +54,8 @@ class Recipe:
                 max_count = 2 * self.recipe[name] if double else self.recipe[name] 
                 for _ in range(max_count):
                     screen_element.trigger_with_arg(blender)
-        if self.recipe[ICE]:
-            button[ICE].trigger()
+        if self.recipe[ADDICE]:
+            button[ADDICE].trigger()
         if self.recipe[AGE]:
             button[AGE].trigger()
         button[MIX].trigger()
@@ -67,8 +67,8 @@ class Recipe:
         else:
             button[MIX].trigger()
 
-ingredients = [ADELHYDE, BRONSON_EXTRACT, POWDERED_DELTA, FLANERGIDE, KARMOTRINE]
-buttons = [ICE, AGE, LEFT_SLOT, RIGHT_SLOT, RESET, MIX]
+ingredients = [ADELHYDE, BRONSONEXTRACT, POWDEREDDELTA, FLANERGIDE, KARMOTRINE]
+buttons = [ADDICE, AGE, LEFTSLOT, RIGHTSLOT, RESET, MIX]
 
 ingredient_element = { name: ScreenElement(INGREDIENT, name) for name in ingredients }
 button_element = { name: ScreenElement(BUTTON, name) for name in buttons }
@@ -78,8 +78,8 @@ add_opt = True
 #add_opt = False
 dry_run = True
 #dry_run = False
-slot = LEFT_SLOT
-#slot = RIGHT_SLOT
+slot = LEFTSLOT
+#slot = RIGHTSLOT
 #double = True
 double = False
 Settings.MoveMouseDelay = 0.1
@@ -88,7 +88,7 @@ Settings.DelayBeforeDrag = 0.1
 Settings.DelayBeforeDrop = 0.1
 
 #drink_name = BAD_TOUCH
-#drink_name = BEER
+drink_name = BEER
 #drink_name = BLEEDING_JANE
 #drink_name = BLOOM_LIGHT
 #drink_name = BLUE_FAIRY
@@ -111,7 +111,7 @@ Settings.DelayBeforeDrop = 0.1
 #drink_name = SUNSHINE_CLOUD
 #drink_name = SUPLEX
 #drink_name = ZEN_STAR
-drink_name = FLAMING_MOAI
+#drink_name = FLAMING_MOAI
 
 if double and drink_name in [MARSBLAST, PIANO_MAN, PIANO_WOMAN, ZEN_STAR, FLAMING_MOAI]:
     print('{drink_name} is already big.'.format(drink_name=drink_name))

@@ -23,7 +23,7 @@ data DrinkAttribute = Flavor
                     | Trait
                     | Price
                     | Recipe
-                    deriving (Bounded, Enum)
+                    deriving (Bounded, Enum, Show)
 
 data DrinkFlavor = Bitter
                  | Bubbly
@@ -53,13 +53,13 @@ data Ingredient = Adelhyde
                 | PowderedDelta
                 | Flanergide
                 | Karmotrine
-                deriving (Bounded, Enum)
+                deriving (Bounded, Enum, Show)
 
 data RecipeAction = AddIce
                   | Age
                   | Mix
                   | Blend
-                  deriving (Bounded, Enum)
+                  deriving (Bounded, Enum, Show)
 
 data Drink =
   Drink { name :: !Text
@@ -81,26 +81,6 @@ data DrinkRecipe =
               , mix :: Bool
               , blend :: Bool
               } deriving (Generic, Show)
-
-instance Show DrinkAttribute where
-  show Flavor = "flavor"
-  show Kind = "kind"
-  show Trait = "trait"
-  show Price = "price"
-  show Recipe = "recipe"
-
-instance Show Ingredient where
-  show Adelhyde = "adelhyde"
-  show BronsonExtract = "bronson_extract"
-  show PowderedDelta = "powdered_delta"
-  show Flanergide = "flanergide"
-  show Karmotrine = "karmotrine"
-
-instance Show RecipeAction where
-  show AddIce = "ice"
-  show Age = "age"
-  show Mix = "mix"
-  show Blend = "blend"
 
 instance FromJSON Drink
 instance FromJSON DrinkRecipe

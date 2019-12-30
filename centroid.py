@@ -1,34 +1,34 @@
 # Category
-BUTTON = 'button'
-INGREDIENT = 'ingredient'
-OTHER = 'other'
+BUTTON = 'Button'
+INGREDIENT = 'Ingredient'
+OTHER = 'Other'
 
 # Button
-ICE = 'ice'
-AGE = 'age'
-LEFT_SLOT = 'left_slot'
-RIGHT_SLOT = 'right_slot'
-RESET = 'reset'
-MIX = 'mix'
+ADDICE = 'AddIce'
+AGE = 'Age'
+LEFTSLOT = 'LeftSlot'
+RIGHTSLOT = 'RightSlot'
+RESET = 'Reset'
+MIX = 'Mix'
 
 # Ingredient
-ADELHYDE = 'adelhyde'
-BRONSON_EXTRACT = 'bronson_extract'
-POWDERED_DELTA = 'powdered_delta'
-FLANERGIDE = 'flanergide'
-KARMOTRINE = 'karmotrine'
+ADELHYDE = 'Adelhyde'
+BRONSONEXTRACT = 'BronsonExtract'
+POWDEREDDELTA = 'PowderedDelta'
+FLANERGIDE = 'Flanergide'
+KARMOTRINE = 'Karmotrine'
 
 # Other
-BLENDER = 'blender'
-SHORTCUT = 'shortcut'
+BLENDER = 'Blender'
+SHORTCUT = 'Shortcut'
 
 # Coordinate
-X = 'x'
-Y = 'y'
+X = 'X'
+Y = 'Y'
 
 centroid = {
         BUTTON: {
-            ICE: {
+            ADDICE: {
                 X: 759,
                 Y: 340,
                 SHORTCUT: 'a'
@@ -38,11 +38,11 @@ centroid = {
                 Y: 473,
                 SHORTCUT: 's',
                 },
-            LEFT_SLOT: {
+            LEFTSLOT: {
                 X: 1026,
                 Y: 242,
                 },
-            RIGHT_SLOT: {
+            RIGHTSLOT: {
                 X: 1177,
                 Y: 244,
                 },
@@ -62,12 +62,12 @@ centroid = {
                 Y: 345,
                 SHORTCUT: 'q',
                 },
-            BRONSON_EXTRACT: {
+            BRONSONEXTRACT: {
                 X: 984,
                 Y: 345,
                 SHORTCUT: 'w',
                 },
-            POWDERED_DELTA: {
+            POWDEREDDELTA: {
                 X: 1133,
                 Y: 345,
                 SHORTCUT: 'e',
