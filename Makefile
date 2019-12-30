@@ -1,7 +1,7 @@
 all:
 	ghc GenerateDrinkRecipe
 
-run:
+run: all
 	python3 va_11_hall_a.py
 	./GenerateDrinkRecipe
 

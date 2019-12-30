@@ -87,7 +87,7 @@ Settings.DelayBeforeMouseDown = 0.1
 Settings.DelayBeforeDrag = 0.1
 Settings.DelayBeforeDrop = 0.1
 
-drink_name = BAD_TOUCH
+#drink_name = BAD_TOUCH
 #drink_name = BEER
 #drink_name = BLEEDING_JANE
 #drink_name = BLOOM_LIGHT
@@ -111,8 +111,9 @@ drink_name = BAD_TOUCH
 #drink_name = SUNSHINE_CLOUD
 #drink_name = SUPLEX
 #drink_name = ZEN_STAR
+drink_name = FLAMING_MOAI
 
-if double and drink_name in [MARSBLAST, PIANO_MAN, PIANO_WOMAN, ZEN_STAR]:
+if double and drink_name in [MARSBLAST, PIANO_MAN, PIANO_WOMAN, ZEN_STAR, FLAMING_MOAI]:
     print('{drink_name} is already big.'.format(drink_name=drink_name))
     double = False
 
