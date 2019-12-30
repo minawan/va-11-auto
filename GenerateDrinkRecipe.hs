@@ -140,7 +140,6 @@ constantsFromRecipe =
            , map toText drinkKindConstants
            , map toText drinkTraitConstants
            ]
-  where
 
 convertConstantToSymbol :: Text -> Text
 convertConstantToSymbol "" = "NONE"
@@ -155,53 +154,93 @@ convertConstantsToInitializations = map initializeConstant
 
 initializeConstants :: [Drink] -> [Text]
 initializeConstants drinks = convertConstantsToInitializations constants
-  where drinkNames = map name drinks
-        constants = constantsFromDrink
-                 ++ constantsFromRecipe
-                 ++ drinkNames ++ [""]
+  where
+    drinkNames = map name drinks
+    constants = constantsFromDrink
+             ++ constantsFromRecipe
+             ++ drinkNames
+             ++ [""]
 
 
 boolToText :: Bool -> Text
 boolToText True = "True"
 boolToText False = "False"
 
+ingredientFromDrinkRecipe :: Ingredient -> DrinkRecipe -> Int
+ingredientFromDrinkRecipe Adelhyde = adelhyde
+ingredientFromDrinkRecipe BronsonExtract = bronsonExtract
+ingredientFromDrinkRecipe PowderedDelta = powderedDelta
+ingredientFromDrinkRecipe Flanergide = flanergide
+ingredientFromDrinkRecipe Karmotrine = karmotrine
+
+recipeActionFromDrinkRecipe :: RecipeAction -> DrinkRecipe -> Bool
+recipeActionFromDrinkRecipe AddIce = addIce
+recipeActionFromDrinkRecipe Age = age
+recipeActionFromDrinkRecipe Mix = mix
+recipeActionFromDrinkRecipe Blend = blend
+
 convertDrinkRecipeToPythonDict :: DrinkRecipe -> Text
-convertDrinkRecipeToPythonDict (DrinkRecipe adelhyde bronsonExtract powderedDelta flanergide karmotrine addIce age mix blend) =
+convertDrinkRecipeToPythonDict recipe =
     Text.concat
-      [ "{", indent, convertConstantToSymbol $ toText Adelhyde, colon, toText adelhyde, comma
-      , indent, convertConstantToSymbol $ toText BronsonExtract, colon, toText bronsonExtract, comma
-      , indent, convertConstantToSymbol $ toText PowderedDelta, colon, toText powderedDelta, comma
-      , indent, convertConstantToSymbol $ toText Flanergide, colon, toText flanergide, comma
-      , indent, convertConstantToSymbol $ toText Karmotrine, colon, toText karmotrine, comma
-      , indent, convertConstantToSymbol $ toText AddIce, colon, boolToText addIce, comma
-      , indent, convertConstantToSymbol $ toText Age, colon, boolToText age, comma
-      , indent, convertConstantToSymbol $ toText Mix, colon, boolToText mix, comma
-      , indent, convertConstantToSymbol $ toText Blend, colon, boolToText blend, comma, "\n  }"
+      [ "{"
+      , Text.concat $ map formatIngredientKeyValuePair ingredientConstants
+      , Text.concat $ map formatRecipeActionKeyValuePair recipeActionConstants
+      , "\n    }"
+      ]
+  where
+    colon = ": "
+    comma = ", "
+    indent = "\n      "
+    formatIngredientKeyValuePair ingredient =
+      Text.concat
+        [ indent
+        , convertConstantToSymbol $ toText ingredient
+        , colon
+        , toText $ ingredientFromDrinkRecipe ingredient recipe
+        , comma
+        ]
+    formatRecipeActionKeyValuePair action =
+      Text.concat
+        [ indent
+        , convertConstantToSymbol $ toText action
+        , colon
+        , boolToText $ recipeActionFromDrinkRecipe action recipe
+        , comma
+        ]
+
+drinkAttributeSymbolFromDrink :: DrinkAttribute -> Drink -> Text
+drinkAttributeSymbolFromDrink Flavor = convertConstantToSymbol . flavor
+drinkAttributeSymbolFromDrink Kind = convertConstantToSymbol . kind
+drinkAttributeSymbolFromDrink Trait = convertConstantToSymbol . trait
+drinkAttributeSymbolFromDrink Price = toText . price
+drinkAttributeSymbolFromDrink Recipe = convertDrinkRecipeToPythonDict . recipe
+
+convertToPythonDict :: Drink -> Text
+convertToPythonDict drink =
+    Text.concat
+      [ "  "
+      , convertConstantToSymbol $ name drink
+      , ": {"
+      , Text.concat $ map formatDrinkAttributeKeyValuePair drinkAttributeConstants
+      , "\n  },"
       ]
   where
     colon = ": "
     comma = ", "
     indent = "\n    "
-
-convertToPythonDict :: Drink -> Text
-convertToPythonDict (Drink name flavor kind trait price recipe) =
-    Text.concat
-      [ convertConstantToSymbol name, ": { "
-      , indent, convertConstantToSymbol $ toText Flavor, colon, convertConstantToSymbol flavor, comma
-      , indent, convertConstantToSymbol $ toText Kind, colon, convertConstantToSymbol kind, comma
-      , indent, convertConstantToSymbol $ toText Trait, colon, convertConstantToSymbol trait, comma
-      , indent, convertConstantToSymbol $ toText Price, colon, toText price, comma
-      , indent, convertConstantToSymbol $ toText Recipe, colon, convertDrinkRecipeToPythonDict recipe, ",\n},"
-      ]
-  where
-    colon = ": "
-    comma = ", "
-    indent = "\n  "
+    formatDrinkAttributeKeyValuePair attribute =
+      Text.concat
+        [ indent
+        , convertConstantToSymbol $ toText attribute
+        , colon
+        , drinkAttributeSymbolFromDrink attribute drink
+        , comma
+        ]
 
 generatePythonDict :: [Drink] -> Text
 generatePythonDict drinks =
   Text.concat [ Text.unlines $ initializeConstants drinks
-              , "drink = {"
+              , "drink = {\n"
               , Text.unlines $ map convertToPythonDict drinks
               , "}"
               ]
