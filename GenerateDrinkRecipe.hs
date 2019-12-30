@@ -2,13 +2,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
 
-import Control.Monad
 import Data.Aeson 
-import Data.Aeson.Text (encodeToLazyText)
 import qualified Data.ByteString.Lazy as B
 import qualified Data.Text as Text
 import Data.Text (Text)
-import Data.Text.Encoding (decodeUtf8)
 import Data.Text.IO as I hiding (putStrLn)
 import GHC.Generics
 
