@@ -1,0 +1,35 @@
+(Drink
+  (id int)
+  (name string)
+  (attribute
+    (DrinkAttribute
+      (id int)
+      (flavor string)
+      (kind string)
+      (trait string)
+      (price int)
+    )
+  )
+  (recipe
+    (Recipe
+      (id int)
+      (ingredient
+        (Ingredient
+          (id int)
+          (adelhyde int)
+          (bronson_extract int)
+          (powdered_delta int)
+          (flanergide int)
+          (karmotrine int)
+        )
+      )
+      (action
+        (RecipeAction
+          (id int)
+          (add_ice bool)
+          (wait bool)
+        )
+      )
+    )
+  )
+)

@@ -1,0 +1,44 @@
+[
+  {
+    "Drink": {
+      "id": "int",
+      "name": "string",
+      "attribute": "DrinkAttribute.id",
+      "recipe": "Recipe.id"
+    }
+  },
+  {
+    "DrinkAttribute": {
+      "id": "int",
+      "flavor": "string",
+      "kind": "string",
+      "trait": "string",
+      "price": "int"
+    }
+  },
+  {
+    "Recipe": {
+      "id": "int",
+      "ingredient": "Ingredient.id",
+      "action": "RecipeAction.id"
+    }
+  },
+  {
+    "Ingredient": {
+      "id": "int",
+      "adelhyde": "int",
+      "bronson_extract": "int",
+      "powdered_delta": "int",
+      "flanergide": "int",
+      "karmotrine": "int"
+    }
+  },
+  {
+    "RecipeAction": {
+      "id": "int",
+      "add_ice": "bool",
+      "age": "bool",
+      "wait": "bool"
+    }
+  }
+]
