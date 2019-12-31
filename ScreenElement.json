@@ -1,0 +1,25 @@
+{
+  "tableName": "ScreenElement",
+  "tableColumns": [
+    {
+      "columnName": "name",
+      "columnType": "String"
+    },
+    {
+      "columnName": "category",
+      "columnType": "String"
+    },
+    {
+      "columnName": "xCoord",
+      "columnType": "Int"
+    },
+    {
+      "columnName": "yCoord",
+      "columnType": "Int"
+    },
+    {
+      "columnName": "shortcut",
+      "columnType": "Int"
+    }
+  ]
+}
