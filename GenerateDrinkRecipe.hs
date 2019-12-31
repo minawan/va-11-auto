@@ -1,6 +1,5 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE QuasiQuotes #-}
 
 import Data.Aeson 
 import qualified Data.ByteString.Lazy as B
