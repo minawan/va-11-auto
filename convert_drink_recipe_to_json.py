@@ -4,7 +4,7 @@ import pathlib
 import pprint
 import subprocess
 
-REFERENCE_SHEET_BASENAME = 'VA-11_Cheat_Sheet'
+REFERENCE_SHEET_BASENAME = 'DrinkRecipe'
 REFERENCE_SHEET_FILENAME_ODS = REFERENCE_SHEET_BASENAME + '.ods'
 OUTPUT_FILENAME = REFERENCE_SHEET_BASENAME + '.json'
 

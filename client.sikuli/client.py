@@ -89,7 +89,7 @@ Settings.DelayBeforeDrop = 0.1
 
 #drink_name = BAD_TOUCH
 #drink_name = BEER
-drink_name = BLEEDING_JANE
+#drink_name = BLEEDING_JANE
 #drink_name = BLOOM_LIGHT
 #drink_name = BLUE_FAIRY
 #drink_name = BRANDTINI
@@ -107,7 +107,7 @@ drink_name = BLEEDING_JANE
 #drink_name = PIANO_WOMAN
 #drink_name = PILEDRIVER
 #drink_name = SPARKLE_STAR
-#drink_name = SUGAR_RUSH
+drink_name = SUGAR_RUSH
 #drink_name = SUNSHINE_CLOUD
 #drink_name = SUPLEX
 #drink_name = ZEN_STAR

@@ -11,7 +11,7 @@ import Data.Text.IO as I hiding (putStrLn)
 import GHC.Generics
 
 jsonFile :: FilePath
-jsonFile = "VA-11_Cheat_Sheet.json"
+jsonFile = "DrinkRecipe.json"
 
 outputFile :: FilePath
 outputFile = "drink.py"
