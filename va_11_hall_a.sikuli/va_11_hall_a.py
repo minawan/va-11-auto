@@ -54,8 +54,8 @@ class Recipe:
                 max_count = 2 * self.recipe[name] if double else self.recipe[name] 
                 for _ in range(max_count):
                     screen_element.trigger_with_arg(blender)
-        if self.recipe[ADDICE]:
-            button[ADDICE].trigger()
+        if self.recipe[ADD_ICE]:
+            button[ADD_ICE].trigger()
         if self.recipe[AGE]:
             button[AGE].trigger()
         button[MIX].trigger()
@@ -67,8 +67,8 @@ class Recipe:
         else:
             button[MIX].trigger()
 
-ingredients = [ADELHYDE, BRONSONEXTRACT, POWDEREDDELTA, FLANERGIDE, KARMOTRINE]
-buttons = [ADDICE, AGE, LEFTSLOT, RIGHTSLOT, RESET, MIX]
+ingredients = [ADELHYDE, BRONSON_EXTRACT, POWDERED_DELTA, FLANERGIDE, KARMOTRINE]
+buttons = [ADD_ICE, AGE, LEFT_SLOT, RIGHT_SLOT, RESET, MIX]
 
 ingredient_element = { name: ScreenElement(INGREDIENT, name) for name in ingredients }
 button_element = { name: ScreenElement(BUTTON, name) for name in buttons }
@@ -78,8 +78,8 @@ add_opt = True
 #add_opt = False
 dry_run = True
 #dry_run = False
-slot = LEFTSLOT
-#slot = RIGHTSLOT
+slot = LEFT_SLOT
+#slot = RIGHT_SLOT
 #double = True
 double = False
 Settings.MoveMouseDelay = 0.1

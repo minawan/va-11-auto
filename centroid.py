@@ -4,17 +4,17 @@ INGREDIENT = 'Ingredient'
 OTHER = 'Other'
 
 # Button
-ADDICE = 'AddIce'
+ADD_ICE = 'AddIce'
 AGE = 'Age'
-LEFTSLOT = 'LeftSlot'
-RIGHTSLOT = 'RightSlot'
+LEFT_SLOT = 'LeftSlot'
+RIGHT_SLOT = 'RightSlot'
 RESET = 'Reset'
 MIX = 'Mix'
 
 # Ingredient
 ADELHYDE = 'Adelhyde'
-BRONSONEXTRACT = 'BronsonExtract'
-POWDEREDDELTA = 'PowderedDelta'
+BRONSON_EXTRACT = 'BronsonExtract'
+POWDERED_DELTA = 'PowderedDelta'
 FLANERGIDE = 'Flanergide'
 KARMOTRINE = 'Karmotrine'
 
@@ -28,7 +28,7 @@ Y = 'Y'
 
 centroid = {
         BUTTON: {
-            ADDICE: {
+            ADD_ICE: {
                 X: 759,
                 Y: 340,
                 SHORTCUT: 'a'
@@ -38,11 +38,11 @@ centroid = {
                 Y: 473,
                 SHORTCUT: 's',
                 },
-            LEFTSLOT: {
+            LEFT_SLOT: {
                 X: 1026,
                 Y: 242,
                 },
-            RIGHTSLOT: {
+            RIGHT_SLOT: {
                 X: 1177,
                 Y: 244,
                 },
@@ -62,12 +62,12 @@ centroid = {
                 Y: 345,
                 SHORTCUT: 'q',
                 },
-            BRONSONEXTRACT: {
+            BRONSON_EXTRACT: {
                 X: 984,
                 Y: 345,
                 SHORTCUT: 'w',
                 },
-            POWDEREDDELTA: {
+            POWDERED_DELTA: {
                 X: 1133,
                 Y: 345,
                 SHORTCUT: 'e',

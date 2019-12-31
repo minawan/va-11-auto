@@ -4,6 +4,7 @@
 
 import Data.Aeson 
 import qualified Data.ByteString.Lazy as B
+import qualified Data.Char as Char
 import qualified Data.Text as Text
 import Data.Text (Text)
 import Data.Text.IO as I hiding (putStrLn)
@@ -107,7 +108,7 @@ toText :: Show a => a -> Text
 toText = Text.pack . show
 
 constantsFromDrink :: [Text]
-constantsFromDrink = map (Text.pack . show) drinkAttributeConstants
+constantsFromDrink = map toText drinkAttributeConstants
 
 constantsFromRecipe :: [Text]
 constantsFromRecipe =
@@ -119,8 +120,23 @@ constantsFromRecipe =
            ]
 
 convertConstantToSymbol :: Text -> Text
-convertConstantToSymbol "" = "NONE"
-convertConstantToSymbol constant = Text.replace " " "_" $ Text.toUpper constant
+convertConstantToSymbol constant =
+  case Text.uncons constant of
+    Just (' ', remainder) -> Text.cons '_' $ convertConstantToSymbol remainder
+    Just (letter, remainder) ->
+        case Text.uncons remainder of
+          Just (nextLetter, nextRemainder)
+            | Char.isUpper nextLetter ->
+                Text.cons capitalizedLetter
+                . Text.cons '_'
+                $ convertConstantToSymbol nextConstant
+            | otherwise ->
+                Text.cons capitalizedLetter
+                $ convertConstantToSymbol remainder
+            where nextConstant = Text.cons nextLetter nextRemainder
+          Nothing -> Text.singleton capitalizedLetter
+      where capitalizedLetter = Char.toUpper letter
+    Nothing -> "NONE"
 
 initializeConstant :: Text -> Text
 initializeConstant constant = Text.concat [symbol, " = '", constant, "'"]
@@ -137,7 +153,6 @@ initializeConstants drinks = convertConstantsToInitializations constants
              ++ constantsFromRecipe
              ++ drinkNames
              ++ [""]
-
 
 boolToText :: Bool -> Text
 boolToText True = "True"
