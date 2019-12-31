@@ -8,4 +8,4 @@ run: build DrinkRecipe.ods
 	./GenerateDrinkRecipe
 
 clean:
-	rm -f DrinkRecipe.csv DrinkRecipe.json GenerateDrinkRecipe.hi GenerateDrinkRecipe.o GenerateDrinkRecipe GenerateDrinkRecipe.dyn_hi GenerateDrinkRecipe.dyn_o drink.py
+	rm -f DrinkRecipe.csv DrinkRecipe.json *.hi *.o *.dyn_hi *.dyn_o GenerateDrinkRecipe GenerateTableReader drink.py GenerateScreenElement.hs

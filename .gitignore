@@ -1,8 +1,10 @@
+DrinkRecipe.json
 GenerateDrinkRecipe
+GenerateScreenElement.hs
+GenerateTableReader
 drink.py
 *.csv
 *.dyn_hi
 *.dyn_o
 *.hi
-DrinkRecipe.json
 *.o
