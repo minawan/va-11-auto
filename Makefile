@@ -1,7 +1,9 @@
-all:
+all: build
+
+build: GenerateDrinkRecipe.hs
 	ghc GenerateDrinkRecipe
 
-run: all
+run: build VA-11_Cheat_Sheet.ods
 	python3 va_11_hall_a.py
 	./GenerateDrinkRecipe
 

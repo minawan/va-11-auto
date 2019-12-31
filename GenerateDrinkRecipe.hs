@@ -55,8 +55,7 @@ data Ingredient = Adelhyde
 
 data RecipeAction = AddIce
                   | Age
-                  | Mix
-                  | Blend
+                  | Wait
                   deriving (Bounded, Enum, Show)
 
 data Drink =
@@ -76,8 +75,7 @@ data DrinkRecipe =
               , karmotrine :: Int
               , addIce :: Bool
               , age :: Bool
-              , mix :: Bool
-              , blend :: Bool
+              , wait :: Bool
               } deriving (Generic, Show)
 
 instance FromJSON Drink
@@ -168,8 +166,7 @@ ingredientFromDrinkRecipe Karmotrine = karmotrine
 recipeActionFromDrinkRecipe :: RecipeAction -> DrinkRecipe -> Bool
 recipeActionFromDrinkRecipe AddIce = addIce
 recipeActionFromDrinkRecipe Age = age
-recipeActionFromDrinkRecipe Mix = mix
-recipeActionFromDrinkRecipe Blend = blend
+recipeActionFromDrinkRecipe Wait = wait
 
 convertDrinkRecipeToPythonDict :: DrinkRecipe -> Text
 convertDrinkRecipeToPythonDict recipe =

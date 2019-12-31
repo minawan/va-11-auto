@@ -59,7 +59,7 @@ class Recipe:
         if self.recipe[AGE]:
             button[AGE].trigger()
         button[MIX].trigger()
-        wait(5 if self.recipe[BLEND] else 1)
+        wait(5 if self.recipe[WAIT] else 1)
         button[MIX].trigger()
         if self.dry_run:
             pass
@@ -88,8 +88,8 @@ Settings.DelayBeforeDrag = 0.1
 Settings.DelayBeforeDrop = 0.1
 
 #drink_name = BAD_TOUCH
-drink_name = BEER
-#drink_name = BLEEDING_JANE
+#drink_name = BEER
+drink_name = BLEEDING_JANE
 #drink_name = BLOOM_LIGHT
 #drink_name = BLUE_FAIRY
 #drink_name = BRANDTINI

@@ -31,10 +31,9 @@ with open(REFERENCE_SHEET_BASENAME + '.csv') as csv_file:
     recipe['powderedDelta'] = int(row['powdered_delta']) if row['powdered_delta'] else 0
     recipe['flanergide'] = int(row['flanergide']) if row['flanergide'] else 0
     recipe['karmotrine'] = -1 if row['karmotrine'] == 'opt' else int(row['karmotrine']) if row['karmotrine'] else 0
-    recipe['addIce'] = row['ice'] == 'Y'
+    recipe['addIce'] = row['add_ice'] == 'Y'
     recipe['age'] = row['age'] == 'Y'
-    recipe['mix'] = row['mix'] == 'Y'
-    recipe['blend'] = row['blend'] == 'Y'
+    recipe['wait'] = row['wait'] == 'Y'
     drink['recipe'] = recipe
     items.append(drink)
 
