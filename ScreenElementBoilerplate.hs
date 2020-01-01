@@ -1,20 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-import Data.Csv
+import Data.Csv (Header, decodeByName)
 import qualified Data.ByteString.Lazy as B
 import qualified Data.Vector as Vector
 import Data.Vector (Vector)
 
-data ScreenElement = ScreenElement
-  { name :: !String
-  , category :: !String
-  , xCoord :: !Int
-  , yCoord :: !Int
-  , shortcut :: !Int
-  } deriving (Show)
-
-instance FromNamedRecord ScreenElement where
-  parseNamedRecord record = ScreenElement <$> record .: "name" <*> record .: "category" <*> record .: "xCoord" <*> record .: "yCoord" <*> record .: "shortcut"
+import ScreenElement
 
 data Category =
   Category { button :: Either String Button

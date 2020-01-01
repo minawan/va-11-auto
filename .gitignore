@@ -3,6 +3,8 @@ GenerateDrinkRecipe
 GenerateScreenElement
 GenerateScreenElement.hs
 GenerateTableReader
+ScreenElement.hs
+ScreenElementBoilerplate
 drink.py
 *.csv
 *.dyn_hi

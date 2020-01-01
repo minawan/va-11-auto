@@ -13,8 +13,11 @@ import Text.Printf (printf)
 jsonFile :: FilePath
 jsonFile = "ScreenElement.json"
 
-outputFile :: FilePath
-outputFile = "GenerateScreenElement.hs"
+outputLibFile :: FilePath
+outputLibFile = "ScreenElement.hs"
+
+outputBinFile :: FilePath
+outputBinFile = "GenerateScreenElement.hs"
 
 data Table =
   Table { tableName :: !Text
@@ -50,14 +53,13 @@ getParseNamedRecordInApplicativeForm columns varName =
     project component = Text.concat [ varName, " .: \"", component, "\""]
     names = map columnName columns
 
-convertToHaskell :: Table -> Text
-convertToHaskell (Table tableName tableColumns) =
+convertToHaskellLib :: Table -> Text
+convertToHaskellLib (Table tableName tableColumns) =
     Text.pack . unlines $
       [ "{-# LANGUAGE OverloadedStrings #-}"
+      , "module ScreenElement where"
       , ""
       , "import Data.Csv"
-      , "import qualified Data.ByteString.Lazy as B"
-      , "import Data.Vector (Vector)"
       , ""
       , printf "data %s = %s" tableName tableName
       , printf "  { %s" (convertColumnsToHaskell tableColumns)
@@ -66,6 +68,16 @@ convertToHaskell (Table tableName tableColumns) =
       , printf "instance FromNamedRecord %s where" tableName
       , printf "  parseNamedRecord record = %s <$> %s" tableName
           (getParseNamedRecordInApplicativeForm tableColumns "record")
+      ]
+
+convertToHaskellBin :: Table -> Text
+convertToHaskellBin (Table tableName tableColumns) =
+    Text.pack . unlines $
+      [ "import Data.Csv (Header, decodeByName)"
+      , "import qualified Data.ByteString.Lazy as B"
+      , "import Data.Vector (Vector)"
+      , ""
+      , "import ScreenElement"
       , ""
       , "main :: IO ()"
       , "main = do"
@@ -80,4 +92,6 @@ main = do
   res <- (eitherDecode <$> getRawJSON jsonFile) :: IO (Either String Table)
   case res of
     Left err -> putStrLn err
-    Right table -> I.writeFile outputFile $ convertToHaskell table
+    Right table -> do
+      I.writeFile outputLibFile $ convertToHaskellLib table
+      I.writeFile outputBinFile $ convertToHaskellBin table
