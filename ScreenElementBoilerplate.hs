@@ -36,6 +36,12 @@ data Other = Other { blender :: Either String Element } deriving (Show)
 
 data Element = Element Int Int Int deriving (Show)
 
+inputFile :: FilePath
+inputFile = "ScreenElement.csv"
+
+outputFile :: FilePath
+outputFile = "centroid.py"
+
 buttonLiteral :: String
 buttonLiteral = "Button"
 
@@ -348,11 +354,11 @@ elementToPythonDict constant (Right (Element xCoord yCoord shortcut)) =
 
 main :: IO ()
 main = do
-  csvData <- B.readFile "ScreenElement.csv"
+  csvData <- B.readFile inputFile
   let decodedCsvData = decodeByName csvData :: Either String (Header, Vector ScreenElement)
   case decodedCsvData of
     Left err -> putStrLn err
     Right (_, val) -> do
-      putStrLn initializeConstants
-      putStrLn . toPythonDict . structurize $ Vector.toList val
+      writeFile outputFile initializeConstants
+      appendFile outputFile . toPythonDict . structurize $ Vector.toList val
 
