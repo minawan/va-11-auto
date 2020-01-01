@@ -5,6 +5,7 @@ GenerateScreenElement.hs
 GenerateTableReader
 ScreenElement.hs
 ScreenElementBoilerplate
+centroid.py
 drink.py
 *.csv
 *.dyn_hi

@@ -46,55 +46,55 @@ buttonLiteral :: String
 buttonLiteral = "Button"
 
 addIceLiteral :: String
-addIceLiteral = "addIce"
+addIceLiteral = "AddIce"
 
 ageLiteral :: String
-ageLiteral = "age"
+ageLiteral = "Age"
 
 leftSlotLiteral :: String
-leftSlotLiteral = "leftSlot"
+leftSlotLiteral = "LeftSlot"
 
 rightSlotLiteral :: String
-rightSlotLiteral = "rightSlot"
+rightSlotLiteral = "RightSlot"
 
 resetLiteral :: String
-resetLiteral = "reset"
+resetLiteral = "Reset"
 
 mixLiteral :: String
-mixLiteral = "mix"
+mixLiteral = "Mix"
 
 ingredientLiteral :: String
 ingredientLiteral = "Ingredient"
 
 adelhydeLiteral :: String
-adelhydeLiteral = "adelhyde"
+adelhydeLiteral = "Adelhyde"
 
 bronsonExtractLiteral :: String
-bronsonExtractLiteral = "bronsonExtract"
+bronsonExtractLiteral = "BronsonExtract"
 
 powderedDeltaLiteral :: String
-powderedDeltaLiteral = "powderedDelta"
+powderedDeltaLiteral = "PowderedDelta"
 
 flanergideLiteral :: String
-flanergideLiteral = "flanergide"
+flanergideLiteral = "Flanergide"
 
 karmotrineLiteral :: String
-karmotrineLiteral = "karmotrine"
+karmotrineLiteral = "Karmotrine"
 
 otherLiteral :: String
 otherLiteral = "Other"
 
 blenderLiteral :: String
-blenderLiteral = "blender"
+blenderLiteral = "Blender"
 
 xCoordLiteral :: String
-xCoordLiteral = "xCoord"
+xCoordLiteral = "XCoord"
 
 yCoordLiteral :: String
-yCoordLiteral = "yCoord"
+yCoordLiteral = "YCoord"
 
 shortcutLiteral :: String
-shortcutLiteral = "shortcut"
+shortcutLiteral = "Shortcut"
 
 convertConstantToSymbol :: String -> String
 convertConstantToSymbol "" = "NONE"
