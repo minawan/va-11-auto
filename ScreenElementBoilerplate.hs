@@ -2,8 +2,10 @@
 
 import Data.Csv (Header, decodeByName)
 import qualified Data.ByteString.Lazy as B
+import qualified Data.Char as Char
 import qualified Data.Vector as Vector
 import Data.Vector (Vector)
+import Text.Printf (printf)
 
 import ScreenElement
 
@@ -33,6 +35,99 @@ data Ingredient =
 data Other = Other { blender :: Either String Element } deriving (Show)
 
 data Element = Element Int Int Int deriving (Show)
+
+buttonLiteral :: String
+buttonLiteral = "Button"
+
+addIceLiteral :: String
+addIceLiteral = "addIce"
+
+ageLiteral :: String
+ageLiteral = "age"
+
+leftSlotLiteral :: String
+leftSlotLiteral = "leftSlot"
+
+rightSlotLiteral :: String
+rightSlotLiteral = "rightSlot"
+
+resetLiteral :: String
+resetLiteral = "reset"
+
+mixLiteral :: String
+mixLiteral = "mix"
+
+ingredientLiteral :: String
+ingredientLiteral = "Ingredient"
+
+adelhydeLiteral :: String
+adelhydeLiteral = "adelhyde"
+
+bronsonExtractLiteral :: String
+bronsonExtractLiteral = "bronsonExtract"
+
+powderedDeltaLiteral :: String
+powderedDeltaLiteral = "powderedDelta"
+
+flanergideLiteral :: String
+flanergideLiteral = "flanergide"
+
+karmotrineLiteral :: String
+karmotrineLiteral = "karmotrine"
+
+otherLiteral :: String
+otherLiteral = "Other"
+
+blenderLiteral :: String
+blenderLiteral = "blender"
+
+xCoordLiteral :: String
+xCoordLiteral = "xCoord"
+
+yCoordLiteral :: String
+yCoordLiteral = "yCoord"
+
+shortcutLiteral :: String
+shortcutLiteral = "shortcut"
+
+convertConstantToSymbol :: String -> String
+convertConstantToSymbol "" = "NONE"
+convertConstantToSymbol [letter] = [Char.toUpper letter]
+convertConstantToSymbol (' ':remainder) =
+    '_' : convertConstantToSymbol remainder
+convertConstantToSymbol (letter:nextLetter:nextRemainder)
+  | Char.isUpper nextLetter =
+      capitalizedLetter : '_' : nextConstant
+  | otherwise = capitalizedLetter : nextConstant
+  where
+    capitalizedLetter = Char.toUpper letter
+    nextConstant = convertConstantToSymbol $ nextLetter : nextRemainder
+
+initializeConstants :: String
+initializeConstants =
+    unlines $
+      map (uncurry (printf "%s = '%s'") . \ constant ->
+        (convertConstantToSymbol constant, constant)) literals
+  where
+    literals = [ buttonLiteral
+               , addIceLiteral
+               , ageLiteral
+               , leftSlotLiteral
+               , rightSlotLiteral
+               , resetLiteral
+               , mixLiteral
+               , ingredientLiteral
+               , adelhydeLiteral
+               , bronsonExtractLiteral
+               , powderedDeltaLiteral
+               , flanergideLiteral
+               , karmotrineLiteral
+               , otherLiteral
+               , blenderLiteral
+               , xCoordLiteral
+               , yCoordLiteral
+               , shortcutLiteral
+               ]
 
 structurize :: [ScreenElement] -> Category
 structurize xs = Category (getButton xs)
@@ -169,5 +264,7 @@ main = do
   let decodedCsvData = decodeByName csvData :: Either String (Header, Vector ScreenElement)
   case decodedCsvData of
     Left err -> putStrLn err
-    Right (_, val) -> putStrLn . show . structurize $ Vector.toList val
+    Right (_, val) -> do
+      putStrLn . show . structurize $ Vector.toList val
+      putStrLn initializeConstants
 
