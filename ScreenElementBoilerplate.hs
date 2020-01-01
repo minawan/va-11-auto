@@ -258,6 +258,94 @@ isBlenderElement (ScreenElement name _ _ _ _) = name == "blender"
 getBlender :: [ScreenElement] -> Either String Element
 getBlender = getElement isBlenderElement
 
+toPythonDict :: Category -> String
+toPythonDict (Category button ingredient other) =
+    unlines [ "centroid = {"
+            , buttonToPythonDict button
+            , ingredientToPythonDict ingredient
+            , otherToPythonDict other
+            , "}"
+            ]
+
+buttonToPythonDict :: Either String Button -> String
+buttonToPythonDict (Left err) = err
+buttonToPythonDict (Right (Button addIce age leftSlot rightSlot reset mix)) =
+    unlines [ printf "%s: {" $ convertConstantToSymbol buttonLiteral
+            , addIceToPythonDict addIce
+            , ageToPythonDict age
+            , leftSlotToPythonDict leftSlot
+            , rightSlotToPythonDict rightSlot
+            , resetToPythonDict reset
+            , mixToPythonDict mix
+            , "},"
+            ]
+
+addIceToPythonDict :: Either String Element -> String
+addIceToPythonDict = elementToPythonDict addIceLiteral
+
+ageToPythonDict :: Either String Element -> String
+ageToPythonDict = elementToPythonDict ageLiteral
+
+leftSlotToPythonDict :: Either String Element -> String
+leftSlotToPythonDict = elementToPythonDict leftSlotLiteral
+
+rightSlotToPythonDict :: Either String Element -> String
+rightSlotToPythonDict = elementToPythonDict rightSlotLiteral
+
+resetToPythonDict :: Either String Element -> String
+resetToPythonDict = elementToPythonDict resetLiteral
+
+mixToPythonDict :: Either String Element -> String
+mixToPythonDict = elementToPythonDict mixLiteral
+
+ingredientToPythonDict :: Either String Ingredient -> String
+ingredientToPythonDict (Left err) = err
+ingredientToPythonDict (Right (Ingredient adelhyde bronsonExtract powderedDelta flanergide karmotrine)) =
+    unlines [ printf "%s: {" $ convertConstantToSymbol ingredientLiteral
+            , adelhydeToPythonLiteral adelhyde
+            , bronsonExtractToPythonLiteral bronsonExtract
+            , powderedDeltaToPythonLiteral powderedDelta
+            , flanergideToPythonLiteral flanergide
+            , karmotrineToPythonLiteral karmotrine
+            , "},"
+            ]
+
+adelhydeToPythonLiteral :: Either String Element -> String
+adelhydeToPythonLiteral = elementToPythonDict adelhydeLiteral
+
+bronsonExtractToPythonLiteral :: Either String Element -> String
+bronsonExtractToPythonLiteral = elementToPythonDict bronsonExtractLiteral
+
+powderedDeltaToPythonLiteral :: Either String Element -> String
+powderedDeltaToPythonLiteral = elementToPythonDict powderedDeltaLiteral
+
+flanergideToPythonLiteral :: Either String Element -> String
+flanergideToPythonLiteral = elementToPythonDict flanergideLiteral
+
+karmotrineToPythonLiteral :: Either String Element -> String
+karmotrineToPythonLiteral = elementToPythonDict karmotrineLiteral
+
+otherToPythonDict :: Either String Other -> String
+otherToPythonDict (Left err) = err
+otherToPythonDict (Right (Other blender)) =
+    unlines [ printf "%s: {" $ convertConstantToSymbol otherLiteral
+            , blenderToPythonDict blender
+            , "},"
+            ]
+
+blenderToPythonDict :: Either String Element -> String
+blenderToPythonDict = elementToPythonDict blenderLiteral
+
+elementToPythonDict :: String -> Either String Element -> String
+elementToPythonDict constant (Left err) = printf "%s: %s" constant err
+elementToPythonDict constant (Right (Element xCoord yCoord shortcut)) =
+    unlines [ printf "%s: {" $ convertConstantToSymbol constant
+            , printf "%s: %d," (convertConstantToSymbol xCoordLiteral) xCoord
+            , printf "%s: %d," (convertConstantToSymbol yCoordLiteral) yCoord
+            , printf "%s: %d," (convertConstantToSymbol shortcutLiteral) shortcut
+            , "},"
+            ]
+
 main :: IO ()
 main = do
   csvData <- B.readFile "ScreenElement.csv"
@@ -265,6 +353,6 @@ main = do
   case decodedCsvData of
     Left err -> putStrLn err
     Right (_, val) -> do
-      putStrLn . show . structurize $ Vector.toList val
       putStrLn initializeConstants
+      putStrLn . toPythonDict . structurize $ Vector.toList val
 
