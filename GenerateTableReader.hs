@@ -8,6 +8,7 @@ import qualified Data.Text as Text
 import Data.Text (Text)
 import Data.Text.IO as I hiding (putStrLn)
 import GHC.Generics
+import Text.Printf (printf)
 
 jsonFile :: FilePath
 jsonFile = "ScreenElement.json"
@@ -51,28 +52,25 @@ getParseNamedRecordInApplicativeForm columns varName =
 
 convertToHaskell :: Table -> Text
 convertToHaskell (Table tableName tableColumns) =
-    Text.unlines
+    Text.pack . unlines $
       [ "{-# LANGUAGE OverloadedStrings #-}"
       , ""
       , "import Data.Csv"
       , "import qualified Data.ByteString.Lazy as B"
       , "import Data.Vector (Vector)"
       , ""
-      , Text.concat ["data ", tableName, " = ", tableName]
-      , Text.concat ["  { ", convertColumnsToHaskell tableColumns ]
+      , printf "data %s = %s" tableName tableName
+      , printf "  { %s" (convertColumnsToHaskell tableColumns)
       , "  } deriving (Show)"
       , ""
-      , Text.concat ["instance FromNamedRecord ", tableName, " where"]
-      , Text.concat [ "  parseNamedRecord record = ", tableName, " <$> "
-                    , getParseNamedRecordInApplicativeForm tableColumns "record"
-                    ]
+      , printf "instance FromNamedRecord %s where" tableName
+      , printf "  parseNamedRecord record = %s <$> %s" tableName
+          (getParseNamedRecordInApplicativeForm tableColumns "record")
       , ""
       , "main :: IO ()"
       , "main = do"
-      , "  csvData <- B.readFile \"ScreenElement.csv\""
-      , Text.concat [ "  let decodedCsvData = decodeByName csvData"
-                    , " :: Either String (Header, Vector ", tableName, ")"
-                    ]
+      , printf "  csvData <- B.readFile \"ScreenElement.csv\""
+      , printf "  let decodedCsvData = decodeByName csvData :: Either String (Header, Vector %s)" tableName
       , "  case decodedCsvData of"
       , "    Left err -> putStrLn err"
       , "    Right (_, val) -> putStrLn $ show val"
