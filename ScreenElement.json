@@ -21,5 +21,21 @@
       "columnName": "shortcut",
       "columnType": "Int"
     }
+  ],
+  "tableLevels": [
+    {
+      "levelName": "category",
+      "sublevels": [
+        "name"
+      ]
+    },
+    {
+      "levelName": "name",
+      "sublevels": [
+        "xCoord",
+        "yCoord",
+        "shortcut"
+      ]
+    }
   ]
 }

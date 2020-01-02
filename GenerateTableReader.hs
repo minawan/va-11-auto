@@ -22,6 +22,7 @@ outputBinFile = "GenerateScreenElement.hs"
 data Table =
   Table { tableName :: !Text
         , tableColumns :: ![Column]
+        , tableLevels :: ![Level]
         } deriving (Generic, Show)
 
 data Column =
@@ -29,8 +30,14 @@ data Column =
          , columnType :: !Text
          } deriving (Generic, Show)
 
+data Level =
+  Level { levelName :: !Text
+        , sublevels :: ![Text]
+        } deriving (Generic, Show)
+
 instance FromJSON Table
 instance FromJSON Column
+instance FromJSON Level
 
 getRawJSON :: FilePath -> IO B.ByteString
 getRawJSON = B.readFile
@@ -54,7 +61,7 @@ getParseNamedRecordInApplicativeForm columns varName =
     names = map columnName columns
 
 convertToHaskellLib :: Table -> Text
-convertToHaskellLib (Table tableName tableColumns) =
+convertToHaskellLib (Table tableName tableColumns _) =
     Text.pack . unlines $
       [ "{-# LANGUAGE OverloadedStrings #-}"
       , "module ScreenElement where"
@@ -71,7 +78,7 @@ convertToHaskellLib (Table tableName tableColumns) =
       ]
 
 convertToHaskellBin :: Table -> Text
-convertToHaskellBin (Table tableName tableColumns) =
+convertToHaskellBin (Table tableName tableColumns _) =
     Text.pack . unlines $
       [ "import Data.Csv (Header, decodeByName)"
       , "import qualified Data.ByteString.Lazy as B"
