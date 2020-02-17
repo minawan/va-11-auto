@@ -40,7 +40,7 @@ class ScreenElement:
         y = entry[Y_COORD]
         self.centroid = (x, y)
         try:
-            self.shortcut = entry[SHORTCUT]
+            self.shortcut = str(chr(entry[SHORTCUT]))
         except KeyError:
             print('Shortcut not available for {name} of type {category}'.format(name=name, category=category))
             self.shortcut = 'l'
@@ -86,8 +86,9 @@ class Recipe:
         return 5 if self.recipe[WAIT] else 1
 
 def dragAndDropTo(source, destination, use_shortcut):
-    if use_shortcut:
-        return TypeCommand(source.getShortcut())
+    shortcut = source.getShortcut()
+    if use_shortcut and shortcut != '\x00':
+        return TypeCommand(shortcut)
     return DragAndDropCommand(source.getCentroid(), destination.getCentroid())
 
 def trigger(screen_element, use_shortcut):
