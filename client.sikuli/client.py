@@ -14,6 +14,47 @@ with open(centroid_filename, 'r') as centroid_file:
 with open(drink_filename, 'r') as drink_file:
     exec(drink_file.read())
 
+#add_opt = True
+add_opt = False
+#serve = True
+serve = False
+slot = LEFT_SLOT
+#slot = RIGHT_SLOT
+double = True
+#double = False
+#use_shortcut = True
+use_shortcut = False
+
+#drink_name = BAD_TOUCH
+#drink_name = BEER
+#drink_name = BLEEDING_JANE
+#drink_name = BLOOM_LIGHT
+#drink_name = BLUE_FAIRY
+#drink_name = BRANDTINI
+#drink_name = COBALT_VELVET
+drink_name = CREVICE_SPIKE
+#drink_name = FLUFFY_DREAM
+#drink_name = FRINGE_WEAVER
+#drink_name = FROTHY_WATER
+#drink_name = GRIZZLY_TEMPLE
+#drink_name = GUT_PUNCH
+#drink_name = MARSBLAST
+#drink_name = MERCURYBLAST
+#drink_name = MOONBLAST
+#drink_name = PIANO_MAN
+#drink_name = PIANO_WOMAN
+#drink_name = PILEDRIVER
+#drink_name = SPARKLE_STAR
+#drink_name = SUGAR_RUSH
+#drink_name = SUNSHINE_CLOUD
+#drink_name = SUPLEX
+#drink_name = ZEN_STAR
+#drink_name = FLAMING_MOAI
+
+if double and not add_opt and drink_name == CREVICE_SPIKE:
+    print('Adding karmotrine to big crevice spike.')
+    add_opt = True
+
 class DragAndDropCommand:
     def __init__(self, source, destination):
         self.source = source
@@ -181,47 +222,6 @@ screen_elements = dict()
 screen_elements.update({ name: ScreenElement(INGREDIENT, name) for name in Recipe.ingredients })
 screen_elements.update({ name: ScreenElement(BUTTON, name) for name in ScreenElement.buttons })
 screen_elements[BLENDER] = ScreenElement(OTHER, BLENDER)
-
-add_opt = True
-#add_opt = False
-#serve = True
-serve = False
-slot = LEFT_SLOT
-#slot = RIGHT_SLOT
-double = True
-#double = False
-#use_shortcut = True
-use_shortcut = False
-
-#drink_name = BAD_TOUCH
-#drink_name = BEER
-#drink_name = BLEEDING_JANE
-#drink_name = BLOOM_LIGHT
-#drink_name = BLUE_FAIRY
-#drink_name = BRANDTINI
-#drink_name = COBALT_VELVET
-#drink_name = CREVICE_SPIKE
-#drink_name = FLUFFY_DREAM
-#drink_name = FRINGE_WEAVER
-#drink_name = FROTHY_WATER
-#drink_name = GRIZZLY_TEMPLE
-#drink_name = GUT_PUNCH
-#drink_name = MARSBLAST
-#drink_name = MERCURYBLAST
-#drink_name = MOONBLAST
-#drink_name = PIANO_MAN
-#drink_name = PIANO_WOMAN
-drink_name = PILEDRIVER
-#drink_name = SPARKLE_STAR
-#drink_name = SUGAR_RUSH
-#drink_name = SUNSHINE_CLOUD
-#drink_name = SUPLEX
-#drink_name = ZEN_STAR
-#drink_name = FLAMING_MOAI
-
-if double and not add_opt and drink_name == CREVICE_SPIKE:
-    print('Adding karmotrine to big crevice spike.')
-    add_opt = True
 
 drink_recipe = Recipe(drink[drink_name][RECIPE])
 
