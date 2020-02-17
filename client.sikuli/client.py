@@ -77,6 +77,7 @@ class ResetAction(SingleElementRecipeAction):
         super(ResetAction, self).__init__(RESET)
 
 class ScreenElement:
+    buttons = [ADD_ICE, AGE, LEFT_SLOT, RIGHT_SLOT, RESET, MIX]
     def __init__(self, category, name):
         entry = centroid[category][name]
         x = entry[X_COORD]
@@ -176,11 +177,9 @@ def nextCommandFromAction(screen_elements, use_shortcut, action):
     else:
         print('Unexpected recipe action type:', action.__class__.__name__)
 
-buttons = [ADD_ICE, AGE, LEFT_SLOT, RIGHT_SLOT, RESET, MIX]
-
 screen_elements = dict()
 screen_elements.update({ name: ScreenElement(INGREDIENT, name) for name in Recipe.ingredients })
-screen_elements.update({ name: ScreenElement(BUTTON, name) for name in buttons })
+screen_elements.update({ name: ScreenElement(BUTTON, name) for name in ScreenElement.buttons })
 screen_elements[BLENDER] = ScreenElement(OTHER, BLENDER)
 
 add_opt = True
@@ -209,10 +208,10 @@ use_shortcut = False
 #drink_name = GUT_PUNCH
 #drink_name = MARSBLAST
 #drink_name = MERCURYBLAST
-drink_name = MOONBLAST
+#drink_name = MOONBLAST
 #drink_name = PIANO_MAN
 #drink_name = PIANO_WOMAN
-#drink_name = PILEDRIVER
+drink_name = PILEDRIVER
 #drink_name = SPARKLE_STAR
 #drink_name = SUGAR_RUSH
 #drink_name = SUNSHINE_CLOUD
