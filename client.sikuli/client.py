@@ -117,27 +117,27 @@ class Recipe:
             for name in Recipe.ingredients:
                 self.recipe[name] *= 2
 
-    def getIngredientCount(self, ingredient_name):
+    def _getIngredientCount(self, ingredient_name):
         return self.recipe[ingredient_name]
 
-    def isOnTheRocks(self):
+    def _isOnTheRocks(self):
         return self.recipe[ADD_ICE]
 
-    def isAged(self):
+    def _isAged(self):
         return self.recipe[AGE]
 
-    def mixDuration(self):
+    def _mixDuration(self):
         return 5 if self.recipe[WAIT] else 1
 
     def nextAction(self):
         for ingredient_name in Recipe.ingredients:
-            for _ in range(self.getIngredientCount(ingredient_name)):
+            for _ in range(self._getIngredientCount(ingredient_name)):
                 yield AddIngredientAction(ingredient_name)
-        if self.isOnTheRocks():
+        if self._isOnTheRocks():
             yield AddIceAction()
-        if self.isAged():
+        if self._isAged():
             yield AgeAction()
-        yield MixForAction(self.mixDuration())
+        yield MixForAction(self._mixDuration())
 
 def dragAndDropTo(source, destination, use_shortcut):
     shortcut = source.getShortcut()
@@ -187,8 +187,8 @@ add_opt = True
 #add_opt = False
 #serve = True
 serve = False
-#slot = LEFT_SLOT
-slot = RIGHT_SLOT
+slot = LEFT_SLOT
+#slot = RIGHT_SLOT
 double = True
 #double = False
 #use_shortcut = True
@@ -206,10 +206,10 @@ use_shortcut = False
 #drink_name = FRINGE_WEAVER
 #drink_name = FROTHY_WATER
 #drink_name = GRIZZLY_TEMPLE
-drink_name = GUT_PUNCH
+#drink_name = GUT_PUNCH
 #drink_name = MARSBLAST
 #drink_name = MERCURYBLAST
-#drink_name = MOONBLAST
+drink_name = MOONBLAST
 #drink_name = PIANO_MAN
 #drink_name = PIANO_WOMAN
 #drink_name = PILEDRIVER
