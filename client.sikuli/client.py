@@ -149,8 +149,8 @@ def trigger(screen_element, use_shortcut):
     return dragAndDropTo(screen_element, screen_element, use_shortcut)
 
 def nextCommand(recipe, screen_elements, slot, serve, use_shortcut):
+    yield trigger(screen_elements[RESET], use_shortcut)    
     yield trigger(screen_elements[slot], use_shortcut)
-    yield trigger(screen_elements[RESET], use_shortcut)
 
     for action in recipe.nextAction():
         if isinstance(action, AddIngredientAction):
@@ -188,14 +188,14 @@ double = False
 use_shortcut = False
 
 #drink_name = BAD_TOUCH
-drink_name = BEER
+#drink_name = BEER
 #drink_name = BLEEDING_JANE
 #drink_name = BLOOM_LIGHT
 #drink_name = BLUE_FAIRY
 #drink_name = BRANDTINI
 #drink_name = COBALT_VELVET
 #drink_name = CREVICE_SPIKE
-#drink_name = FLUFFY_DREAM
+drink_name = FLUFFY_DREAM
 #drink_name = FRINGE_WEAVER
 #drink_name = FROTHY_WATER
 #drink_name = GRIZZLY_TEMPLE
