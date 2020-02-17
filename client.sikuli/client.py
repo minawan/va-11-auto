@@ -148,26 +148,33 @@ def dragAndDropTo(source, destination, use_shortcut):
 def trigger(screen_element, use_shortcut):
     return dragAndDropTo(screen_element, screen_element, use_shortcut)
 
-def nextCommand(recipe, screen_elements, slot, serve, use_shortcut):
-    yield trigger(screen_elements[RESET], use_shortcut)    
-    yield trigger(screen_elements[slot], use_shortcut)
-
+def nextAction(recipe, slot, serve):
+    yield ResetAction()
+    yield SelectSlotAction(slot)
     for action in recipe.nextAction():
-        if isinstance(action, AddIngredientAction):
-            yield dragAndDropTo(screen_elements[action.getSource()], screen_elements[action.getDestination()], use_shortcut)
-        elif isinstance(action, AddIceAction):
-            yield trigger(screen_elements[action.getSource()], use_shortcut)
-        elif isinstance(action, AgeAction):
-            yield trigger(screen_elements[action.getSource()], use_shortcut)
-        elif isinstance(action, MixForAction):
-            yield trigger(screen_elements[action.getSource()], use_shortcut)
-            yield WaitCommand(action.getSeconds())
-            yield trigger(screen_elements[action.getSource()], use_shortcut)
-        else:
-            print('Unexpected recipe action type:', action.__class__.__name__)
-
+        yield action
     if serve:
-        yield trigger(screen_elements[MIX], use_shortcut)
+        yield ServeAction()
+
+def nextCommandFromAction(screen_elements, use_shortcut, action):
+    if isinstance(action, AddIngredientAction):
+        yield dragAndDropTo(screen_elements[action.getSource()], screen_elements[action.getDestination()], use_shortcut)
+    elif isinstance(action, AddIceAction):
+        yield trigger(screen_elements[action.getSource()], use_shortcut)
+    elif isinstance(action, AgeAction):
+        yield trigger(screen_elements[action.getSource()], use_shortcut)
+    elif isinstance(action, MixForAction):
+        yield trigger(screen_elements[action.getSource()], use_shortcut)
+        yield WaitCommand(action.getSeconds())
+        yield trigger(screen_elements[action.getSource()], use_shortcut)
+    elif isinstance(action, ResetAction):
+        yield trigger(screen_elements[action.getSource()], use_shortcut)
+    elif isinstance(action, SelectSlotAction):
+        yield trigger(screen_elements[action.getSource()], use_shortcut)
+    elif isinstance(action, ServeAction):
+        yield trigger(screen_elements[action.getSource()], use_shortcut)
+    else:
+        print('Unexpected recipe action type:', action.__class__.__name__)
 
 buttons = [ADD_ICE, AGE, LEFT_SLOT, RIGHT_SLOT, RESET, MIX]
 
@@ -198,8 +205,8 @@ use_shortcut = False
 #drink_name = FLUFFY_DREAM
 #drink_name = FRINGE_WEAVER
 #drink_name = FROTHY_WATER
-drink_name = GRIZZLY_TEMPLE
-#drink_name = GUT_PUNCH
+#drink_name = GRIZZLY_TEMPLE
+drink_name = GUT_PUNCH
 #drink_name = MARSBLAST
 #drink_name = MERCURYBLAST
 #drink_name = MOONBLAST
@@ -225,5 +232,6 @@ if double:
 if add_opt:
     drink_recipe.addOpt()
 
-for command in nextCommand(drink_recipe, screen_elements, slot, serve, use_shortcut):
-    command.execute()
+for action in nextAction(drink_recipe, slot, serve):
+    for command in nextCommandFromAction(screen_elements, use_shortcut, action):
+        command.execute()
