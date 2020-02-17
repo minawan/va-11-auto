@@ -32,7 +32,7 @@ use_shortcut = False
 #drink_name = BLUE_FAIRY
 #drink_name = BRANDTINI
 #drink_name = COBALT_VELVET
-drink_name = CREVICE_SPIKE
+#drink_name = CREVICE_SPIKE
 #drink_name = FLUFFY_DREAM
 #drink_name = FRINGE_WEAVER
 #drink_name = FROTHY_WATER
@@ -41,7 +41,7 @@ drink_name = CREVICE_SPIKE
 #drink_name = MARSBLAST
 #drink_name = MERCURYBLAST
 #drink_name = MOONBLAST
-#drink_name = PIANO_MAN
+drink_name = PIANO_MAN
 #drink_name = PIANO_WOMAN
 #drink_name = PILEDRIVER
 #drink_name = SPARKLE_STAR
@@ -201,19 +201,11 @@ def nextAction(recipe, slot, serve):
 def nextCommandFromAction(screen_elements, use_shortcut, action):
     if isinstance(action, AddIngredientAction):
         yield dragAndDropTo(screen_elements[action.getSource()], screen_elements[action.getDestination()], use_shortcut)
-    elif isinstance(action, AddIceAction):
-        yield trigger(screen_elements[action.getSource()], use_shortcut)
-    elif isinstance(action, AgeAction):
-        yield trigger(screen_elements[action.getSource()], use_shortcut)
     elif isinstance(action, MixForAction):
         yield trigger(screen_elements[action.getSource()], use_shortcut)
         yield WaitCommand(action.getSeconds())
         yield trigger(screen_elements[action.getSource()], use_shortcut)
-    elif isinstance(action, ResetAction):
-        yield trigger(screen_elements[action.getSource()], use_shortcut)
-    elif isinstance(action, SelectSlotAction):
-        yield trigger(screen_elements[action.getSource()], use_shortcut)
-    elif isinstance(action, ServeAction):
+    elif isinstance(action, AddIceAction) or isinstance(action, AgeAction) or isinstance(action, ResetAction) or isinstance(action, SelectSlotAction) or isinstance(action, ServeAction):
         yield trigger(screen_elements[action.getSource()], use_shortcut)
     else:
         print('Unexpected recipe action type:', action.__class__.__name__)
