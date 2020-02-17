@@ -14,6 +14,25 @@ with open(centroid_filename, 'r') as centroid_file:
 with open(drink_filename, 'r') as drink_file:
     exec(drink_file.read())
 
+class DragAndDropCommand:
+    def __init__(self, source, destination):
+        self.source = source
+        self.destination = destination
+    def execute(self):
+        dragDrop(Location(*self.source), Location(*self.destination))
+
+class WaitCommand:
+    def __init__(self, seconds):
+        self.seconds = seconds
+    def execute(self):
+        wait(self.seconds)
+
+class TypeCommand:
+    def __init__(self, shortcut):
+        self.shortcut = shortcut
+    def execute(self):
+        type(self.shortcut)
+
 class ScreenElement:
     def __init__(self, category, name, use_shortcut=False):
         entry = centroid[category][name]
@@ -28,25 +47,29 @@ class ScreenElement:
             self.shortcut = 'l'
 
     def click(self):
-        self.dragDrop(self)
+        return self.dragDrop(self)
 
     def dragDrop(self, element):
-        dragDrop(Location(*self.centroid), Location(*element.centroid))
+        return [DragAndDropCommand(self.centroid, element.centroid)]
 
     def trigger(self):
+        commands = []
         if self.use_shortcut:
-            wait(0.3)
-            type(self.shortcut)
+            commands.append(WaitCommand(0.3))
+            commands.append(TypeCommand(self.shortcut))
         else:
-            self.click()
+            commands.extend(self.click())
+        return commands
 
     # jython pls why no overload
     def trigger_with_arg(self, element):
+        commands = []
         if self.use_shortcut:
-            wait(0.3)
-            type(self.shortcut)
+            commands.append(WaitCommand(0.3))
+            commands.append(TypeCommand(self.shortcut))
         else:
-            self.dragDrop(element)
+            commands.extend(self.dragDrop(element))
+        return commands
 
 class Recipe:
     def __init__(self, recipe):
@@ -74,26 +97,29 @@ class Recipe:
             for name in ingredients:
                 self.recipe[name] *= 2
 
-    def apply(self, ingredient, button, slot, blender, serve):
-        button[slot].trigger()
-        button[RESET].trigger()
+    def generateCommands(self, ingredient, button, slot, blender, serve):
+        commands = []
+        commands.extend(button[slot].trigger())
+        commands.extend(button[RESET].trigger())
 
         for name, screen_element in ingredient.items():
             for _ in range(self.recipe[name]):
-                screen_element.trigger_with_arg(blender)
+                commands.extend(screen_element.trigger_with_arg(blender))
 
         if self.recipe[ADD_ICE]:
-            button[ADD_ICE].trigger()
+            commands.extend(button[ADD_ICE].trigger())
 
         if self.recipe[AGE]:
-            button[AGE].trigger()
+            commands.extend(button[AGE].trigger())
 
-        button[MIX].trigger()
-        wait(5 if self.recipe[WAIT] else 1)
-        button[MIX].trigger()
+        commands.extend(button[MIX].trigger())
+        commands.append(WaitCommand(5 if self.recipe[WAIT] else 1))
+        commands.extend(button[MIX].trigger())
 
         if serve:
-            button[MIX].trigger()
+            commands.extend(button[MIX].trigger())
+
+        return commands
 
 ingredients = [ADELHYDE, BRONSON_EXTRACT, POWDERED_DELTA, FLANERGIDE, KARMOTRINE]
 buttons = [ADD_ICE, AGE, LEFT_SLOT, RIGHT_SLOT, RESET, MIX]
@@ -149,4 +175,5 @@ if double:
 if add_opt:
     drink_recipe[drink_name].addOpt()
 
-drink_recipe[drink_name].apply(ingredient_element, button_element, slot, blender, serve)
+for command in drink_recipe[drink_name].generateCommands(ingredient_element, button_element, slot, blender, serve):
+    command.execute()
