@@ -182,8 +182,8 @@ add_opt = True
 serve = False
 #slot = LEFT_SLOT
 slot = RIGHT_SLOT
-#double = True
-double = False
+double = True
+#double = False
 #use_shortcut = True
 use_shortcut = False
 
@@ -195,10 +195,10 @@ use_shortcut = False
 #drink_name = BRANDTINI
 #drink_name = COBALT_VELVET
 #drink_name = CREVICE_SPIKE
-drink_name = FLUFFY_DREAM
+#drink_name = FLUFFY_DREAM
 #drink_name = FRINGE_WEAVER
 #drink_name = FROTHY_WATER
-#drink_name = GRIZZLY_TEMPLE
+drink_name = GRIZZLY_TEMPLE
 #drink_name = GUT_PUNCH
 #drink_name = MARSBLAST
 #drink_name = MERCURYBLAST
@@ -217,13 +217,13 @@ if double and not add_opt and drink_name == CREVICE_SPIKE:
     print('Adding karmotrine to big crevice spike.')
     add_opt = True
 
-drink_recipe = { name: Recipe(attr[RECIPE]) for name, attr in drink.items() }
+drink_recipe = Recipe(drink[drink_name][RECIPE])
 
 if double:
-    drink_recipe[drink_name].doubleSize()
+    drink_recipe.doubleSize()
 
 if add_opt:
-    drink_recipe[drink_name].addOpt()
+    drink_recipe.addOpt()
 
-for command in nextCommand(drink_recipe[drink_name], screen_elements, slot, serve, use_shortcut):
+for command in nextCommand(drink_recipe, screen_elements, slot, serve, use_shortcut):
     command.execute()
