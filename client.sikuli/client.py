@@ -34,25 +34,22 @@ class TypeCommand:
         type(self.shortcut)
 
 class ScreenElement:
-    def __init__(self, category, name, use_shortcut=False):
+    def __init__(self, category, name):
         entry = centroid[category][name]
         x = entry[X_COORD]
         y = entry[Y_COORD]
         self.centroid = (x, y)
-        self.use_shortcut = use_shortcut
         try:
             self.shortcut = entry[SHORTCUT]
         except KeyError:
             print('Shortcut not available for {name} of type {category}'.format(name=name, category=category))
             self.shortcut = 'l'
 
-    def trigger(self):
-        return self.dragAndDropTo(self)
+    def getCentroid(self):
+        return self.centroid
 
-    def dragAndDropTo(self, element):
-        if self.use_shortcut:
-            return TypeCommand(self.shortcut)
-        return DragAndDropCommand(self.centroid, element.centroid)
+    def getShortcut(self):
+        return self.shortcut
 
 class Recipe:
     def __init__(self, recipe):
@@ -88,26 +85,34 @@ class Recipe:
     def mixDuration(self):
         return 5 if self.recipe[WAIT] else 1
 
-def nextCommand(recipe, ingredient, button, slot, blender, serve):
-    yield button[slot].trigger()
-    yield button[RESET].trigger()
+def dragAndDropTo(source, destination, use_shortcut):
+    if use_shortcut:
+        return TypeCommand(source.getShortcut())
+    return DragAndDropCommand(source.getCentroid(), destination.getCentroid())
+
+def trigger(screen_element, use_shortcut):
+    return dragAndDropTo(screen_element, screen_element, use_shortcut)
+
+def nextCommand(recipe, ingredient, button, slot, blender, serve, use_shortcut):
+    yield trigger(button[slot], use_shortcut)
+    yield trigger(button[RESET], use_shortcut)
 
     for name, screen_element in ingredient.items():
         for _ in range(recipe.getIngredientCount(name)):
-            yield screen_element.dragAndDropTo(blender)
+            yield dragAndDropTo(screen_element, blender, use_shortcut)
 
     if recipe.isOnTheRocks():
-        yield button[ADD_ICE].trigger()
+        yield trigger(button[ADD_ICE], use_shortcut)
 
     if recipe.isAged():
-        yield button[AGE].trigger()
+        yield trigger(button[AGE], use_shortcut)
 
-    yield button[MIX].trigger()
+    yield trigger(button[MIX], use_shortcut)
     yield WaitCommand(recipe.mixDuration())
-    yield button[MIX].trigger()
+    yield trigger(button[MIX], use_shortcut)
 
     if serve:
-        yield button[MIX].trigger()
+        yield trigger(button[MIX], use_shortcut)
 
 ingredients = [ADELHYDE, BRONSON_EXTRACT, POWDERED_DELTA, FLANERGIDE, KARMOTRINE]
 buttons = [ADD_ICE, AGE, LEFT_SLOT, RIGHT_SLOT, RESET, MIX]
@@ -116,22 +121,24 @@ ingredient_element = { name: ScreenElement(INGREDIENT, name) for name in ingredi
 button_element = { name: ScreenElement(BUTTON, name) for name in buttons }
 blender = ScreenElement(OTHER, BLENDER)
 
-#add_opt = True
-add_opt = False
+add_opt = True
+#add_opt = False
 #serve = True
 serve = False
 slot = LEFT_SLOT
 #slot = RIGHT_SLOT
-#double = True
-double = False
+double = True
+#double = False
+use_shortcut = True
+#use_shortcut = False
 
 #drink_name = BAD_TOUCH
-drink_name = BEER
+#drink_name = BEER
 #drink_name = BLEEDING_JANE
 #drink_name = BLOOM_LIGHT
 #drink_name = BLUE_FAIRY
 #drink_name = BRANDTINI
-#drink_name = COBALT_VELVET
+drink_name = COBALT_VELVET
 #drink_name = CREVICE_SPIKE
 #drink_name = FLUFFY_DREAM
 #drink_name = FRINGE_WEAVER
@@ -163,5 +170,5 @@ if double:
 if add_opt:
     drink_recipe[drink_name].addOpt(ingredients)
 
-for command in nextCommand(drink_recipe[drink_name], ingredient_element, button_element, slot, blender, serve):
+for command in nextCommand(drink_recipe[drink_name], ingredient_element, button_element, slot, blender, serve, use_shortcut):
     command.execute()
