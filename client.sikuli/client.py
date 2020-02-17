@@ -95,25 +95,26 @@ class ScreenElement:
         return self.shortcut
 
 class Recipe:
+    ingredients = [ADELHYDE, BRONSON_EXTRACT, POWDERED_DELTA, FLANERGIDE, KARMOTRINE]
     def __init__(self, recipe):
         self.recipe = recipe
 
-    def _isBig(self, ingredients):
+    def _isBig(self):
         total_amount = 0
-        for name in ingredients:
+        for name in Recipe.ingredients:
             individual_amount = self.recipe[name]
             if individual_amount > 0:
                 total_amount += individual_amount
         return total_amount > 10
 
-    def addOpt(self, ingredients):
-        for name in ingredients:
+    def addOpt(self):
+        for name in Recipe.ingredients:
             if self.recipe[name] < 0:
                 self.recipe[name] = 1
 
-    def doubleSize(self, ingredients):
-        if not self._isBig(ingredients):
-            for name in ingredients:
+    def doubleSize(self):
+        if not self._isBig():
+            for name in Recipe.ingredients:
                 self.recipe[name] *= 2
 
     def getIngredientCount(self, ingredient_name):
@@ -128,8 +129,8 @@ class Recipe:
     def mixDuration(self):
         return 5 if self.recipe[WAIT] else 1
 
-    def nextAction(self, ingredients):
-        for ingredient_name in ingredients:
+    def nextAction(self):
+        for ingredient_name in Recipe.ingredients:
             for _ in range(self.getIngredientCount(ingredient_name)):
                 yield AddIngredientAction(ingredient_name)
         if self.isOnTheRocks():
@@ -147,11 +148,11 @@ def dragAndDropTo(source, destination, use_shortcut):
 def trigger(screen_element, use_shortcut):
     return dragAndDropTo(screen_element, screen_element, use_shortcut)
 
-def nextCommand(recipe, ingredients, ingredient, button, slot, blender, serve, use_shortcut):
+def nextCommand(recipe, ingredient, button, slot, blender, serve, use_shortcut):
     yield trigger(button[slot], use_shortcut)
     yield trigger(button[RESET], use_shortcut)
 
-    for action in recipe.nextAction(ingredients):
+    for action in recipe.nextAction():
         if isinstance(action, AddIngredientAction):
             yield dragAndDropTo(ingredient[action.getSource()], blender, use_shortcut)
         elif isinstance(action, AddIceAction):
@@ -168,10 +169,9 @@ def nextCommand(recipe, ingredients, ingredient, button, slot, blender, serve, u
     if serve:
         yield trigger(button[MIX], use_shortcut)
 
-ingredients = [ADELHYDE, BRONSON_EXTRACT, POWDERED_DELTA, FLANERGIDE, KARMOTRINE]
 buttons = [ADD_ICE, AGE, LEFT_SLOT, RIGHT_SLOT, RESET, MIX]
 
-ingredient_element = { name: ScreenElement(INGREDIENT, name) for name in ingredients }
+ingredient_element = { name: ScreenElement(INGREDIENT, name) for name in Recipe.ingredients }
 button_element = { name: ScreenElement(BUTTON, name) for name in buttons }
 blender = ScreenElement(OTHER, BLENDER)
 
@@ -219,10 +219,10 @@ if double and not add_opt and drink_name == CREVICE_SPIKE:
 drink_recipe = { name: Recipe(attr[RECIPE]) for name, attr in drink.items() }
 
 if double:
-    drink_recipe[drink_name].doubleSize(ingredients)
+    drink_recipe[drink_name].doubleSize()
 
 if add_opt:
-    drink_recipe[drink_name].addOpt(ingredients)
+    drink_recipe[drink_name].addOpt()
 
-for command in nextCommand(drink_recipe[drink_name], ingredients, ingredient_element, button_element, slot, blender, serve, use_shortcut):
+for command in nextCommand(drink_recipe[drink_name], ingredient_element, button_element, slot, blender, serve, use_shortcut):
     command.execute()
