@@ -33,6 +33,49 @@ class TypeCommand:
     def execute(self):
         type(self.shortcut)
 
+class RecipeAction(object):
+    def __init__(self, source, destination):
+        self.source = source
+        self.destination = destination
+    def getSource(self):
+        return self.source
+    def getDestination(self):
+        return self.destination
+
+class SingleElementRecipeAction(RecipeAction):
+    def __init__(self, source):
+        super(SingleElementRecipeAction, self).__init__(source, source)
+
+class AddIngredientAction(RecipeAction):
+    def __init__(self, source):
+        super(AddIngredientAction, self).__init__(source, BLENDER)
+
+class MixForAction(SingleElementRecipeAction):
+    def __init__(self, seconds):
+        super(MixForAction, self).__init__(MIX)
+        self.seconds = seconds
+    def getSeconds(self):
+        return self.seconds
+
+class ServeAction(SingleElementRecipeAction):
+    def __init__(self):
+        super(ServeAction, self).__init__(MIX)
+
+class AddIceAction(SingleElementRecipeAction):
+    def __init__(self):
+        super(AddIceAction, self).__init__(ADD_ICE)
+
+class AgeAction(SingleElementRecipeAction):
+    def __init__(self):
+        super(AgeAction, self).__init__(AGE)
+
+class SelectSlotAction(SingleElementRecipeAction):
+    pass
+
+class ResetAction(SingleElementRecipeAction):
+    def __init__(self):
+        super(ResetAction, self).__init__(RESET)
+
 class ScreenElement:
     def __init__(self, category, name):
         entry = centroid[category][name]
@@ -85,6 +128,16 @@ class Recipe:
     def mixDuration(self):
         return 5 if self.recipe[WAIT] else 1
 
+    def nextAction(self, ingredients):
+        for ingredient_name in ingredients:
+            for _ in range(self.getIngredientCount(ingredient_name)):
+                yield AddIngredientAction(ingredient_name)
+        if self.isOnTheRocks():
+            yield AddIceAction()
+        if self.isAged():
+            yield AgeAction()
+        yield MixForAction(self.mixDuration())
+
 def dragAndDropTo(source, destination, use_shortcut):
     shortcut = source.getShortcut()
     if use_shortcut and shortcut != '\x00':
@@ -94,23 +147,23 @@ def dragAndDropTo(source, destination, use_shortcut):
 def trigger(screen_element, use_shortcut):
     return dragAndDropTo(screen_element, screen_element, use_shortcut)
 
-def nextCommand(recipe, ingredient, button, slot, blender, serve, use_shortcut):
+def nextCommand(recipe, ingredients, ingredient, button, slot, blender, serve, use_shortcut):
     yield trigger(button[slot], use_shortcut)
     yield trigger(button[RESET], use_shortcut)
 
-    for name, screen_element in ingredient.items():
-        for _ in range(recipe.getIngredientCount(name)):
-            yield dragAndDropTo(screen_element, blender, use_shortcut)
-
-    if recipe.isOnTheRocks():
-        yield trigger(button[ADD_ICE], use_shortcut)
-
-    if recipe.isAged():
-        yield trigger(button[AGE], use_shortcut)
-
-    yield trigger(button[MIX], use_shortcut)
-    yield WaitCommand(recipe.mixDuration())
-    yield trigger(button[MIX], use_shortcut)
+    for action in recipe.nextAction(ingredients):
+        if isinstance(action, AddIngredientAction):
+            yield dragAndDropTo(ingredient[action.getSource()], blender, use_shortcut)
+        elif isinstance(action, AddIceAction):
+            yield trigger(button[action.getSource()], use_shortcut)
+        elif isinstance(action, AgeAction):
+            yield trigger(button[action.getSource()], use_shortcut)
+        elif isinstance(action, MixForAction):
+            yield trigger(button[action.getSource()], use_shortcut)
+            yield WaitCommand(action.getSeconds())
+            yield trigger(button[action.getSource()], use_shortcut)
+        else:
+            print('Unexpected recipe action type:', action.__class__.__name__)
 
     if serve:
         yield trigger(button[MIX], use_shortcut)
@@ -126,20 +179,20 @@ add_opt = True
 #add_opt = False
 #serve = True
 serve = False
-slot = LEFT_SLOT
-#slot = RIGHT_SLOT
-double = True
-#double = False
-use_shortcut = True
-#use_shortcut = False
+#slot = LEFT_SLOT
+slot = RIGHT_SLOT
+#double = True
+double = False
+#use_shortcut = True
+use_shortcut = False
 
 #drink_name = BAD_TOUCH
-#drink_name = BEER
+drink_name = BEER
 #drink_name = BLEEDING_JANE
 #drink_name = BLOOM_LIGHT
 #drink_name = BLUE_FAIRY
 #drink_name = BRANDTINI
-drink_name = COBALT_VELVET
+#drink_name = COBALT_VELVET
 #drink_name = CREVICE_SPIKE
 #drink_name = FLUFFY_DREAM
 #drink_name = FRINGE_WEAVER
@@ -171,5 +224,5 @@ if double:
 if add_opt:
     drink_recipe[drink_name].addOpt(ingredients)
 
-for command in nextCommand(drink_recipe[drink_name], ingredient_element, button_element, slot, blender, serve, use_shortcut):
+for command in nextCommand(drink_recipe[drink_name], ingredients, ingredient_element, button_element, slot, blender, serve, use_shortcut):
     command.execute()
