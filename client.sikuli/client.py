@@ -97,29 +97,41 @@ class Recipe:
             for name in ingredients:
                 self.recipe[name] *= 2
 
-    def generateCommands(self, ingredient, button, slot, blender, serve):
-        commands = []
-        commands.extend(button[slot].trigger())
-        commands.extend(button[RESET].trigger())
+    def getIngredientCount(self, ingredient_name):
+        return self.recipe[ingredient_name]
 
-        for name, screen_element in ingredient.items():
-            for _ in range(self.recipe[name]):
-                commands.extend(screen_element.trigger_with_arg(blender))
+    def isOnTheRocks(self):
+        return self.recipe[ADD_ICE]
 
-        if self.recipe[ADD_ICE]:
-            commands.extend(button[ADD_ICE].trigger())
+    def isAged(self):
+        return self.recipe[AGE]
 
-        if self.recipe[AGE]:
-            commands.extend(button[AGE].trigger())
+    def mixDuration(self):
+        return 5 if self.recipe[WAIT] else 1
 
+def generateCommands(recipe, ingredient, button, slot, blender, serve):
+    commands = []
+    commands.extend(button[slot].trigger())
+    commands.extend(button[RESET].trigger())
+
+    for name, screen_element in ingredient.items():
+        for _ in range(recipe.getIngredientCount(name)):
+            commands.extend(screen_element.trigger_with_arg(blender))
+
+    if recipe.isOnTheRocks():
+        commands.extend(button[ADD_ICE].trigger())
+
+    if recipe.isAged():
+        commands.extend(button[AGE].trigger())
+
+    commands.extend(button[MIX].trigger())
+    commands.append(WaitCommand(recipe.mixDuration()))
+    commands.extend(button[MIX].trigger())
+
+    if serve:
         commands.extend(button[MIX].trigger())
-        commands.append(WaitCommand(5 if self.recipe[WAIT] else 1))
-        commands.extend(button[MIX].trigger())
 
-        if serve:
-            commands.extend(button[MIX].trigger())
-
-        return commands
+    return commands
 
 ingredients = [ADELHYDE, BRONSON_EXTRACT, POWDERED_DELTA, FLANERGIDE, KARMOTRINE]
 buttons = [ADD_ICE, AGE, LEFT_SLOT, RIGHT_SLOT, RESET, MIX]
@@ -138,10 +150,10 @@ double = True
 #double = False
 
 #drink_name = BAD_TOUCH
-drink_name = BEER
+#drink_name = BEER
 #drink_name = BLEEDING_JANE
 #drink_name = BLOOM_LIGHT
-#drink_name = BLUE_FAIRY
+drink_name = BLUE_FAIRY
 #drink_name = BRANDTINI
 #drink_name = COBALT_VELVET
 #drink_name = CREVICE_SPIKE
@@ -175,5 +187,5 @@ if double:
 if add_opt:
     drink_recipe[drink_name].addOpt()
 
-for command in drink_recipe[drink_name].generateCommands(ingredient_element, button_element, slot, blender, serve):
+for command in generateCommands(drink_recipe[drink_name], ingredient_element, button_element, slot, blender, serve):
     command.execute()
