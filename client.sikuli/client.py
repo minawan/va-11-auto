@@ -83,14 +83,10 @@ class Recipe:
                 total_amount += individual_amount
         return total_amount > 10
 
-    def addOpt(self):
-        updated_recipe = dict()
-        for name, count in self.recipe.items():
-            if count < 0:
-                updated_recipe[name] = 1
-            else:
-                updated_recipe[name] = count
-        self.recipe = updated_recipe
+    def addOpt(self, ingredients):
+        for name in ingredients:
+            if self.recipe[name] < 0:
+                self.recipe[name] = 1
 
     def doubleSize(self, ingredients):
         if not self._isBig(ingredients):
@@ -140,14 +136,14 @@ ingredient_element = { name: ScreenElement(INGREDIENT, name) for name in ingredi
 button_element = { name: ScreenElement(BUTTON, name) for name in buttons }
 blender = ScreenElement(OTHER, BLENDER)
 
-add_opt = True
-#add_opt = False
+#add_opt = True
+add_opt = False
 #serve = True
 serve = False
 slot = LEFT_SLOT
 #slot = RIGHT_SLOT
-double = True
-#double = False
+#double = True
+double = False
 
 #drink_name = BAD_TOUCH
 #drink_name = BEER
@@ -185,7 +181,7 @@ if double:
     drink_recipe[drink_name].doubleSize(ingredients)
 
 if add_opt:
-    drink_recipe[drink_name].addOpt()
+    drink_recipe[drink_name].addOpt(ingredients)
 
 for command in generateCommands(drink_recipe[drink_name], ingredient_element, button_element, slot, blender, serve):
     command.execute()
