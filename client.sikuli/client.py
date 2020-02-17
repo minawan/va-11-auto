@@ -46,26 +46,13 @@ class ScreenElement:
             print('Shortcut not available for {name} of type {category}'.format(name=name, category=category))
             self.shortcut = 'l'
 
-    def click(self):
-        return self.dragDrop(self)
-
-    def dragDrop(self, element):
-        return DragAndDropCommand(self.centroid, element.centroid)
-
     def trigger(self):
-        if self.use_shortcut:
-            yield WaitCommand(0.3)
-            yield TypeCommand(self.shortcut)
-        else:
-            yield self.click()
+        return self.dragAndDropTo(self)
 
-    # jython pls why no overload
-    def trigger_with_arg(self, element):
+    def dragAndDropTo(self, element):
         if self.use_shortcut:
-            yield WaitCommand(0.3)
-            yield TypeCommand(self.shortcut)
-        else:
-            yield self.dragDrop(element)
+            return TypeCommand(self.shortcut)
+        return DragAndDropCommand(self.centroid, element.centroid)
 
 class Recipe:
     def __init__(self, recipe):
@@ -102,33 +89,25 @@ class Recipe:
         return 5 if self.recipe[WAIT] else 1
 
 def nextCommand(recipe, ingredient, button, slot, blender, serve):
-    for cmd in button[slot].trigger():
-        yield cmd
-    for cmd in button[RESET].trigger():
-        yield cmd
+    yield button[slot].trigger()
+    yield button[RESET].trigger()
 
     for name, screen_element in ingredient.items():
         for _ in range(recipe.getIngredientCount(name)):
-            for cmd in screen_element.trigger_with_arg(blender):
-                yield cmd
+            yield screen_element.dragAndDropTo(blender)
 
     if recipe.isOnTheRocks():
-        for cmd in button[ADD_ICE].trigger():
-            yield cmd
+        yield button[ADD_ICE].trigger()
 
     if recipe.isAged():
-        for cmd in button[AGE].trigger():
-            yield cmd
+        yield button[AGE].trigger()
 
-    for cmd in button[MIX].trigger():
-        yield cmd
+    yield button[MIX].trigger()
     yield WaitCommand(recipe.mixDuration())
-    for cmd in button[MIX].trigger():
-        yield cmd
+    yield button[MIX].trigger()
 
     if serve:
-        for cmd in button[MIX].trigger():
-            yield cmd
+        yield button[MIX].trigger()
 
 ingredients = [ADELHYDE, BRONSON_EXTRACT, POWDERED_DELTA, FLANERGIDE, KARMOTRINE]
 buttons = [ADD_ICE, AGE, LEFT_SLOT, RIGHT_SLOT, RESET, MIX]
@@ -143,8 +122,8 @@ add_opt = False
 serve = False
 slot = LEFT_SLOT
 #slot = RIGHT_SLOT
-double = True
-#double = False
+#double = True
+double = False
 
 #drink_name = BAD_TOUCH
 drink_name = BEER
