@@ -40,10 +40,9 @@ class ScreenElement:
             self.dragDrop(element)
 
 class Recipe:
-    def __init__(self, recipe, add_opt, dry_run):
+    def __init__(self, recipe, add_opt):
         self.recipe = recipe
         self.add_opt = add_opt
-        self.dry_run = dry_run
 
     def doubleSize(self):
         updated_recipe = dict()
@@ -51,7 +50,7 @@ class Recipe:
             updated_recipe[name] = 2 * count
         self.recipe = updated_recipe
 
-    def apply(self, ingredient, button, slot, blender):
+    def apply(self, ingredient, button, slot, blender, serve):
         button[slot].trigger()
         button[RESET].trigger()
 
@@ -72,7 +71,7 @@ class Recipe:
         wait(5 if self.recipe[WAIT] else 1)
         button[MIX].trigger()
 
-        if not self.dry_run:
+        if serve:
             button[MIX].trigger()
 
 ingredients = [ADELHYDE, BRONSON_EXTRACT, POWDERED_DELTA, FLANERGIDE, KARMOTRINE]
@@ -84,8 +83,8 @@ blender = ScreenElement(OTHER, BLENDER)
 
 #add_opt = True
 add_opt = False
-dry_run = True
-#dry_run = False
+serve = True
+#serve = False
 slot = LEFT_SLOT
 #slot = RIGHT_SLOT
 #double = True
@@ -96,8 +95,8 @@ Settings.DelayBeforeDrag = 0.1
 Settings.DelayBeforeDrop = 0.1
 
 #drink_name = BAD_TOUCH
-#drink_name = BEER
-drink_name = BLEEDING_JANE
+drink_name = BEER
+#drink_name = BLEEDING_JANE
 #drink_name = BLOOM_LIGHT
 #drink_name = BLUE_FAIRY
 #drink_name = BRANDTINI
@@ -129,11 +128,11 @@ if double and not add_opt and drink_name == CREVICE_SPIKE:
     print('Adding karmotrine to big crevice spike.')
     add_opt = True
 
-drink_recipe = { name: Recipe(attr[RECIPE], add_opt, dry_run) for name, attr in drink.items() }
+drink_recipe = { name: Recipe(attr[RECIPE], add_opt) for name, attr in drink.items() }
 
 if double:
     drink_recipe[drink_name].doubleSize()
 
-drink_recipe[drink_name].apply(ingredient_element, button_element, slot, blender)
+drink_recipe[drink_name].apply(ingredient_element, button_element, slot, blender, serve)
 #wait(5)
 
