@@ -44,27 +44,35 @@ class Recipe:
         self.recipe = recipe
         self.add_opt = add_opt
         self.dry_run = dry_run
-    def apply(self, ingredient, button, slot, blender, double=False):
+
+    def doubleSize(self):
+        updated_recipe = dict()
+        for name, count in self.recipe.items():
+            updated_recipe[name] = 2 * count
+        self.recipe = updated_recipe
+
+    def apply(self, ingredient, button, slot, blender):
         button[slot].trigger()
         button[RESET].trigger()
+
         for name, screen_element in ingredient.items():
             if self.recipe[name] < 0 and self.add_opt:
                 screen_element.trigger_with_arg(blender)
-            else:
-                max_count = 2 * self.recipe[name] if double else self.recipe[name] 
-                for _ in range(max_count):
-                    screen_element.trigger_with_arg(blender)
+                continue
+            for _ in range(self.recipe[name]):
+                screen_element.trigger_with_arg(blender)
+
         if self.recipe[ADD_ICE]:
             button[ADD_ICE].trigger()
+
         if self.recipe[AGE]:
             button[AGE].trigger()
+
         button[MIX].trigger()
         wait(5 if self.recipe[WAIT] else 1)
         button[MIX].trigger()
-        if self.dry_run:
-            pass
-            #button[RESET].trigger()
-        else:
+
+        if not self.dry_run:
             button[MIX].trigger()
 
 ingredients = [ADELHYDE, BRONSON_EXTRACT, POWDERED_DELTA, FLANERGIDE, KARMOTRINE]
@@ -89,7 +97,7 @@ Settings.DelayBeforeDrop = 0.1
 
 #drink_name = BAD_TOUCH
 #drink_name = BEER
-#drink_name = BLEEDING_JANE
+drink_name = BLEEDING_JANE
 #drink_name = BLOOM_LIGHT
 #drink_name = BLUE_FAIRY
 #drink_name = BRANDTINI
@@ -107,7 +115,7 @@ Settings.DelayBeforeDrop = 0.1
 #drink_name = PIANO_WOMAN
 #drink_name = PILEDRIVER
 #drink_name = SPARKLE_STAR
-drink_name = SUGAR_RUSH
+#drink_name = SUGAR_RUSH
 #drink_name = SUNSHINE_CLOUD
 #drink_name = SUPLEX
 #drink_name = ZEN_STAR
@@ -123,6 +131,9 @@ if double and not add_opt and drink_name == CREVICE_SPIKE:
 
 drink_recipe = { name: Recipe(attr[RECIPE], add_opt, dry_run) for name, attr in drink.items() }
 
-drink_recipe[drink_name].apply(ingredient_element, button_element, slot, blender, double=double)
+if double:
+    drink_recipe[drink_name].doubleSize()
+
+drink_recipe[drink_name].apply(ingredient_element, button_element, slot, blender)
 #wait(5)
 
