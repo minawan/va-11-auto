@@ -30,7 +30,7 @@ use_shortcut = False
 #drink_name = BLEEDING_JANE
 #drink_name = BLOOM_LIGHT
 #drink_name = BLUE_FAIRY
-#drink_name = BRANDTINI
+drink_name = BRANDTINI
 #drink_name = COBALT_VELVET
 #drink_name = CREVICE_SPIKE
 #drink_name = FLUFFY_DREAM
@@ -41,7 +41,7 @@ use_shortcut = False
 #drink_name = MARSBLAST
 #drink_name = MERCURYBLAST
 #drink_name = MOONBLAST
-drink_name = PIANO_MAN
+#drink_name = PIANO_MAN
 #drink_name = PIANO_WOMAN
 #drink_name = PILEDRIVER
 #drink_name = SPARKLE_STAR
@@ -205,7 +205,7 @@ def nextCommandFromAction(screen_elements, use_shortcut, action):
         yield trigger(screen_elements[action.getSource()], use_shortcut)
         yield WaitCommand(action.getSeconds())
         yield trigger(screen_elements[action.getSource()], use_shortcut)
-    elif isinstance(action, AddIceAction) or isinstance(action, AgeAction) or isinstance(action, ResetAction) or isinstance(action, SelectSlotAction) or isinstance(action, ServeAction):
+    elif isinstance(action, SingleElementRecipeAction):
         yield trigger(screen_elements[action.getSource()], use_shortcut)
     else:
         print('Unexpected recipe action type:', action.__class__.__name__)
