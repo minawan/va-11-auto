@@ -1,5 +1,10 @@
 import os
 
+Settings.MoveMouseDelay = 0.1
+Settings.DelayBeforeMouseDown = 0.1
+Settings.DelayBeforeDrag = 0.1
+Settings.DelayBeforeDrop = 0.1
+
 resource_location = os.environ['VALHALLA_ROOT']
 centroid_filename = os.path.join(resource_location, 'centroid.py')
 drink_filename = os.path.join(resource_location, 'drink.py')
@@ -40,9 +45,17 @@ class ScreenElement:
             self.dragDrop(element)
 
 class Recipe:
-    def __init__(self, recipe, add_opt):
+    def __init__(self, recipe):
         self.recipe = recipe
-        self.add_opt = add_opt
+
+    def addOpt(self):
+        updated_recipe = dict()
+        for name, count in self.recipe.items():
+            if count < 0:
+                updated_recipe[name] = 1
+            else:
+                updated_recipe[name] = count
+        self.recipe = updated_recipe
 
     def doubleSize(self):
         updated_recipe = dict()
@@ -55,9 +68,6 @@ class Recipe:
         button[RESET].trigger()
 
         for name, screen_element in ingredient.items():
-            if self.recipe[name] < 0 and self.add_opt:
-                screen_element.trigger_with_arg(blender)
-                continue
             for _ in range(self.recipe[name]):
                 screen_element.trigger_with_arg(blender)
 
@@ -83,19 +93,15 @@ blender = ScreenElement(OTHER, BLENDER)
 
 #add_opt = True
 add_opt = False
-serve = True
-#serve = False
+#serve = True
+serve = False
 slot = LEFT_SLOT
 #slot = RIGHT_SLOT
 #double = True
 double = False
-Settings.MoveMouseDelay = 0.1
-Settings.DelayBeforeMouseDown = 0.1
-Settings.DelayBeforeDrag = 0.1
-Settings.DelayBeforeDrop = 0.1
 
 #drink_name = BAD_TOUCH
-drink_name = BEER
+#drink_name = BEER
 #drink_name = BLEEDING_JANE
 #drink_name = BLOOM_LIGHT
 #drink_name = BLUE_FAIRY
@@ -114,7 +120,7 @@ drink_name = BEER
 #drink_name = PIANO_WOMAN
 #drink_name = PILEDRIVER
 #drink_name = SPARKLE_STAR
-#drink_name = SUGAR_RUSH
+drink_name = SUGAR_RUSH
 #drink_name = SUNSHINE_CLOUD
 #drink_name = SUPLEX
 #drink_name = ZEN_STAR
@@ -128,10 +134,13 @@ if double and not add_opt and drink_name == CREVICE_SPIKE:
     print('Adding karmotrine to big crevice spike.')
     add_opt = True
 
-drink_recipe = { name: Recipe(attr[RECIPE], add_opt) for name, attr in drink.items() }
+drink_recipe = { name: Recipe(attr[RECIPE]) for name, attr in drink.items() }
 
 if double:
     drink_recipe[drink_name].doubleSize()
+
+if add_opt:
+    drink_recipe[drink_name].addOpt()
 
 drink_recipe[drink_name].apply(ingredient_element, button_element, slot, blender, serve)
 #wait(5)
