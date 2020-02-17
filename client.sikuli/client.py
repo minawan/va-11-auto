@@ -148,32 +148,33 @@ def dragAndDropTo(source, destination, use_shortcut):
 def trigger(screen_element, use_shortcut):
     return dragAndDropTo(screen_element, screen_element, use_shortcut)
 
-def nextCommand(recipe, ingredient, button, slot, blender, serve, use_shortcut):
-    yield trigger(button[slot], use_shortcut)
-    yield trigger(button[RESET], use_shortcut)
+def nextCommand(recipe, screen_elements, slot, serve, use_shortcut):
+    yield trigger(screen_elements[slot], use_shortcut)
+    yield trigger(screen_elements[RESET], use_shortcut)
 
     for action in recipe.nextAction():
         if isinstance(action, AddIngredientAction):
-            yield dragAndDropTo(ingredient[action.getSource()], blender, use_shortcut)
+            yield dragAndDropTo(screen_elements[action.getSource()], screen_elements[action.getDestination()], use_shortcut)
         elif isinstance(action, AddIceAction):
-            yield trigger(button[action.getSource()], use_shortcut)
+            yield trigger(screen_elements[action.getSource()], use_shortcut)
         elif isinstance(action, AgeAction):
-            yield trigger(button[action.getSource()], use_shortcut)
+            yield trigger(screen_elements[action.getSource()], use_shortcut)
         elif isinstance(action, MixForAction):
-            yield trigger(button[action.getSource()], use_shortcut)
+            yield trigger(screen_elements[action.getSource()], use_shortcut)
             yield WaitCommand(action.getSeconds())
-            yield trigger(button[action.getSource()], use_shortcut)
+            yield trigger(screen_elements[action.getSource()], use_shortcut)
         else:
             print('Unexpected recipe action type:', action.__class__.__name__)
 
     if serve:
-        yield trigger(button[MIX], use_shortcut)
+        yield trigger(screen_elements[MIX], use_shortcut)
 
 buttons = [ADD_ICE, AGE, LEFT_SLOT, RIGHT_SLOT, RESET, MIX]
 
-ingredient_element = { name: ScreenElement(INGREDIENT, name) for name in Recipe.ingredients }
-button_element = { name: ScreenElement(BUTTON, name) for name in buttons }
-blender = ScreenElement(OTHER, BLENDER)
+screen_elements = dict()
+screen_elements.update({ name: ScreenElement(INGREDIENT, name) for name in Recipe.ingredients })
+screen_elements.update({ name: ScreenElement(BUTTON, name) for name in buttons })
+screen_elements[BLENDER] = ScreenElement(OTHER, BLENDER)
 
 add_opt = True
 #add_opt = False
@@ -224,5 +225,5 @@ if double:
 if add_opt:
     drink_recipe[drink_name].addOpt()
 
-for command in nextCommand(drink_recipe[drink_name], ingredient_element, button_element, slot, blender, serve, use_shortcut):
+for command in nextCommand(drink_recipe[drink_name], screen_elements, slot, serve, use_shortcut):
     command.execute()
