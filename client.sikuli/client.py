@@ -26,16 +26,20 @@ class ScreenElement:
         except KeyError:
             print('Shortcut not available for {name} of type {category}'.format(name=name, category=category))
             self.shortcut = 'l'
+
     def click(self):
         self.dragDrop(self)
+
     def dragDrop(self, element):
         dragDrop(Location(*self.centroid), Location(*element.centroid))
+
     def trigger(self):
         if self.use_shortcut:
             wait(0.3)
             type(self.shortcut)
         else:
             self.click()
+
     # jython pls why no overload
     def trigger_with_arg(self, element):
         if self.use_shortcut:
@@ -48,6 +52,14 @@ class Recipe:
     def __init__(self, recipe):
         self.recipe = recipe
 
+    def _isBig(self, ingredients):
+        total_amount = 0
+        for name in ingredients:
+            individual_amount = self.recipe[name]
+            if individual_amount > 0:
+                total_amount += individual_amount
+        return total_amount > 10
+
     def addOpt(self):
         updated_recipe = dict()
         for name, count in self.recipe.items():
@@ -57,11 +69,10 @@ class Recipe:
                 updated_recipe[name] = count
         self.recipe = updated_recipe
 
-    def doubleSize(self):
-        updated_recipe = dict()
-        for name, count in self.recipe.items():
-            updated_recipe[name] = 2 * count
-        self.recipe = updated_recipe
+    def doubleSize(self, ingredients):
+        if not self._isBig(ingredients):
+            for name in ingredients:
+                self.recipe[name] *= 2
 
     def apply(self, ingredient, button, slot, blender, serve):
         button[slot].trigger()
@@ -91,17 +102,17 @@ ingredient_element = { name: ScreenElement(INGREDIENT, name) for name in ingredi
 button_element = { name: ScreenElement(BUTTON, name) for name in buttons }
 blender = ScreenElement(OTHER, BLENDER)
 
-#add_opt = True
-add_opt = False
+add_opt = True
+#add_opt = False
 #serve = True
 serve = False
 slot = LEFT_SLOT
 #slot = RIGHT_SLOT
-#double = True
-double = False
+double = True
+#double = False
 
 #drink_name = BAD_TOUCH
-#drink_name = BEER
+drink_name = BEER
 #drink_name = BLEEDING_JANE
 #drink_name = BLOOM_LIGHT
 #drink_name = BLUE_FAIRY
@@ -120,15 +131,11 @@ double = False
 #drink_name = PIANO_WOMAN
 #drink_name = PILEDRIVER
 #drink_name = SPARKLE_STAR
-drink_name = SUGAR_RUSH
+#drink_name = SUGAR_RUSH
 #drink_name = SUNSHINE_CLOUD
 #drink_name = SUPLEX
 #drink_name = ZEN_STAR
 #drink_name = FLAMING_MOAI
-
-if double and drink_name in [MARSBLAST, PIANO_MAN, PIANO_WOMAN, ZEN_STAR, FLAMING_MOAI]:
-    print('{drink_name} is already big.'.format(drink_name=drink_name))
-    double = False
 
 if double and not add_opt and drink_name == CREVICE_SPIKE:
     print('Adding karmotrine to big crevice spike.')
@@ -137,11 +144,9 @@ if double and not add_opt and drink_name == CREVICE_SPIKE:
 drink_recipe = { name: Recipe(attr[RECIPE]) for name, attr in drink.items() }
 
 if double:
-    drink_recipe[drink_name].doubleSize()
+    drink_recipe[drink_name].doubleSize(ingredients)
 
 if add_opt:
     drink_recipe[drink_name].addOpt()
 
 drink_recipe[drink_name].apply(ingredient_element, button_element, slot, blender, serve)
-#wait(5)
-
