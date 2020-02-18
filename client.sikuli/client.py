@@ -20,17 +20,17 @@ add_opt = False
 serve = False
 slot = LEFT_SLOT
 #slot = RIGHT_SLOT
-double = True
-#double = False
+#double = True
+double = False
 #use_shortcut = True
 use_shortcut = False
 
 #drink_name = BAD_TOUCH
-#drink_name = BEER
+drink_name = BEER
 #drink_name = BLEEDING_JANE
 #drink_name = BLOOM_LIGHT
 #drink_name = BLUE_FAIRY
-drink_name = BRANDTINI
+#drink_name = BRANDTINI
 #drink_name = COBALT_VELVET
 #drink_name = CREVICE_SPIKE
 #drink_name = FLUFFY_DREAM
@@ -118,9 +118,8 @@ class ResetAction(SingleElementRecipeAction):
         super(ResetAction, self).__init__(RESET)
 
 class ScreenElement:
-    buttons = [ADD_ICE, AGE, LEFT_SLOT, RIGHT_SLOT, RESET, MIX]
-    def __init__(self, category, name):
-        entry = centroid[category][name]
+    elements = [ADD_ICE, AGE, LEFT_SLOT, RIGHT_SLOT, RESET, MIX, BLENDER]
+    def __init__(self, entry):
         x = entry[X_COORD]
         y = entry[Y_COORD]
         self.centroid = (x, y)
@@ -211,9 +210,10 @@ def nextCommandFromAction(screen_elements, use_shortcut, action):
         print('Unexpected recipe action type:', action.__class__.__name__)
 
 screen_elements = dict()
-screen_elements.update({ name: ScreenElement(INGREDIENT, name) for name in Recipe.ingredients })
-screen_elements.update({ name: ScreenElement(BUTTON, name) for name in ScreenElement.buttons })
-screen_elements[BLENDER] = ScreenElement(OTHER, BLENDER)
+for name in Recipe.ingredients:
+    screen_elements[name] = ScreenElement(centroid[name])
+for name in ScreenElement.elements:
+    screen_elements[name] = ScreenElement(centroid[name])
 
 drink_recipe = Recipe(drink[drink_name][RECIPE])
 

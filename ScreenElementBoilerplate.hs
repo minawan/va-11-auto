@@ -42,6 +42,9 @@ inputFile = "ScreenElement.csv"
 outputFile :: FilePath
 outputFile = "centroid.py"
 
+categoryLiteral :: String
+categoryLiteral = "Category"
+
 buttonLiteral :: String
 buttonLiteral = "Button"
 
@@ -115,7 +118,8 @@ initializeConstants =
       map (uncurry (printf "%s = '%s'") . \ constant ->
         (convertConstantToSymbol constant, constant)) literals
   where
-    literals = [ buttonLiteral
+    literals = [ categoryLiteral
+               , buttonLiteral
                , addIceLiteral
                , ageLiteral
                , leftSlotLiteral
@@ -264,13 +268,21 @@ isBlenderElement (ScreenElement name _ _ _ _) = name == "blender"
 getBlender :: [ScreenElement] -> Either String Element
 getBlender = getElement isBlenderElement
 
-toPythonDict :: Category -> String
-toPythonDict (Category button ingredient other) =
+toPythonDict :: [ScreenElement] -> String
+toPythonDict elements =
     unlines [ "centroid = {"
-            , buttonToPythonDict button
-            , ingredientToPythonDict ingredient
-            , otherToPythonDict other
+            , unlines $ map screenElementToPythonDict elements
             , "}"
+            ]
+
+screenElementToPythonDict :: ScreenElement -> String
+screenElementToPythonDict (ScreenElement name category xCoord yCoord shortcut) =
+    unlines [ printf "%s: {" (convertConstantToSymbol name)
+            , printf "%s: %s," (convertConstantToSymbol categoryLiteral) (convertConstantToSymbol category)
+            , printf "%s: %d," (convertConstantToSymbol xCoordLiteral) xCoord
+            , printf "%s: %d," (convertConstantToSymbol yCoordLiteral) yCoord
+            , printf "%s: %d," (convertConstantToSymbol shortcutLiteral) shortcut
+            , "},"
             ]
 
 buttonToPythonDict :: Either String Button -> String
@@ -360,5 +372,5 @@ main = do
     Left err -> putStrLn err
     Right (_, val) -> do
       writeFile outputFile initializeConstants
-      appendFile outputFile . toPythonDict . structurize $ Vector.toList val
+      appendFile outputFile . toPythonDict $ Vector.toList val
 
