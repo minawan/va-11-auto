@@ -24,14 +24,9 @@
   ],
   "tableLevels": [
     {
-      "levelName": "category",
-      "sublevels": [
-        "name"
-      ]
-    },
-    {
       "levelName": "name",
       "sublevels": [
+        "category",
         "xCoord",
         "yCoord",
         "shortcut"
