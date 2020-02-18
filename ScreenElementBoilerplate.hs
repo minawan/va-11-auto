@@ -3,6 +3,8 @@
 import Data.Csv (Header, decodeByName)
 import qualified Data.ByteString.Lazy as B
 import qualified Data.Char as Char
+import qualified Data.List as List
+import qualified Data.Set as Set
 import qualified Data.Vector as Vector
 import Data.Vector (Vector)
 import Text.Printf (printf)
@@ -85,32 +87,23 @@ convertConstantToSymbol (letter:nextLetter:nextRemainder)
     capitalizedLetter = Char.toUpper letter
     nextConstant = convertConstantToSymbol $ nextLetter : nextRemainder
 
-initializeConstants :: String
-initializeConstants =
+getLiterals :: [ScreenElement] -> [String]
+getLiterals [] = []
+getLiterals ((ScreenElement name category _ _ _):elements) =
+    name : category : getLiterals elements
+
+initializeConstants :: [ScreenElement] -> String
+initializeConstants elements =
     unlines $
       map (uncurry (printf "%s = '%s'") . \ constant ->
         (convertConstantToSymbol constant, constant)) literals
   where
-    literals = [ categoryLiteral
-               , buttonLiteral
-               , addIceLiteral
-               , ageLiteral
-               , leftSlotLiteral
-               , rightSlotLiteral
-               , resetLiteral
-               , mixLiteral
-               , ingredientLiteral
-               , adelhydeLiteral
-               , bronsonExtractLiteral
-               , powderedDeltaLiteral
-               , flanergideLiteral
-               , karmotrineLiteral
-               , otherLiteral
-               , blenderLiteral
-               , xCoordLiteral
-               , yCoordLiteral
-               , shortcutLiteral
-               ]
+    literals = List.sort $
+                 [ categoryLiteral
+                 , xCoordLiteral
+                 , yCoordLiteral
+                 , shortcutLiteral
+                 ] ++ (Set.toList . Set.fromList $ getLiterals elements)
 
 toPythonDict :: [ScreenElement] -> String
 toPythonDict elements =
@@ -136,6 +129,6 @@ main = do
   case decodedCsvData of
     Left err -> putStrLn err
     Right (_, val) -> do
-      writeFile outputFile initializeConstants
+      writeFile outputFile . initializeConstants $ Vector.toList val
       appendFile outputFile . toPythonDict $ Vector.toList val
 
