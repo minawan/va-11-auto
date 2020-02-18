@@ -20,51 +20,6 @@ outputFile = "centroid.py"
 categoryLiteral :: String
 categoryLiteral = "Category"
 
-buttonLiteral :: String
-buttonLiteral = "Button"
-
-addIceLiteral :: String
-addIceLiteral = "AddIce"
-
-ageLiteral :: String
-ageLiteral = "Age"
-
-leftSlotLiteral :: String
-leftSlotLiteral = "LeftSlot"
-
-rightSlotLiteral :: String
-rightSlotLiteral = "RightSlot"
-
-resetLiteral :: String
-resetLiteral = "Reset"
-
-mixLiteral :: String
-mixLiteral = "Mix"
-
-ingredientLiteral :: String
-ingredientLiteral = "Ingredient"
-
-adelhydeLiteral :: String
-adelhydeLiteral = "Adelhyde"
-
-bronsonExtractLiteral :: String
-bronsonExtractLiteral = "BronsonExtract"
-
-powderedDeltaLiteral :: String
-powderedDeltaLiteral = "PowderedDelta"
-
-flanergideLiteral :: String
-flanergideLiteral = "Flanergide"
-
-karmotrineLiteral :: String
-karmotrineLiteral = "Karmotrine"
-
-otherLiteral :: String
-otherLiteral = "Other"
-
-blenderLiteral :: String
-blenderLiteral = "Blender"
-
 xCoordLiteral :: String
 xCoordLiteral = "XCoord"
 
