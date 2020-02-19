@@ -49,4 +49,4 @@ clean:
 	rm -f *.hi
 	rm -f *.o
 	rm -f client.sikuli/client.py
-    rmdir client.sikuli
+	rmdir client.sikuli
