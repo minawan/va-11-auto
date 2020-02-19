@@ -1,9 +1,6 @@
 import os
 
-print('Settings.MoveMouseDelay = 0.1')
-print('Settings.DelayBeforeMouseDown = 0.1')
-print('Settings.DelayBeforeDrag = 0.1')
-print('Settings.DelayBeforeDrop = 0.1')
+print('xdotool search --name "VA-11 Hall-A: Cyberpunk Bartender Action" ', end='')
 
 resource_location = os.environ['VALHALLA_ROOT']
 centroid_filename = os.path.join(resource_location, 'centroid.py')
@@ -55,6 +52,18 @@ if double and not add_opt and drink_name == CREVICE_SPIKE:
     print('Adding karmotrine to big crevice spike.')
     add_opt = True
 
+class ClickCommand:
+    def __init__(self, source):
+        self.source = source
+    def execute(self):
+        source_x, source_y = self.source
+        print('mousemove {source_x} {source_y} '.format(source_x=source_x, source_y=source_y), end='')
+        print('sleep 0.5 ', end='')
+        print('mousedown 1 ', end='')
+        print('sleep 0.5 ', end='')
+        print('mouseup 1 ', end='')
+        print('sleep 0.5 ', end='')
+
 class DragAndDropCommand:
     def __init__(self, source, destination):
         self.source = source
@@ -62,19 +71,24 @@ class DragAndDropCommand:
     def execute(self):
         source_x, source_y = self.source
         destination_x, destination_y = self.destination
-        print('dragDrop(Location({source_x}, {source_y}), Location({destination_x}, {destination_y}))'.format(source_x=source_x, source_y=source_y, destination_x=destination_x, destination_y=destination_y))
+        print('mousemove {source_x} {source_y} '.format(source_x=source_x, source_y=source_y), end='')
+        print('sleep 0.5 ', end='')
+        print('mousedown 1 ', end='')
+        print('mousemove {destination_x} {destination_y} '.format(destination_x=destination_x, destination_y=destination_y), end='')
+        print('sleep 0.5 ', end='')
+        print('mouseup 1 ', end='')
 
 class WaitCommand:
     def __init__(self, seconds):
         self.seconds = seconds
     def execute(self):
-        print('wait({seconds})'.format(seconds=self.seconds))
+        print('sleep {seconds} '.format(seconds=self.seconds), end='')
 
 class TypeCommand:
     def __init__(self, shortcut):
         self.shortcut = shortcut
     def execute(self):
-        print('type({shortcut})'.format(shortcut=self.shortcut))
+        print('key {shortcut} '.format(shortcut=self.shortcut), end='')
 
 class RecipeAction(object):
     def __init__(self, source, destination):
@@ -189,7 +203,10 @@ def dragAndDropTo(source, destination, use_shortcut):
     return DragAndDropCommand(source.getCentroid(), destination.getCentroid())
 
 def trigger(screen_element, use_shortcut):
-    return dragAndDropTo(screen_element, screen_element, use_shortcut)
+    shortcut = screen_element.getShortcut()
+    if use_shortcut and shortcut != '\x00':
+        return TypeCommand(shortcut)
+    return ClickCommand(screen_element.getCentroid())
 
 def nextAction(recipe, slot, serve):
     yield ResetAction()
@@ -228,3 +245,5 @@ if add_opt:
 for action in nextAction(drink_recipe, slot, serve):
     for command in nextCommandFromAction(screen_elements, use_shortcut, action):
         command.execute()
+
+print()
