@@ -1,9 +1,9 @@
 import os
 
-Settings.MoveMouseDelay = 0.1
-Settings.DelayBeforeMouseDown = 0.1
-Settings.DelayBeforeDrag = 0.1
-Settings.DelayBeforeDrop = 0.1
+print('Settings.MoveMouseDelay = 0.1')
+print('Settings.DelayBeforeMouseDown = 0.1')
+print('Settings.DelayBeforeDrag = 0.1')
+print('Settings.DelayBeforeDrop = 0.1')
 
 resource_location = os.environ['VALHALLA_ROOT']
 centroid_filename = os.path.join(resource_location, 'centroid.py')
@@ -60,19 +60,21 @@ class DragAndDropCommand:
         self.source = source
         self.destination = destination
     def execute(self):
-        dragDrop(Location(*self.source), Location(*self.destination))
+        source_x, source_y = self.source
+        destination_x, destination_y = self.destination
+        print('dragDrop(Location({source_x}, {source_y}), Location({destination_x}, {destination_y}))'.format(source_x=source_x, source_y=source_y, destination_x=destination_x, destination_y=destination_y))
 
 class WaitCommand:
     def __init__(self, seconds):
         self.seconds = seconds
     def execute(self):
-        wait(self.seconds)
+        print('wait({seconds})'.format(seconds=self.seconds))
 
 class TypeCommand:
     def __init__(self, shortcut):
         self.shortcut = shortcut
     def execute(self):
-        type(self.shortcut)
+        print('type({shortcut})'.format(shortcut=self.shortcut))
 
 class RecipeAction(object):
     def __init__(self, source, destination):

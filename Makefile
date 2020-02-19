@@ -1,6 +1,10 @@
 all: build
 
-build: centroid.py drink.py
+build: client.sikuli/client.py
+
+client.sikuli/client.py: client.py centroid.py drink.py
+	mkdir -p client.sikuli
+	python client.py > client.sikuli/client.py
 
 centroid.py: ScreenElementBoilerplate ScreenElement.csv
 	./ScreenElementBoilerplate
@@ -44,3 +48,5 @@ clean:
 	rm -f *.dyn_o
 	rm -f *.hi
 	rm -f *.o
+	rm -f client.sikuli/client.py
+    rmdir client.sikuli
