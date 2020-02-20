@@ -1,10 +1,9 @@
 all: build
 
-build: client.sikuli/client.py
+build: main.sh
 
-client.sikuli/client.py: client.py centroid.py drink.py
-	mkdir -p client.sikuli
-	python client.py > client.sikuli/client.py
+main.sh: client.py centroid.py drink.py
+	python3 client.py > main.sh
 
 centroid.py: ScreenElementBoilerplate ScreenElement.csv
 	./ScreenElementBoilerplate
@@ -48,5 +47,4 @@ clean:
 	rm -f *.dyn_o
 	rm -f *.hi
 	rm -f *.o
-	rm -f client.sikuli/client.py
-	rmdir client.sikuli
+	rm -f main.sh

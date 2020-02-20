@@ -12,4 +12,4 @@ drink.py
 *.dyn_o
 *.hi
 *.o
-client.sikuli
+main.sh*
