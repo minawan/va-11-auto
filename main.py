@@ -1,15 +1,17 @@
 import os
+from centroid import *
+from drink import *
 
 print('xdotool search --name "VA-11 Hall-A: Cyberpunk Bartender Action" ', end='')
 
-resource_location = os.environ['VALHALLA_ROOT']
-centroid_filename = os.path.join(resource_location, 'centroid.py')
-drink_filename = os.path.join(resource_location, 'drink.py')
+#resource_location = os.environ['VALHALLA_ROOT']
+#centroid_filename = os.path.join(resource_location, 'centroid.py')
+#drink_filename = os.path.join(resource_location, 'drink.py')
 
-with open(centroid_filename, 'r') as centroid_file:
-    exec(centroid_file.read())
-with open(drink_filename, 'r') as drink_file:
-    exec(drink_file.read())
+#with open(centroid_filename, 'r') as centroid_file:
+#    exec(centroid_file.read())
+#with open(drink_filename, 'r') as drink_file:
+#    exec(drink_file.read())
 
 #add_opt = True
 add_opt = False

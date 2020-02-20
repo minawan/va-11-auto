@@ -2,8 +2,8 @@ all: build
 
 build: main.sh
 
-main.sh: client.py centroid.py drink.py
-	python3 client.py > main.sh
+main.sh: main.py centroid.py drink.py
+	python3 main.py > main.sh
 
 centroid.py: ScreenElementBoilerplate ScreenElement.csv
 	./ScreenElementBoilerplate
@@ -48,3 +48,4 @@ clean:
 	rm -f *.hi
 	rm -f *.o
 	rm -f main.sh
+	rm -rf __pycache__
