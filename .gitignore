@@ -13,3 +13,4 @@ drink.py
 *.hi
 *.o
 main.sh*
+__pycache__
