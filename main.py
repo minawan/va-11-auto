@@ -135,7 +135,7 @@ class ScreenElement:
         try:
             self.shortcut = str(chr(entry[SHORTCUT]))
         except KeyError:
-            print('Shortcut not available for {name} of type {category}'.format(name=name, category=category))
+            print('Shortcut not available for {name} of type {category}'.format(name=name, category=entry[CATEGORY]))
             self.shortcut = 'l'
 
     def getCentroid(self):
