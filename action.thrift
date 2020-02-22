@@ -1,4 +1,4 @@
 enum ScreenElementType {
-    LEFT_SLOT,
+    LEFT_SLOT
     RIGHT_SLOT
 }
