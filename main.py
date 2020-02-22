@@ -1,51 +1,8 @@
+import sys
 import os
+
 from centroid import *
 from drink import *
-
-print('xdotool search --name "VA-11 Hall-A: Cyberpunk Bartender Action" ', end='')
-
-#add_opt = True
-add_opt = False
-#serve = True
-serve = False
-slot = LEFT_SLOT
-#slot = RIGHT_SLOT
-#double = True
-double = False
-#use_shortcut = True
-use_shortcut = False
-reset = True
-#reset = False
-
-#drink_name = BAD_TOUCH
-drink_name = BEER
-#drink_name = BLEEDING_JANE
-#drink_name = BLOOM_LIGHT
-#drink_name = BLUE_FAIRY
-#drink_name = BRANDTINI
-#drink_name = COBALT_VELVET
-#drink_name = CREVICE_SPIKE
-#drink_name = FLUFFY_DREAM
-#drink_name = FRINGE_WEAVER
-#drink_name = FROTHY_WATER
-#drink_name = GRIZZLY_TEMPLE
-#drink_name = GUT_PUNCH
-#drink_name = MARSBLAST
-#drink_name = MERCURYBLAST
-#drink_name = MOONBLAST
-#drink_name = PIANO_MAN
-#drink_name = PIANO_WOMAN
-#drink_name = PILEDRIVER
-#drink_name = SPARKLE_STAR
-#drink_name = SUGAR_RUSH
-#drink_name = SUNSHINE_CLOUD
-#drink_name = SUPLEX
-#drink_name = ZEN_STAR
-#drink_name = FLAMING_MOAI
-
-if double and not add_opt and drink_name == CREVICE_SPIKE:
-    print('Adding karmotrine to big crevice spike.')
-    add_opt = True
 
 class ClickCommand:
     def __init__(self, source):
@@ -228,22 +185,71 @@ def nextCommandFromAction(screen_elements, use_shortcut, action):
     else:
         print('Unexpected recipe action type:', action.__class__.__name__)
 
-screen_elements = dict()
-for name in Recipe.ingredients:
-    screen_elements[name] = ScreenElement(centroid[name])
-for name in ScreenElement.elements:
-    screen_elements[name] = ScreenElement(centroid[name])
+def main():
+    print('xdotool search --name "VA-11 Hall-A: Cyberpunk Bartender Action" ', end='')
 
-drink_recipe = Recipe(drink[drink_name][RECIPE])
+    #add_opt = True
+    add_opt = False
+    #serve = True
+    serve = False
+    slot = LEFT_SLOT
+    #slot = RIGHT_SLOT
+    #double = True
+    double = False
+    #use_shortcut = True
+    use_shortcut = False
+    reset = True
+    #reset = False
 
-if double:
-    drink_recipe.doubleSize()
+    #drink_name = BAD_TOUCH
+    drink_name = BEER
+    #drink_name = BLEEDING_JANE
+    #drink_name = BLOOM_LIGHT
+    #drink_name = BLUE_FAIRY
+    #drink_name = BRANDTINI
+    #drink_name = COBALT_VELVET
+    #drink_name = CREVICE_SPIKE
+    #drink_name = FLUFFY_DREAM
+    #drink_name = FRINGE_WEAVER
+    #drink_name = FROTHY_WATER
+    #drink_name = GRIZZLY_TEMPLE
+    #drink_name = GUT_PUNCH
+    #drink_name = MARSBLAST
+    #drink_name = MERCURYBLAST
+    #drink_name = MOONBLAST
+    #drink_name = PIANO_MAN
+    #drink_name = PIANO_WOMAN
+    #drink_name = PILEDRIVER
+    #drink_name = SPARKLE_STAR
+    #drink_name = SUGAR_RUSH
+    #drink_name = SUNSHINE_CLOUD
+    #drink_name = SUPLEX
+    #drink_name = ZEN_STAR
+    #drink_name = FLAMING_MOAI
 
-if add_opt:
-    drink_recipe.addOpt()
+    if double and not add_opt and drink_name == CREVICE_SPIKE:
+        print('Adding karmotrine to big crevice spike.')
+        add_opt = True
 
-for action in nextAction(drink_recipe, slot, serve, reset):
-    for command in nextCommandFromAction(screen_elements, use_shortcut, action):
-        command.execute()
+    screen_elements = dict()
+    for name in Recipe.ingredients:
+        screen_elements[name] = ScreenElement(centroid[name])
+    for name in ScreenElement.elements:
+        screen_elements[name] = ScreenElement(centroid[name])
 
-print()
+    drink_recipe = Recipe(drink[drink_name][RECIPE])
+
+    if double:
+        drink_recipe.doubleSize()
+
+    if add_opt:
+        drink_recipe.addOpt()
+
+    for action in nextAction(drink_recipe, slot, serve, reset):
+        for command in nextCommandFromAction(screen_elements, use_shortcut, action):
+            command.execute()
+
+    print()
+
+if __name__ == '__main__':
+    main()
