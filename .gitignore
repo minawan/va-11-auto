@@ -14,3 +14,4 @@ drink.py
 *.o
 main.sh*
 __pycache__
+thrift

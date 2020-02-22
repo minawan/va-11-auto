@@ -51,7 +51,7 @@ initializeConstants :: [ScreenElement] -> String
 initializeConstants elements =
     unlines $
       map (uncurry (printf "%s = '%s'") . \ constant ->
-        (convertConstantToSymbol constant, constant)) literals
+        (convertConstantToSymbol constant, convertConstantToSymbol constant)) literals
   where
     literals = List.sort $
                  [ categoryLiteral

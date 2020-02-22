@@ -136,19 +136,32 @@ convertConstantToSymbol constant =
     Nothing -> "NONE"
 
 initializeConstant :: Text -> Text
-initializeConstant constant = Text.concat [symbol, " = '", constant, "'"]
+initializeConstant constant = Text.concat [symbol, " = '", symbol, "'"]
   where symbol = convertConstantToSymbol constant
 
 convertConstantsToInitializations :: [Text] -> [Text]
 convertConstantsToInitializations = map initializeConstant
 
+convertNameToSymbol :: Text -> Text
+convertNameToSymbol drinkName =
+  case Text.uncons drinkName of
+    Just (' ', remainder) -> Text.cons '_' $ convertNameToSymbol remainder
+    Just (letter, remainder) -> Text.cons (Char.toUpper letter) $ convertNameToSymbol remainder
+    Nothing -> Text.empty
+
+initializeName :: Text -> Text
+initializeName drinkName = Text.concat [symbol, " = '", symbol, "'"]
+    where symbol = convertNameToSymbol drinkName
+
+convertNamesToInitializations :: [Text] -> [Text]
+convertNamesToInitializations = map initializeName
+
 initializeConstants :: [Drink] -> [Text]
-initializeConstants drinks = convertConstantsToInitializations constants
+initializeConstants drinks = convertConstantsToInitializations constants ++ convertNamesToInitializations drinkNames
   where
     drinkNames = map name drinks
     constants = constantsFromDrink
              ++ constantsFromRecipe
-             ++ drinkNames
              ++ [""]
 
 boolToText :: Bool -> Text

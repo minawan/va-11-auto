@@ -1,6 +1,12 @@
 import sys
 import os
 
+sys.path.append('thrift/gen-py')
+
+from action.ttypes import ScreenElementType
+from command.ttypes import CommandRequest
+from recipe.ttypes import DrinkName
+
 from centroid import *
 from drink import *
 
@@ -196,7 +202,7 @@ def main():
     add_opt = False
     #serve = True
     serve = False
-    slot = LEFT_SLOT
+    slot = ScreenElementType.LEFT_SLOT
     #slot = RIGHT_SLOT
     #double = True
     double = False
@@ -206,7 +212,7 @@ def main():
     #reset = False
 
     #drink_name = BAD_TOUCH
-    drink_name = BEER
+    drink_name = DrinkName.BEER
     #drink_name = BLEEDING_JANE
     #drink_name = BLOOM_LIGHT
     #drink_name = BLUE_FAIRY
@@ -235,22 +241,24 @@ def main():
         print('Adding karmotrine to big crevice spike.')
         add_opt = True
 
+    request = CommandRequest(drinkName=drink_name, addKarmotrine=add_opt, bigSize=double, reset=reset, slot=slot, serve=serve, useShortcut=use_shortcut)
+
     screen_elements = dict()
     for name in Recipe.ingredients:
         screen_elements[name] = ScreenElement(centroid[name])
     for name in ScreenElement.elements:
         screen_elements[name] = ScreenElement(centroid[name])
 
-    drink_recipe = Recipe(drink[drink_name][RECIPE])
+    drink_recipe = Recipe(drink[DrinkName._VALUES_TO_NAMES[request.drinkName]][RECIPE])
 
-    if double:
+    if request.bigSize:
         drink_recipe.doubleSize()
 
-    if add_opt:
+    if request.addKarmotrine:
         drink_recipe.addOpt()
 
-    for action in nextAction(drink_recipe, slot, serve, reset):
-        for command in nextCommandFromAction(screen_elements, use_shortcut, action):
+    for action in nextAction(drink_recipe, ScreenElementType._VALUES_TO_NAMES[request.slot], request.serve, request.reset):
+        for command in nextCommandFromAction(screen_elements, request.useShortcut, action):
             execute(command)
 
     print()

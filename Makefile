@@ -2,8 +2,12 @@ all: build
 
 build: main.sh
 
-main.sh: main.py centroid.py drink.py
+main.sh: thrift main.py centroid.py drink.py
 	python3 main.py > main.sh
+
+thrift: command.thrift recipe.thrift action.thrift
+	mkdir -p thrift
+	thrift -r --gen py --gen go:package_prefix=github.com/minawan/va-11-auto/thrift/gen-go/ -o thrift/ command.thrift
 
 centroid.py: ScreenElementBoilerplate ScreenElement.csv
 	./ScreenElementBoilerplate
@@ -48,4 +52,5 @@ clean:
 	rm -f *.hi
 	rm -f *.o
 	rm -f main.sh
-	rm -rf __pycache__
+	rm -rf __pycache__/
+	rm -rf thrift/
