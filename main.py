@@ -99,8 +99,11 @@ class SingleElementRecipeAction(RecipeAction):
         super(SingleElementRecipeAction, self).__init__(source, source)
 
 class AddIngredientAction(RecipeAction):
-    def __init__(self, source):
+    def __init__(self, source, amount):
         super(AddIngredientAction, self).__init__(source, BLENDER)
+        self.amount = amount
+    def getAmount(self):
+        return self.amount
 
 class MixForAction(SingleElementRecipeAction):
     def __init__(self, seconds):
@@ -183,8 +186,8 @@ class Recipe:
 
     def nextAction(self):
         for ingredient_name in Recipe.ingredients:
-            for _ in range(self._getIngredientCount(ingredient_name)):
-                yield AddIngredientAction(ingredient_name)
+            amount = self._getIngredientCount(ingredient_name)
+            yield AddIngredientAction(ingredient_name, amount)
         if self._isOnTheRocks():
             yield AddIceAction()
         if self._isAged():
@@ -214,7 +217,8 @@ def nextAction(recipe, slot, serve, reset):
 
 def nextCommandFromAction(screen_elements, use_shortcut, action):
     if isinstance(action, AddIngredientAction):
-        yield dragAndDropTo(screen_elements[action.getSource()], screen_elements[action.getDestination()], use_shortcut)
+        for _ in range(action.getAmount()):
+            yield dragAndDropTo(screen_elements[action.getSource()], screen_elements[action.getDestination()], use_shortcut)
     elif isinstance(action, MixForAction):
         yield trigger(screen_elements[action.getSource()], use_shortcut)
         yield WaitCommand(action.getSeconds())
