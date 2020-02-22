@@ -14,6 +14,8 @@ slot = LEFT_SLOT
 double = False
 #use_shortcut = True
 use_shortcut = False
+reset = True
+#reset = False
 
 #drink_name = BAD_TOUCH
 drink_name = BEER
@@ -201,8 +203,9 @@ def trigger(screen_element, use_shortcut):
         return TypeCommand(shortcut)
     return ClickCommand(screen_element.getCentroid())
 
-def nextAction(recipe, slot, serve):
-    yield ResetAction()
+def nextAction(recipe, slot, serve, reset):
+    if reset:
+        yield ResetAction()
     yield SelectSlotAction(slot)
     for action in recipe.nextAction():
         yield action
@@ -235,7 +238,7 @@ if double:
 if add_opt:
     drink_recipe.addOpt()
 
-for action in nextAction(drink_recipe, slot, serve):
+for action in nextAction(drink_recipe, slot, serve, reset):
     for command in nextCommandFromAction(screen_elements, use_shortcut, action):
         command.execute()
 
