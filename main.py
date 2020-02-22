@@ -7,40 +7,19 @@ from drink import *
 class ClickCommand:
     def __init__(self, source):
         self.source = source
-    def execute(self):
-        source_x, source_y = self.source
-        print('mousemove {source_x} {source_y} '.format(source_x=source_x, source_y=source_y), end='')
-        print('sleep 0.5 ', end='')
-        print('mousedown 1 ', end='')
-        print('sleep 0.5 ', end='')
-        print('mouseup 1 ', end='')
-        print('sleep 0.5 ', end='')
 
 class DragAndDropCommand:
     def __init__(self, source, destination):
         self.source = source
         self.destination = destination
-    def execute(self):
-        source_x, source_y = self.source
-        destination_x, destination_y = self.destination
-        print('mousemove {source_x} {source_y} '.format(source_x=source_x, source_y=source_y), end='')
-        print('sleep 0.5 ', end='')
-        print('mousedown 1 ', end='')
-        print('mousemove {destination_x} {destination_y} '.format(destination_x=destination_x, destination_y=destination_y), end='')
-        print('sleep 0.5 ', end='')
-        print('mouseup 1 ', end='')
 
 class WaitCommand:
     def __init__(self, seconds):
         self.seconds = seconds
-    def execute(self):
-        print('sleep {seconds} '.format(seconds=self.seconds), end='')
 
 class TypeCommand:
     def __init__(self, shortcut):
         self.shortcut = shortcut
-    def execute(self):
-        print('key {shortcut} '.format(shortcut=self.shortcut), end='')
 
 class RecipeAction(object):
     def __init__(self, source, destination):
@@ -185,6 +164,31 @@ def nextCommandFromAction(screen_elements, use_shortcut, action):
     else:
         print('Unexpected recipe action type:', action.__class__.__name__)
 
+def execute(command):
+    if isinstance(command, ClickCommand):
+        source_x, source_y = command.source
+        print('mousemove {source_x} {source_y} '.format(source_x=source_x, source_y=source_y), end='')
+        print('sleep 0.5 ', end='')
+        print('mousedown 1 ', end='')
+        print('sleep 0.5 ', end='')
+        print('mouseup 1 ', end='')
+        print('sleep 0.5 ', end='')
+    elif isinstance(command, DragAndDropCommand):
+        source_x, source_y = command.source
+        destination_x, destination_y = command.destination
+        print('mousemove {source_x} {source_y} '.format(source_x=source_x, source_y=source_y), end='')
+        print('sleep 0.5 ', end='')
+        print('mousedown 1 ', end='')
+        print('mousemove {destination_x} {destination_y} '.format(destination_x=destination_x, destination_y=destination_y), end='')
+        print('sleep 0.5 ', end='')
+        print('mouseup 1 ', end='')
+    elif isinstance(command, WaitCommand):
+        print('sleep {seconds} '.format(seconds=command.seconds), end='')
+    elif isinstance(command, TypeCommand):
+        print('key {shortcut} '.format(shortcut=command.shortcut), end='')
+    else:
+        print('Unexpected command type:', command.__class__.__name__)
+
 def main():
     print('xdotool search --name "VA-11 Hall-A: Cyberpunk Bartender Action" ', end='')
 
@@ -247,7 +251,7 @@ def main():
 
     for action in nextAction(drink_recipe, slot, serve, reset):
         for command in nextCommandFromAction(screen_elements, use_shortcut, action):
-            command.execute()
+            execute(command)
 
     print()
 
