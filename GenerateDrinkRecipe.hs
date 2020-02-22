@@ -143,11 +143,7 @@ convertConstantsToInitializations :: [Text] -> [Text]
 convertConstantsToInitializations = map initializeConstant
 
 convertNameToSymbol :: Text -> Text
-convertNameToSymbol drinkName =
-  case Text.uncons drinkName of
-    Just (' ', remainder) -> Text.cons '_' $ convertNameToSymbol remainder
-    Just (letter, remainder) -> Text.cons (Char.toUpper letter) $ convertNameToSymbol remainder
-    Nothing -> Text.empty
+convertNameToSymbol = Text.replace " " "_" . Text.map Char.toUpper
 
 initializeName :: Text -> Text
 initializeName drinkName = Text.concat [symbol, " = '", symbol, "'"]
