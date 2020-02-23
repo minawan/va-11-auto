@@ -131,12 +131,6 @@ def getRecipeActions(request):
     return RecipeActionResponse(actions=actions)
 
 def getActionsFromDrinkRecipe(drink_recipe, slot, serve, reset):
-    request = RecipeActionRequest(
-                  drinkRecipe=drink_recipe,
-                  reset=reset,
-                  slot=slot,
-                  serve=serve)
-    response = getRecipeActions(request)
     return response.actions
 
 def getCommandsFromAction(screen_elements, use_shortcut, action):
@@ -217,11 +211,11 @@ def getDrinkRecipe(request):
                    age=drink_recipe.isAged(),
                    blend=drink_recipe.isBlended()))
 
-def getCommands(request):
+def getCommands(command_request):
     drink_recipe_request = DrinkRecipeRequest(
-                               drinkName=request.drinkName,
-                               addKarmotrine=request.addKarmotrine,
-                               bigSize=request.bigSize)
+                               drinkName=command_request.drinkName,
+                               addKarmotrine=command_request.addKarmotrine,
+                               bigSize=command_request.bigSize)
 
     drink_recipe_response = getDrinkRecipe(drink_recipe_request)
 
@@ -231,14 +225,19 @@ def getCommands(request):
     for name in ScreenElement.elements:
         screen_elements[name] = ScreenElement(centroid[name])
 
-    for action in getActionsFromDrinkRecipe(
-                      drink_recipe_response.drinkRecipe,
-                      request.slot,
-                      request.serve,
-                      request.reset):
-        for command in getCommandsFromAction(
-                           screen_elements, request.useShortcut, action).commands:
-            yield command
+    recipe_action_request = RecipeActionRequest(
+                                drinkRecipe=drink_recipe_response.drinkRecipe,
+                                reset=command_request.reset,
+                                slot=command_request.slot,
+                                serve=command_request.serve)
+    recipe_action_response = getRecipeActions(recipe_action_request)
+    commands = []
+    for action in recipe_action_response.actions:
+        commands.extend(getCommandsFromAction(
+                            screen_elements,
+                            command_request.useShortcut,
+                            action).commands)
+    return CommandResponse(commands=commands)
 
 def main():
     #add_opt = True
@@ -290,7 +289,7 @@ def main():
                           useShortcut=use_shortcut)
 
     print('xdotool search --name "VA-11 Hall-A: Cyberpunk Bartender Action" ', end='')
-    for command in getCommands(command_request):
+    for command in getCommands(command_request).commands:
         execute(command)
     print()
 
