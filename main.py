@@ -130,53 +130,39 @@ def getRecipeActions(request):
 
     return RecipeActionResponse(actions=actions)
 
-def nextAction(drink_recipe, slot, serve, reset):
+def getActionsFromDrinkRecipe(drink_recipe, slot, serve, reset):
     request = RecipeActionRequest(
                   drinkRecipe=drink_recipe,
                   reset=reset,
                   slot=slot,
                   serve=serve)
     response = getRecipeActions(request)
-    for action in response.actions:
-        if action.resetAction:
-            yield action.resetAction
-        elif action.selectSlotAction:
-            yield action.selectSlotAction
-        elif action.addIngredientAction:
-            yield action.addIngredientAction
-        elif action.addIceAction:
-            yield action.addIceAction
-        elif action.ageAction:
-            yield action.ageAction
-        elif action.mixAction:
-            yield action.mixAction
-        elif action.serveAction:
-            yield action.serveAction
+    return response.actions
 
 def getCommandsFromAction(screen_elements, use_shortcut, action):
     commands = []
-    if isinstance(action, AddIngredientAction):
-        source = screen_elements[ScreenElementType._VALUES_TO_NAMES[action.ingredient]]
+    if action.resetAction:
+        commands.append(trigger(screen_elements[RESET], use_shortcut))
+    elif action.selectSlotAction:
+        commands.append(trigger(screen_elements[ScreenElementType._VALUES_TO_NAMES[action.selectSlotAction.slot]], use_shortcut))
+    elif action.addIngredientAction:
+        source = screen_elements[ScreenElementType._VALUES_TO_NAMES[action.addIngredientAction.ingredient]]
         destination = screen_elements[BLENDER]
-        for _ in range(action.amount):
+        for _ in range(action.addIngredientAction.amount):
             shortcut = source.getShortcut()
             if use_shortcut and shortcut != '\x00':
                 commands.append(Command(typeCommand=TypeCommand(key=ord(shortcut))))
             else:
                 commands.append(Command(dragAndDropCommand=DragAndDropCommand(source=toCoord(source.getCentroid()), destination=toCoord(destination.getCentroid()))))
-    elif isinstance(action, MixAction):
-        commands.append(trigger(screen_elements[MIX], use_shortcut))
-        commands.append(Command(waitCommand=WaitCommand(durationInSeconds=action.durationInSeconds)))
-        commands.append(trigger(screen_elements[MIX], use_shortcut))
-    elif isinstance(action, AddIceAction):
+    elif action.addIceAction:
         commands.append(trigger(screen_elements[ADD_ICE], use_shortcut))
-    elif isinstance(action, AgeAction):
+    elif action.ageAction:
         commands.append(trigger(screen_elements[AGE], use_shortcut))
-    elif isinstance(action, ResetAction):
-        commands.append(trigger(screen_elements[RESET], use_shortcut))
-    elif isinstance(action, SelectSlotAction):
-        commands.append(trigger(screen_elements[ScreenElementType._VALUES_TO_NAMES[action.slot]], use_shortcut))
-    elif isinstance(action, ServeAction):
+    elif action.mixAction:
+        commands.append(trigger(screen_elements[MIX], use_shortcut))
+        commands.append(Command(waitCommand=WaitCommand(durationInSeconds=action.mixAction.durationInSeconds)))
+        commands.append(trigger(screen_elements[MIX], use_shortcut))
+    elif action.serveAction:
         commands.append(trigger(screen_elements[MIX], use_shortcut))
     else:
         print('Unexpected recipe action type:', action.__class__.__name__)
@@ -245,7 +231,7 @@ def getCommands(request):
     for name in ScreenElement.elements:
         screen_elements[name] = ScreenElement(centroid[name])
 
-    for action in nextAction(
+    for action in getActionsFromDrinkRecipe(
                       drink_recipe_response.drinkRecipe,
                       request.slot,
                       request.serve,
