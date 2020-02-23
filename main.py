@@ -14,7 +14,14 @@ from action.ttypes import ResetAction
 from action.ttypes import ScreenElementType
 from action.ttypes import SelectSlotAction
 from action.ttypes import ServeAction
+from command.ttypes import ClickCommand
+from command.ttypes import Command
 from command.ttypes import CommandRequest
+from command.ttypes import CommandResponse
+from command.ttypes import Coord
+from command.ttypes import DragAndDropCommand
+from command.ttypes import TypeCommand
+from command.ttypes import WaitCommand
 from recipe.ttypes import DrinkName
 from recipe.ttypes import DrinkRecipe
 from recipe.ttypes import DrinkRecipeRequest
@@ -22,23 +29,6 @@ from recipe.ttypes import DrinkRecipeResponse
 
 from centroid import *
 from drink import *
-
-class ClickCommand:
-    def __init__(self, source):
-        self.source = source
-
-class DragAndDropCommand:
-    def __init__(self, source, destination):
-        self.source = source
-        self.destination = destination
-
-class WaitCommand:
-    def __init__(self, seconds):
-        self.seconds = seconds
-
-class TypeCommand:
-    def __init__(self, shortcut):
-        self.shortcut = shortcut
 
 class ScreenElement:
     elements = [ADD_ICE, AGE, LEFT_SLOT, RIGHT_SLOT, RESET, MIX, BLENDER]
@@ -108,17 +98,15 @@ class Recipe:
     def isBlended(self):
         return self.recipe[WAIT]
 
-def dragAndDropTo(source, destination, use_shortcut):
-    shortcut = source.getShortcut()
-    if use_shortcut and shortcut != '\x00':
-        return TypeCommand(shortcut)
-    return DragAndDropCommand(source.getCentroid(), destination.getCentroid())
+
+def toCoord(centroid):
+    return Coord(x=centroid[0], y=centroid[1])
 
 def trigger(screen_element, use_shortcut):
     shortcut = screen_element.getShortcut()
     if use_shortcut and shortcut != '\x00':
-        return TypeCommand(shortcut)
-    return ClickCommand(screen_element.getCentroid())
+        return Command(typeCommand=TypeCommand(key=ord(shortcut)))
+    return Command(clickCommand=ClickCommand(position=toCoord(screen_element.getCentroid())))
 
 def getRecipeActions(request):
     actions = RecipeActionSet()
@@ -165,51 +153,60 @@ def nextAction(drink_recipe, slot, serve, reset):
     if actions.serveAction:
         yield actions.serveAction
 
-def nextCommandFromAction(screen_elements, use_shortcut, action):
+def getCommandsFromAction(screen_elements, use_shortcut, action):
+    commands = []
     if isinstance(action, AddIngredientAction):
+        source = screen_elements[ScreenElementType._VALUES_TO_NAMES[action.ingredient]]
+        destination = screen_elements[BLENDER]
         for _ in range(action.amount):
-            yield dragAndDropTo(screen_elements[ScreenElementType._VALUES_TO_NAMES[action.ingredient]], screen_elements[BLENDER], use_shortcut)
+            shortcut = source.getShortcut()
+            if use_shortcut and shortcut != '\x00':
+                commands.append(Command(typeCommand=TypeCommand(key=ord(shortcut))))
+            else:
+                commands.append(Command(dragAndDropCommand=DragAndDropCommand(source=toCoord(source.getCentroid()), destination=toCoord(destination.getCentroid()))))
     elif isinstance(action, MixAction):
-        yield trigger(screen_elements[MIX], use_shortcut)
-        yield WaitCommand(action.durationInSeconds)
-        yield trigger(screen_elements[MIX], use_shortcut)
+        commands.append(trigger(screen_elements[MIX], use_shortcut))
+        commands.append(Command(waitCommand=WaitCommand(durationInSeconds=action.durationInSeconds)))
+        commands.append(trigger(screen_elements[MIX], use_shortcut))
     elif isinstance(action, AddIceAction):
-        yield trigger(screen_elements[ADD_ICE], use_shortcut)
+        commands.append(trigger(screen_elements[ADD_ICE], use_shortcut))
     elif isinstance(action, AgeAction):
-        yield trigger(screen_elements[AGE], use_shortcut)
+        commands.append(trigger(screen_elements[AGE], use_shortcut))
     elif isinstance(action, ResetAction):
-        yield trigger(screen_elements[RESET], use_shortcut)
+        commands.append(trigger(screen_elements[RESET], use_shortcut))
     elif isinstance(action, SelectSlotAction):
-        yield trigger(screen_elements[ScreenElementType._VALUES_TO_NAMES[action.slot]], use_shortcut)
+        commands.append(trigger(screen_elements[ScreenElementType._VALUES_TO_NAMES[action.slot]], use_shortcut))
     elif isinstance(action, ServeAction):
-        yield trigger(screen_elements[MIX], use_shortcut)
+        commands.append(trigger(screen_elements[MIX], use_shortcut))
     else:
         print('Unexpected recipe action type:', action.__class__.__name__)
 
+    return CommandResponse(commands=commands)
+
 def execute(command):
-    if isinstance(command, ClickCommand):
-        source_x, source_y = command.source
-        print('mousemove {source_x} {source_y} '.format(source_x=source_x, source_y=source_y), end='')
+    if command.clickCommand:
+        position = command.clickCommand.position
+        print('mousemove {x} {y} '.format(x=position.x, y=position.y), end='')
         print('sleep 0.5 ', end='')
         print('mousedown 1 ', end='')
         print('sleep 0.5 ', end='')
         print('mouseup 1 ', end='')
         print('sleep 0.5 ', end='')
-    elif isinstance(command, DragAndDropCommand):
-        source_x, source_y = command.source
-        destination_x, destination_y = command.destination
-        print('mousemove {source_x} {source_y} '.format(source_x=source_x, source_y=source_y), end='')
+    elif command.dragAndDropCommand:
+        source = command.dragAndDropCommand.source
+        destination = command.dragAndDropCommand.destination
+        print('mousemove {x} {y} '.format(x=source.x, y=source.y), end='')
         print('sleep 0.5 ', end='')
         print('mousedown 1 ', end='')
-        print('mousemove {destination_x} {destination_y} '.format(destination_x=destination_x, destination_y=destination_y), end='')
+        print('mousemove {x} {y} '.format(x=destination.x, y=destination.y), end='')
         print('sleep 0.5 ', end='')
         print('mouseup 1 ', end='')
-    elif isinstance(command, WaitCommand):
-        print('sleep {seconds} '.format(seconds=command.seconds), end='')
-    elif isinstance(command, TypeCommand):
-        print('key {shortcut} '.format(shortcut=command.shortcut), end='')
+    elif command.waitCommand:
+        print('sleep {seconds} '.format(seconds=command.waitCommand.durationInSeconds), end='')
+    elif command.typeCommand:
+        print('key {shortcut} '.format(shortcut=chr(command.typeCommand.key), end=''))
     else:
-        print('Unexpected command type:', command.__class__.__name__)
+        print('Unexpected command type:', str(command))
 
 def getDrinkRecipe(request):
     drink_recipe = Recipe(drink[DrinkName._VALUES_TO_NAMES[request.drinkName]][RECIPE])
@@ -254,8 +251,8 @@ def getCommands(request):
                       request.slot,
                       request.serve,
                       request.reset):
-        for command in nextCommandFromAction(
-                           screen_elements, request.useShortcut, action):
+        for command in getCommandsFromAction(
+                           screen_elements, request.useShortcut, action).commands:
             yield command
 
 def main():

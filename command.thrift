@@ -1,12 +1,49 @@
 include "recipe.thrift"
 include "action.thrift"
 
+struct Coord {
+    1: i32 x;
+    2: i32 y;
+}
+
+struct ClickCommand {
+    1: Coord position;
+}
+
+struct DragAndDropCommand {
+    1: Coord source;
+    2: Coord destination;
+}
+
+struct TypeCommand {
+    1: i8 key;
+}
+
+struct WaitCommand {
+    1: i32 durationInSeconds;
+}
+
+union Command {
+    1: ClickCommand clickCommand;
+    2: DragAndDropCommand dragAndDropCommand;
+    3: TypeCommand typeCommand;
+    4: WaitCommand waitCommand;
+}
+
 struct CommandRequest {
-    1: optional recipe.DrinkName drinkName;
-    2: optional bool addKarmotrine;
-    3: optional bool bigSize;
-    4: optional bool reset;
-    5: optional action.ScreenElementType slot;
-    6: optional bool serve;
-    7: optional bool useShortcut;
+    1: recipe.DrinkName drinkName;
+    2: bool addKarmotrine;
+    3: bool bigSize;
+    4: bool reset;
+    5: action.ScreenElementType slot;
+    6: bool serve;
+    7: bool useShortcut;
+}
+
+struct CommandResponse {
+    1: list<Command> commands;
+}
+
+service CommandServer {
+    CommandResponse getCommands(1:CommandRequest request)
 }
