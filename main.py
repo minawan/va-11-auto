@@ -133,7 +133,13 @@ def getRecipeActions(request):
 def getActionsFromDrinkRecipe(drink_recipe, slot, serve, reset):
     return response.actions
 
-def getCommandsFromAction(screen_elements, use_shortcut, action):
+def getCommandsFromAction(use_shortcut, action):
+    screen_elements = dict()
+    for name in Recipe.ingredients:
+        screen_elements[name] = ScreenElement(centroid[name])
+    for name in ScreenElement.elements:
+        screen_elements[name] = ScreenElement(centroid[name])
+
     commands = []
     if action.resetAction:
         commands.append(trigger(screen_elements[RESET], use_shortcut))
@@ -219,12 +225,6 @@ def getCommands(command_request):
 
     drink_recipe_response = getDrinkRecipe(drink_recipe_request)
 
-    screen_elements = dict()
-    for name in Recipe.ingredients:
-        screen_elements[name] = ScreenElement(centroid[name])
-    for name in ScreenElement.elements:
-        screen_elements[name] = ScreenElement(centroid[name])
-
     recipe_action_request = RecipeActionRequest(
                                 drinkRecipe=drink_recipe_response.drinkRecipe,
                                 reset=command_request.reset,
@@ -234,7 +234,6 @@ def getCommands(command_request):
     commands = []
     for action in recipe_action_response.actions:
         commands.extend(getCommandsFromAction(
-                            screen_elements,
                             command_request.useShortcut,
                             action).commands)
     return CommandResponse(commands=commands)
