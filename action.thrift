@@ -36,14 +36,14 @@ struct AgeAction { }
 
 struct ServeAction { }
 
-struct RecipeActionSet {
-    1: optional ResetAction resetAction;
-    2: optional SelectSlotAction selectSlotAction;
-    3: list<AddIngredientAction> addIngredientActions;
-    4: optional AddIceAction addIceAction;
-    5: optional AgeAction ageAction;
-    6: optional MixAction mixAction;
-    7: optional ServeAction serveAction;
+union RecipeAction {
+    1: ResetAction resetAction;
+    2: SelectSlotAction selectSlotAction;
+    3: AddIngredientAction addIngredientAction;
+    4: AddIceAction addIceAction;
+    5: AgeAction ageAction;
+    6: MixAction mixAction;
+    7: ServeAction serveAction;
 }
 
 struct RecipeActionRequest {
@@ -54,7 +54,7 @@ struct RecipeActionRequest {
 }
 
 struct RecipeActionResponse {
-    1: optional RecipeActionSet recipeActions;
+    1: list<RecipeAction> actions;
 }
 
 service RecipeActionServer {

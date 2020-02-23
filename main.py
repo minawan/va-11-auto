@@ -7,9 +7,9 @@ from action.ttypes import AddIceAction
 from action.ttypes import AddIngredientAction
 from action.ttypes import AgeAction
 from action.ttypes import MixAction
+from action.ttypes import RecipeAction
 from action.ttypes import RecipeActionRequest
 from action.ttypes import RecipeActionResponse
-from action.ttypes import RecipeActionSet
 from action.ttypes import ResetAction
 from action.ttypes import ScreenElementType
 from action.ttypes import SelectSlotAction
@@ -109,27 +109,26 @@ def trigger(screen_element, use_shortcut):
     return Command(clickCommand=ClickCommand(position=toCoord(screen_element.getCentroid())))
 
 def getRecipeActions(request):
-    actions = RecipeActionSet()
+    actions = []
     if request.reset:
-        actions.resetAction = ResetAction()
-    actions.selectSlotAction = SelectSlotAction(slot=request.slot)
+        actions.append(RecipeAction(resetAction=ResetAction()))
+    actions.append(RecipeAction(selectSlotAction=SelectSlotAction(slot=request.slot)))
     drink_recipe = request.drinkRecipe
-    actions.addIngredientActions = []
-    actions.addIngredientActions.append(AddIngredientAction(ingredient=ScreenElementType.ADELHYDE, amount=drink_recipe.adelhyde))
-    actions.addIngredientActions.append(AddIngredientAction(ingredient=ScreenElementType.BRONSON_EXTRACT, amount=drink_recipe.bronsonExtract))
-    actions.addIngredientActions.append(AddIngredientAction(ingredient=ScreenElementType.POWDERED_DELTA, amount=drink_recipe.powderedDelta))
-    actions.addIngredientActions.append(AddIngredientAction(ingredient=ScreenElementType.FLANERGIDE, amount=drink_recipe.flanergide))
-    actions.addIngredientActions.append(AddIngredientAction(ingredient=ScreenElementType.KARMOTRINE, amount=drink_recipe.karmotrine))
+    actions.append(RecipeAction(addIngredientAction=AddIngredientAction(ingredient=ScreenElementType.ADELHYDE, amount=drink_recipe.adelhyde)))
+    actions.append(RecipeAction(addIngredientAction=AddIngredientAction(ingredient=ScreenElementType.BRONSON_EXTRACT, amount=drink_recipe.bronsonExtract)))
+    actions.append(RecipeAction(addIngredientAction=AddIngredientAction(ingredient=ScreenElementType.POWDERED_DELTA, amount=drink_recipe.powderedDelta)))
+    actions.append(RecipeAction(addIngredientAction=AddIngredientAction(ingredient=ScreenElementType.FLANERGIDE, amount=drink_recipe.flanergide)))
+    actions.append(RecipeAction(addIngredientAction=AddIngredientAction(ingredient=ScreenElementType.KARMOTRINE, amount=drink_recipe.karmotrine)))
     if drink_recipe.addIce:
-        actions.addIceAction = AddIceAction()
+        actions.append(RecipeAction(addIceAction=AddIceAction()))
     if drink_recipe.age:
-        actions.ageAction = AgeAction()
+        actions.append(RecipeAction(ageAction=AgeAction()))
     durationInSeconds = 5 if drink_recipe.blend else 1
-    actions.mixAction = MixAction(durationInSeconds=durationInSeconds)
+    actions.append(RecipeAction(mixAction=MixAction(durationInSeconds=durationInSeconds)))
     if request.serve:
-        actions.serveAction = ServeAction()
+        actions.append(RecipeAction(serveAction=ServeAction()))
 
-    return RecipeActionResponse(recipeActions=actions)
+    return RecipeActionResponse(actions=actions)
 
 def nextAction(drink_recipe, slot, serve, reset):
     request = RecipeActionRequest(
@@ -138,20 +137,21 @@ def nextAction(drink_recipe, slot, serve, reset):
                   slot=slot,
                   serve=serve)
     response = getRecipeActions(request)
-    actions = response.recipeActions
-    if actions.resetAction:
-        yield actions.resetAction
-    if actions.selectSlotAction:
-        yield actions.selectSlotAction
-    for add_ingredient_action in actions.addIngredientActions:
-        yield add_ingredient_action
-    if actions.addIceAction:
-        yield actions.addIceAction
-    if actions.ageAction:
-        yield actions.ageAction
-    yield actions.mixAction
-    if actions.serveAction:
-        yield actions.serveAction
+    for action in response.actions:
+        if action.resetAction:
+            yield action.resetAction
+        elif action.selectSlotAction:
+            yield action.selectSlotAction
+        elif action.addIngredientAction:
+            yield action.addIngredientAction
+        elif action.addIceAction:
+            yield action.addIceAction
+        elif action.ageAction:
+            yield action.ageAction
+        elif action.mixAction:
+            yield action.mixAction
+        elif action.serveAction:
+            yield action.serveAction
 
 def getCommandsFromAction(screen_elements, use_shortcut, action):
     commands = []
@@ -269,7 +269,7 @@ def main():
     #reset = False
 
     #drink_name = DrinkName.BAD_TOUCH
-    #drink_name = DrinkName.BEER
+    drink_name = DrinkName.BEER
     #drink_name = DrinkName.BLEEDING_JANE
     #drink_name = DrinkName.BLOOM_LIGHT
     #drink_name = DrinkName.BLUE_FAIRY
@@ -292,7 +292,7 @@ def main():
     #drink_name = DrinkName.SUNSHINE_CLOUD
     #drink_name = DrinkName.SUPLEX
     #drink_name = DrinkName.ZEN_STAR
-    drink_name = DrinkName.FLAMING_MOAI
+    #drink_name = DrinkName.FLAMING_MOAI
 
     command_request = CommandRequest(
                           drinkName=drink_name,
