@@ -3,7 +3,17 @@ import os
 
 sys.path.append('thrift/gen-py')
 
+from action.ttypes import AddIceAction
+from action.ttypes import AddIngredientAction
+from action.ttypes import AgeAction
+from action.ttypes import MixAction
+from action.ttypes import RecipeActionRequest
+from action.ttypes import RecipeActionResponse
+from action.ttypes import RecipeActionSet
+from action.ttypes import ResetAction
 from action.ttypes import ScreenElementType
+from action.ttypes import SelectSlotAction
+from action.ttypes import ServeAction
 from command.ttypes import CommandRequest
 from recipe.ttypes import DrinkName
 from recipe.ttypes import DrinkRecipe
@@ -29,52 +39,6 @@ class WaitCommand:
 class TypeCommand:
     def __init__(self, shortcut):
         self.shortcut = shortcut
-
-class RecipeAction(object):
-    def __init__(self, source, destination):
-        self.source = source
-        self.destination = destination
-    def getSource(self):
-        return self.source
-    def getDestination(self):
-        return self.destination
-
-class SingleElementRecipeAction(RecipeAction):
-    def __init__(self, source):
-        super(SingleElementRecipeAction, self).__init__(source, source)
-
-class AddIngredientAction(RecipeAction):
-    def __init__(self, source, amount):
-        super(AddIngredientAction, self).__init__(source, BLENDER)
-        self.amount = amount
-    def getAmount(self):
-        return self.amount
-
-class MixForAction(SingleElementRecipeAction):
-    def __init__(self, seconds):
-        super(MixForAction, self).__init__(MIX)
-        self.seconds = seconds
-    def getSeconds(self):
-        return self.seconds
-
-class ServeAction(SingleElementRecipeAction):
-    def __init__(self):
-        super(ServeAction, self).__init__(MIX)
-
-class AddIceAction(SingleElementRecipeAction):
-    def __init__(self):
-        super(AddIceAction, self).__init__(ADD_ICE)
-
-class AgeAction(SingleElementRecipeAction):
-    def __init__(self):
-        super(AgeAction, self).__init__(AGE)
-
-class SelectSlotAction(SingleElementRecipeAction):
-    pass
-
-class ResetAction(SingleElementRecipeAction):
-    def __init__(self):
-        super(ResetAction, self).__init__(RESET)
 
 class ScreenElement:
     elements = [ADD_ICE, AGE, LEFT_SLOT, RIGHT_SLOT, RESET, MIX, BLENDER]
@@ -156,37 +120,69 @@ def trigger(screen_element, use_shortcut):
         return TypeCommand(shortcut)
     return ClickCommand(screen_element.getCentroid())
 
-def nextActionFromDrinkRecipe(drink_recipe):
-    yield AddIngredientAction(ADELHYDE, drink_recipe.adelhyde)
-    yield AddIngredientAction(BRONSON_EXTRACT, drink_recipe.bronsonExtract)
-    yield AddIngredientAction(POWDERED_DELTA, drink_recipe.powderedDelta)
-    yield AddIngredientAction(FLANERGIDE, drink_recipe.flanergide)
-    yield AddIngredientAction(KARMOTRINE, drink_recipe.karmotrine)
+def getRecipeActions(request):
+    actions = RecipeActionSet()
+    if request.reset:
+        actions.resetAction = ResetAction()
+    actions.selectSlotAction = SelectSlotAction(slot=request.slot)
+    drink_recipe = request.drinkRecipe
+    actions.addIngredientActions = []
+    actions.addIngredientActions.append(AddIngredientAction(ingredient=ScreenElementType.ADELHYDE, amount=drink_recipe.adelhyde))
+    actions.addIngredientActions.append(AddIngredientAction(ingredient=ScreenElementType.BRONSON_EXTRACT, amount=drink_recipe.bronsonExtract))
+    actions.addIngredientActions.append(AddIngredientAction(ingredient=ScreenElementType.POWDERED_DELTA, amount=drink_recipe.powderedDelta))
+    actions.addIngredientActions.append(AddIngredientAction(ingredient=ScreenElementType.FLANERGIDE, amount=drink_recipe.flanergide))
+    actions.addIngredientActions.append(AddIngredientAction(ingredient=ScreenElementType.KARMOTRINE, amount=drink_recipe.karmotrine))
     if drink_recipe.addIce:
-        yield AddIceAction()
+        actions.addIceAction = AddIceAction()
     if drink_recipe.age:
-        yield AgeAction()
-    yield MixForAction(5 if drink_recipe.blend else 1)
+        actions.ageAction = AgeAction()
+    durationInSeconds = 5 if drink_recipe.blend else 1
+    actions.mixAction = MixAction(durationInSeconds=durationInSeconds)
+    if request.serve:
+        actions.serveAction = ServeAction()
+
+    return RecipeActionResponse(recipeActions=actions)
 
 def nextAction(drink_recipe, slot, serve, reset):
-    if reset:
-        yield ResetAction()
-    yield SelectSlotAction(slot)
-    for action in nextActionFromDrinkRecipe(drink_recipe):
-        yield action
-    if serve:
-        yield ServeAction()
+    request = RecipeActionRequest(
+                  drinkRecipe=drink_recipe,
+                  reset=reset,
+                  slot=slot,
+                  serve=serve)
+    response = getRecipeActions(request)
+    actions = response.recipeActions
+    if actions.resetAction:
+        yield actions.resetAction
+    if actions.selectSlotAction:
+        yield actions.selectSlotAction
+    for add_ingredient_action in actions.addIngredientActions:
+        yield add_ingredient_action
+    if actions.addIceAction:
+        yield actions.addIceAction
+    if actions.ageAction:
+        yield actions.ageAction
+    yield actions.mixAction
+    if actions.serveAction:
+        yield actions.serveAction
 
 def nextCommandFromAction(screen_elements, use_shortcut, action):
     if isinstance(action, AddIngredientAction):
-        for _ in range(action.getAmount()):
-            yield dragAndDropTo(screen_elements[action.getSource()], screen_elements[action.getDestination()], use_shortcut)
-    elif isinstance(action, MixForAction):
-        yield trigger(screen_elements[action.getSource()], use_shortcut)
-        yield WaitCommand(action.getSeconds())
-        yield trigger(screen_elements[action.getSource()], use_shortcut)
-    elif isinstance(action, SingleElementRecipeAction):
-        yield trigger(screen_elements[action.getSource()], use_shortcut)
+        for _ in range(action.amount):
+            yield dragAndDropTo(screen_elements[ScreenElementType._VALUES_TO_NAMES[action.ingredient]], screen_elements[BLENDER], use_shortcut)
+    elif isinstance(action, MixAction):
+        yield trigger(screen_elements[MIX], use_shortcut)
+        yield WaitCommand(action.durationInSeconds)
+        yield trigger(screen_elements[MIX], use_shortcut)
+    elif isinstance(action, AddIceAction):
+        yield trigger(screen_elements[ADD_ICE], use_shortcut)
+    elif isinstance(action, AgeAction):
+        yield trigger(screen_elements[AGE], use_shortcut)
+    elif isinstance(action, ResetAction):
+        yield trigger(screen_elements[RESET], use_shortcut)
+    elif isinstance(action, SelectSlotAction):
+        yield trigger(screen_elements[ScreenElementType._VALUES_TO_NAMES[action.slot]], use_shortcut)
+    elif isinstance(action, ServeAction):
+        yield trigger(screen_elements[MIX], use_shortcut)
     else:
         print('Unexpected recipe action type:', action.__class__.__name__)
 
@@ -255,7 +251,7 @@ def getCommands(request):
 
     for action in nextAction(
                       drink_recipe_response.drinkRecipe,
-                      ScreenElementType._VALUES_TO_NAMES[request.slot],
+                      request.slot,
                       request.serve,
                       request.reset):
         for command in nextCommandFromAction(
