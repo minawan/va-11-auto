@@ -6,6 +6,9 @@ sys.path.append('thrift/gen-py')
 from action.ttypes import ScreenElementType
 from command.ttypes import CommandRequest
 from recipe.ttypes import DrinkName
+from recipe.ttypes import DrinkRecipe
+from recipe.ttypes import DrinkRecipeRequest
+from recipe.ttypes import DrinkRecipeResponse
 
 from centroid import *
 from drink import *
@@ -117,24 +120,29 @@ class Recipe:
     def _getIngredientCount(self, ingredient_name):
         return self.recipe[ingredient_name]
 
-    def _isOnTheRocks(self):
+    def getAdelhydeCount(self):
+        return self._getIngredientCount(ADELHYDE)
+
+    def getBronsonExtractCount(self):
+        return self._getIngredientCount(BRONSON_EXTRACT)
+
+    def getPowderedDeltaCount(self):
+        return self._getIngredientCount(POWDERED_DELTA)
+
+    def getFlanergideCount(self):
+        return self._getIngredientCount(FLANERGIDE)
+
+    def getKarmotrineCount(self):
+        return self._getIngredientCount(KARMOTRINE)
+
+    def isOnTheRocks(self):
         return self.recipe[ADD_ICE]
 
-    def _isAged(self):
+    def isAged(self):
         return self.recipe[AGE]
 
-    def _mixDuration(self):
-        return 5 if self.recipe[WAIT] else 1
-
-    def nextAction(self):
-        for ingredient_name in Recipe.ingredients:
-            amount = self._getIngredientCount(ingredient_name)
-            yield AddIngredientAction(ingredient_name, amount)
-        if self._isOnTheRocks():
-            yield AddIceAction()
-        if self._isAged():
-            yield AgeAction()
-        yield MixForAction(self._mixDuration())
+    def isBlended(self):
+        return self.recipe[WAIT]
 
 def dragAndDropTo(source, destination, use_shortcut):
     shortcut = source.getShortcut()
@@ -148,11 +156,24 @@ def trigger(screen_element, use_shortcut):
         return TypeCommand(shortcut)
     return ClickCommand(screen_element.getCentroid())
 
-def nextAction(recipe, slot, serve, reset):
+
+def nextActionFromDrinkRecipe(drink_recipe):
+    yield AddIngredientAction(ADELHYDE, drink_recipe.adelhyde)
+    yield AddIngredientAction(BRONSON_EXTRACT, drink_recipe.bronsonExtract)
+    yield AddIngredientAction(POWDERED_DELTA, drink_recipe.powderedDelta)
+    yield AddIngredientAction(FLANERGIDE, drink_recipe.flanergide)
+    yield AddIngredientAction(KARMOTRINE, drink_recipe.karmotrine)
+    if drink_recipe.addIce:
+        yield AddIceAction()
+    if drink_recipe.age:
+        yield AgeAction()
+    yield MixForAction(5 if drink_recipe.blend else 1)
+
+def nextAction(drink_recipe, slot, serve, reset):
     if reset:
         yield ResetAction()
     yield SelectSlotAction(slot)
-    for action in recipe.nextAction():
+    for action in nextActionFromDrinkRecipe(drink_recipe):
         yield action
     if serve:
         yield ServeAction()
@@ -194,6 +215,30 @@ def execute(command):
         print('key {shortcut} '.format(shortcut=command.shortcut), end='')
     else:
         print('Unexpected command type:', command.__class__.__name__)
+
+def getDrinkRecipe(request):
+    drink_recipe = Recipe(drink[DrinkName._VALUES_TO_NAMES[request.drinkName]][RECIPE])
+
+    if request.bigSize and request.drinkName == CREVICE_SPIKE:
+        print('Adding karmotrine to big crevice spike.')
+        request.addKarmotrine = True
+
+    if request.bigSize:
+        drink_recipe.doubleSize()
+
+    if request.addKarmotrine:
+        drink_recipe.addOpt()
+
+    return DrinkRecipeResponse(
+               drinkRecipe=DrinkRecipe(
+                   adelhyde=drink_recipe.getAdelhydeCount(),
+                   bronsonExtract=drink_recipe.getBronsonExtractCount(),
+                   flanergide=drink_recipe.getFlanergideCount(),
+                   powderedDelta=drink_recipe.getPowderedDeltaCount(),
+                   karmotrine=drink_recipe.getKarmotrineCount(),
+                   addIce=drink_recipe.isOnTheRocks(),
+                   age=drink_recipe.isAged(),
+                   blend=drink_recipe.isBlended()))
 
 def main():
     print('xdotool search --name "VA-11 Hall-A: Cyberpunk Bartender Action" ', end='')
@@ -237,11 +282,7 @@ def main():
     #drink_name = ZEN_STAR
     #drink_name = FLAMING_MOAI
 
-    if double and not add_opt and drink_name == CREVICE_SPIKE:
-        print('Adding karmotrine to big crevice spike.')
-        add_opt = True
-
-    request = CommandRequest(drinkName=drink_name, addKarmotrine=add_opt, bigSize=double, reset=reset, slot=slot, serve=serve, useShortcut=use_shortcut)
+    command_request = CommandRequest(drinkName=drink_name, addKarmotrine=add_opt, bigSize=double, reset=reset, slot=slot, serve=serve, useShortcut=use_shortcut)
 
     screen_elements = dict()
     for name in Recipe.ingredients:
@@ -249,16 +290,12 @@ def main():
     for name in ScreenElement.elements:
         screen_elements[name] = ScreenElement(centroid[name])
 
-    drink_recipe = Recipe(drink[DrinkName._VALUES_TO_NAMES[request.drinkName]][RECIPE])
+    drink_recipe_request = DrinkRecipeRequest(drinkName=command_request.drinkName, addKarmotrine=command_request.addKarmotrine, bigSize=command_request.bigSize)
 
-    if request.bigSize:
-        drink_recipe.doubleSize()
+    drink_recipe_response = getDrinkRecipe(drink_recipe_request)
 
-    if request.addKarmotrine:
-        drink_recipe.addOpt()
-
-    for action in nextAction(drink_recipe, ScreenElementType._VALUES_TO_NAMES[request.slot], request.serve, request.reset):
-        for command in nextCommandFromAction(screen_elements, request.useShortcut, action):
+    for action in nextAction(drink_recipe_response.drinkRecipe, ScreenElementType._VALUES_TO_NAMES[command_request.slot], command_request.serve, command_request.reset):
+        for command in nextCommandFromAction(screen_elements, command_request.useShortcut, action):
             execute(command)
 
     print()
