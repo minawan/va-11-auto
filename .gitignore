@@ -15,3 +15,4 @@ drink.py
 main.sh*
 __pycache__
 thrift
+*.swp
