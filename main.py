@@ -156,7 +156,6 @@ def trigger(screen_element, use_shortcut):
         return TypeCommand(shortcut)
     return ClickCommand(screen_element.getCentroid())
 
-
 def nextActionFromDrinkRecipe(drink_recipe):
     yield AddIngredientAction(ADELHYDE, drink_recipe.adelhyde)
     yield AddIngredientAction(BRONSON_EXTRACT, drink_recipe.bronsonExtract)
@@ -241,23 +240,29 @@ def getDrinkRecipe(request):
                    blend=drink_recipe.isBlended()))
 
 def getCommands(request):
+    drink_recipe_request = DrinkRecipeRequest(
+                               drinkName=request.drinkName,
+                               addKarmotrine=request.addKarmotrine,
+                               bigSize=request.bigSize)
+
+    drink_recipe_response = getDrinkRecipe(drink_recipe_request)
+
     screen_elements = dict()
     for name in Recipe.ingredients:
         screen_elements[name] = ScreenElement(centroid[name])
     for name in ScreenElement.elements:
         screen_elements[name] = ScreenElement(centroid[name])
 
-    drink_recipe_request = DrinkRecipeRequest(drinkName=request.drinkName, addKarmotrine=request.addKarmotrine, bigSize=request.bigSize)
-
-    drink_recipe_response = getDrinkRecipe(drink_recipe_request)
-
-    for action in nextAction(drink_recipe_response.drinkRecipe, ScreenElementType._VALUES_TO_NAMES[request.slot], request.serve, request.reset):
-        for command in nextCommandFromAction(screen_elements, request.useShortcut, action):
+    for action in nextAction(
+                      drink_recipe_response.drinkRecipe,
+                      ScreenElementType._VALUES_TO_NAMES[request.slot],
+                      request.serve,
+                      request.reset):
+        for command in nextCommandFromAction(
+                           screen_elements, request.useShortcut, action):
             yield command
 
 def main():
-    print('xdotool search --name "VA-11 Hall-A: Cyberpunk Bartender Action" ', end='')
-
     #add_opt = True
     add_opt = False
     #serve = True
@@ -297,8 +302,16 @@ def main():
     #drink_name = ZEN_STAR
     #drink_name = FLAMING_MOAI
 
-    command_request = CommandRequest(drinkName=drink_name, addKarmotrine=add_opt, bigSize=double, reset=reset, slot=slot, serve=serve, useShortcut=use_shortcut)
+    command_request = CommandRequest(
+                          drinkName=drink_name,
+                          addKarmotrine=add_opt,
+                          bigSize=double,
+                          reset=reset,
+                          slot=slot,
+                          serve=serve,
+                          useShortcut=use_shortcut)
 
+    print('xdotool search --name "VA-11 Hall-A: Cyberpunk Bartender Action" ', end='')
     for command in getCommands(command_request):
         execute(command)
     print()
