@@ -240,6 +240,21 @@ def getDrinkRecipe(request):
                    age=drink_recipe.isAged(),
                    blend=drink_recipe.isBlended()))
 
+def getCommands(request):
+    screen_elements = dict()
+    for name in Recipe.ingredients:
+        screen_elements[name] = ScreenElement(centroid[name])
+    for name in ScreenElement.elements:
+        screen_elements[name] = ScreenElement(centroid[name])
+
+    drink_recipe_request = DrinkRecipeRequest(drinkName=request.drinkName, addKarmotrine=request.addKarmotrine, bigSize=request.bigSize)
+
+    drink_recipe_response = getDrinkRecipe(drink_recipe_request)
+
+    for action in nextAction(drink_recipe_response.drinkRecipe, ScreenElementType._VALUES_TO_NAMES[request.slot], request.serve, request.reset):
+        for command in nextCommandFromAction(screen_elements, request.useShortcut, action):
+            yield command
+
 def main():
     print('xdotool search --name "VA-11 Hall-A: Cyberpunk Bartender Action" ', end='')
 
@@ -284,20 +299,8 @@ def main():
 
     command_request = CommandRequest(drinkName=drink_name, addKarmotrine=add_opt, bigSize=double, reset=reset, slot=slot, serve=serve, useShortcut=use_shortcut)
 
-    screen_elements = dict()
-    for name in Recipe.ingredients:
-        screen_elements[name] = ScreenElement(centroid[name])
-    for name in ScreenElement.elements:
-        screen_elements[name] = ScreenElement(centroid[name])
-
-    drink_recipe_request = DrinkRecipeRequest(drinkName=command_request.drinkName, addKarmotrine=command_request.addKarmotrine, bigSize=command_request.bigSize)
-
-    drink_recipe_response = getDrinkRecipe(drink_recipe_request)
-
-    for action in nextAction(drink_recipe_response.drinkRecipe, ScreenElementType._VALUES_TO_NAMES[command_request.slot], command_request.serve, command_request.reset):
-        for command in nextCommandFromAction(screen_elements, command_request.useShortcut, action):
-            execute(command)
-
+    for command in getCommands(command_request):
+        execute(command)
     print()
 
 if __name__ == '__main__':
