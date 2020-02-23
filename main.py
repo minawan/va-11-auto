@@ -211,8 +211,7 @@ def execute(command):
 def getDrinkRecipe(request):
     drink_recipe = Recipe(drink[DrinkName._VALUES_TO_NAMES[request.drinkName]][RECIPE])
 
-    if request.bigSize and request.drinkName == CREVICE_SPIKE:
-        print('Adding karmotrine to big crevice spike.')
+    if request.bigSize and request.drinkName == DrinkName.CREVICE_SPIKE:
         request.addKarmotrine = True
 
     if request.bigSize:
@@ -261,7 +260,7 @@ def main():
     #serve = True
     serve = False
     slot = ScreenElementType.LEFT_SLOT
-    #slot = RIGHT_SLOT
+    #slot = ScreenElementType.RIGHT_SLOT
     #double = True
     double = False
     #use_shortcut = True
@@ -269,31 +268,31 @@ def main():
     reset = True
     #reset = False
 
-    #drink_name = BAD_TOUCH
-    drink_name = DrinkName.BEER
-    #drink_name = BLEEDING_JANE
-    #drink_name = BLOOM_LIGHT
-    #drink_name = BLUE_FAIRY
-    #drink_name = BRANDTINI
-    #drink_name = COBALT_VELVET
-    #drink_name = CREVICE_SPIKE
-    #drink_name = FLUFFY_DREAM
-    #drink_name = FRINGE_WEAVER
-    #drink_name = FROTHY_WATER
-    #drink_name = GRIZZLY_TEMPLE
-    #drink_name = GUT_PUNCH
-    #drink_name = MARSBLAST
-    #drink_name = MERCURYBLAST
-    #drink_name = MOONBLAST
-    #drink_name = PIANO_MAN
-    #drink_name = PIANO_WOMAN
-    #drink_name = PILEDRIVER
-    #drink_name = SPARKLE_STAR
-    #drink_name = SUGAR_RUSH
-    #drink_name = SUNSHINE_CLOUD
-    #drink_name = SUPLEX
-    #drink_name = ZEN_STAR
-    #drink_name = FLAMING_MOAI
+    #drink_name = DrinkName.BAD_TOUCH
+    #drink_name = DrinkName.BEER
+    #drink_name = DrinkName.BLEEDING_JANE
+    #drink_name = DrinkName.BLOOM_LIGHT
+    #drink_name = DrinkName.BLUE_FAIRY
+    #drink_name = DrinkName.BRANDTINI
+    #drink_name = DrinkName.COBALT_VELVET
+    #drink_name = DrinkName.CREVICE_SPIKE
+    #drink_name = DrinkName.FLUFFY_DREAM
+    #drink_name = DrinkName.FRINGE_WEAVER
+    #drink_name = DrinkName.FROTHY_WATER
+    #drink_name = DrinkName.GRIZZLY_TEMPLE
+    #drink_name = DrinkName.GUT_PUNCH
+    #drink_name = DrinkName.MARSBLAST
+    #drink_name = DrinkName.MERCURYBLAST
+    #drink_name = DrinkName.MOONBLAST
+    #drink_name = DrinkName.PIANO_MAN
+    #drink_name = DrinkName.PIANO_WOMAN
+    #drink_name = DrinkName.PILEDRIVER
+    #drink_name = DrinkName.SPARKLE_STAR
+    #drink_name = DrinkName.SUGAR_RUSH
+    #drink_name = DrinkName.SUNSHINE_CLOUD
+    #drink_name = DrinkName.SUPLEX
+    #drink_name = DrinkName.ZEN_STAR
+    drink_name = DrinkName.FLAMING_MOAI
 
     command_request = CommandRequest(
                           drinkName=drink_name,
