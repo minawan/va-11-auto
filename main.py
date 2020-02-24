@@ -3,6 +3,7 @@ import os
 
 sys.path.append('thrift/gen-py')
 
+from action import RecipeActionServer
 from action.ttypes import AddIceAction
 from action.ttypes import AddIngredientAction
 from action.ttypes import AgeAction
@@ -26,6 +27,9 @@ from recipe.ttypes import DrinkName
 from recipe.ttypes import DrinkRecipe
 from recipe.ttypes import DrinkRecipeRequest
 from recipe.ttypes import DrinkRecipeResponse
+from thrift.transport import TSocket
+from thrift.transport import TTransport
+from thrift.protocol import TBinaryProtocol
 
 from centroid import *
 from drink import *
@@ -109,26 +113,14 @@ def trigger(screen_element, use_shortcut):
     return Command(clickCommand=ClickCommand(position=toCoord(screen_element.getCentroid())))
 
 def getRecipeActions(request):
-    actions = []
-    if request.reset:
-        actions.append(RecipeAction(resetAction=ResetAction()))
-    actions.append(RecipeAction(selectSlotAction=SelectSlotAction(slot=request.slot)))
-    drink_recipe = request.drinkRecipe
-    actions.append(RecipeAction(addIngredientAction=AddIngredientAction(ingredient=ScreenElementType.ADELHYDE, amount=drink_recipe.adelhyde)))
-    actions.append(RecipeAction(addIngredientAction=AddIngredientAction(ingredient=ScreenElementType.BRONSON_EXTRACT, amount=drink_recipe.bronsonExtract)))
-    actions.append(RecipeAction(addIngredientAction=AddIngredientAction(ingredient=ScreenElementType.POWDERED_DELTA, amount=drink_recipe.powderedDelta)))
-    actions.append(RecipeAction(addIngredientAction=AddIngredientAction(ingredient=ScreenElementType.FLANERGIDE, amount=drink_recipe.flanergide)))
-    actions.append(RecipeAction(addIngredientAction=AddIngredientAction(ingredient=ScreenElementType.KARMOTRINE, amount=drink_recipe.karmotrine)))
-    if drink_recipe.addIce:
-        actions.append(RecipeAction(addIceAction=AddIceAction()))
-    if drink_recipe.age:
-        actions.append(RecipeAction(ageAction=AgeAction()))
-    durationInSeconds = 5 if drink_recipe.blend else 1
-    actions.append(RecipeAction(mixAction=MixAction(durationInSeconds=durationInSeconds)))
-    if request.serve:
-        actions.append(RecipeAction(serveAction=ServeAction()))
-
-    return RecipeActionResponse(actions=actions)
+    socket = TSocket.TSocket('localhost', 9090)
+    transport = TTransport.TBufferedTransport(socket)
+    protocol = TBinaryProtocol.TBinaryProtocol(transport)
+    client = RecipeActionServer.Client(protocol)
+    transport.open()
+    response = client.getRecipeActions(request)
+    transport.close()
+    return response
 
 def getActionsFromDrinkRecipe(drink_recipe, slot, serve, reset):
     return response.actions
