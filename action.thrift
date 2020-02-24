@@ -18,16 +18,16 @@ enum ScreenElementType {
 struct ResetAction { }
 
 struct SelectSlotAction {
-    1: optional ScreenElementType slot;
+    1: ScreenElementType slot;
 }
 
 struct AddIngredientAction {
-    1: optional ScreenElementType ingredient;
-    2: optional i32 amount;
+    1: ScreenElementType ingredient;
+    2: i32 amount;
 }
 
 struct MixAction {
-    1: optional i32 durationInSeconds;
+    1: i32 durationInSeconds;
 }
 
 struct AddIceAction { }
@@ -47,10 +47,10 @@ union RecipeAction {
 }
 
 struct RecipeActionRequest {
-    1: optional recipe.DrinkRecipe drinkRecipe;
-    2: optional bool reset;
-    3: optional ScreenElementType slot;
-    4: optional bool serve;
+    1: recipe.DrinkRecipe drinkRecipe;
+    2: bool reset;
+    3: ScreenElementType slot;
+    4: bool serve;
 }
 
 struct RecipeActionResponse {

@@ -15,7 +15,7 @@ func NewRecipeActionServerHandler() *RecipeActionServerHandler {
 func (*RecipeActionServerHandler) GetRecipeActions(ctx context.Context, request *action.RecipeActionRequest) (*action.RecipeActionResponse, error) {
 	var actions []*action.RecipeAction
 
-	if *request.Reset {
+	if request.Reset {
 		resetAction := action.NewRecipeAction()
 		resetAction.ResetAction = action.NewResetAction()
 		actions = append(actions, resetAction)
@@ -37,8 +37,7 @@ func (*RecipeActionServerHandler) GetRecipeActions(ctx context.Context, request 
 	for _, ingredient := range recipeIngredients {
 		addIngredientAction := action.NewRecipeAction()
 		addIngredientAction.AddIngredientAction = action.NewAddIngredientAction()
-		addIngredientAction.AddIngredientAction.Ingredient = new(action.ScreenElementType)
-		*addIngredientAction.AddIngredientAction.Ingredient = ingredient
+		addIngredientAction.AddIngredientAction.Ingredient = ingredient
 		switch ingredient {
 		case action.ScreenElementType_ADELHYDE:
 			addIngredientAction.AddIngredientAction.Amount = drinkRecipe.Adelhyde
@@ -56,13 +55,13 @@ func (*RecipeActionServerHandler) GetRecipeActions(ctx context.Context, request 
 		actions = append(actions, addIngredientAction)
 	}
 
-	if *drinkRecipe.AddIce {
+	if drinkRecipe.AddIce {
 		addIceAction := action.NewRecipeAction()
 		addIceAction.AddIceAction = action.NewAddIceAction()
 		actions = append(actions, addIceAction)
 	}
 
-	if *drinkRecipe.Age {
+	if drinkRecipe.Age {
 		ageAction := action.NewRecipeAction()
 		ageAction.AgeAction = action.NewAgeAction()
 		actions = append(actions, ageAction)
@@ -70,14 +69,13 @@ func (*RecipeActionServerHandler) GetRecipeActions(ctx context.Context, request 
 
 	mixAction := action.NewRecipeAction()
 	mixAction.MixAction = action.NewMixAction()
-	var durationInSeconds int32 = 1
-	if *drinkRecipe.Blend {
-		durationInSeconds = 5
+	mixAction.MixAction.DurationInSeconds = 1
+	if drinkRecipe.Blend {
+		mixAction.MixAction.DurationInSeconds = 5
 	}
-	mixAction.MixAction.DurationInSeconds = &durationInSeconds
 	actions = append(actions, mixAction)
 
-	if *request.Serve {
+	if request.Serve {
 		serveAction := action.NewRecipeAction()
 		serveAction.ServeAction = action.NewServeAction()
 		actions = append(actions, serveAction)
