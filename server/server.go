@@ -8,7 +8,7 @@ import (
 
 func runServer(transportFactory thrift.TTransportFactory, protocolFactory thrift.TProtocolFactory, addr string) error {
 	transport, err := thrift.NewTServerSocket(addr)
-	
+
 	if err != nil {
 		return err
 	}

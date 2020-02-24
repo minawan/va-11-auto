@@ -6,10 +6,10 @@ import (
 	"github.com/minawan/va-11-auto/thrift/gen-go/action"
 )
 
-type RecipeActionServerHandler struct { }
+type RecipeActionServerHandler struct{}
 
 func NewRecipeActionServerHandler() *RecipeActionServerHandler {
-	return &RecipeActionServerHandler{ }
+	return &RecipeActionServerHandler{}
 }
 
 func (*RecipeActionServerHandler) GetRecipeActions(ctx context.Context, request *action.RecipeActionRequest) (*action.RecipeActionResponse, error) {
