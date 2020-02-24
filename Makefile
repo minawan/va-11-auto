@@ -3,7 +3,7 @@ all: build
 build: main.sh
 
 main.sh: thrift main.py centroid.py drink.py
-	python3 main.py > main.sh
+	python3 main.py | tee 'main.sh'
 
 thrift: command.thrift recipe.thrift action.thrift
 	mkdir -p thrift

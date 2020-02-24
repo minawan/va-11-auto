@@ -16,3 +16,4 @@ main.sh*
 __pycache__
 thrift
 *.swp
+server/server
