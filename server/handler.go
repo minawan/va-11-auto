@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"github.com/minawan/va-11-auto/thrift/gen-go/action"
 )
 
@@ -26,32 +25,12 @@ func (*RecipeActionServerHandler) GetRecipeActions(ctx context.Context, request 
 	selectSlotAction.SelectSlotAction.Slot = request.Slot
 	actions = append(actions, selectSlotAction)
 
-	recipeIngredients := []action.ScreenElementType{
-		action.ScreenElementType_ADELHYDE,
-		action.ScreenElementType_BRONSON_EXTRACT,
-		action.ScreenElementType_POWDERED_DELTA,
-		action.ScreenElementType_FLANERGIDE,
-		action.ScreenElementType_KARMOTRINE,
-	}
 	drinkRecipe := request.DrinkRecipe
-	for _, ingredient := range recipeIngredients {
+	for ingredient, quantity := range drinkRecipe.Quantity {
 		addIngredientAction := action.NewRecipeAction()
 		addIngredientAction.AddIngredientAction = action.NewAddIngredientAction()
 		addIngredientAction.AddIngredientAction.Ingredient = ingredient
-		switch ingredient {
-		case action.ScreenElementType_ADELHYDE:
-			addIngredientAction.AddIngredientAction.Amount = drinkRecipe.Adelhyde
-		case action.ScreenElementType_BRONSON_EXTRACT:
-			addIngredientAction.AddIngredientAction.Amount = drinkRecipe.BronsonExtract
-		case action.ScreenElementType_POWDERED_DELTA:
-			addIngredientAction.AddIngredientAction.Amount = drinkRecipe.PowderedDelta
-		case action.ScreenElementType_FLANERGIDE:
-			addIngredientAction.AddIngredientAction.Amount = drinkRecipe.Flanergide
-		case action.ScreenElementType_KARMOTRINE:
-			addIngredientAction.AddIngredientAction.Amount = drinkRecipe.Karmotrine
-		default:
-			fmt.Println("Unexpected ScreenElementType:", ingredient)
-		}
+		addIngredientAction.AddIngredientAction.Quantity = quantity
 		actions = append(actions, addIngredientAction)
 	}
 

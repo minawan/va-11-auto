@@ -1,29 +1,15 @@
+include "shared.thrift"
 include "recipe.thrift"
-
-enum ScreenElementType {
-    RESET
-    LEFT_SLOT
-    RIGHT_SLOT
-    ADELHYDE
-    BRONSON_EXTRACT
-    POWDERED_DELTA
-    FLANERGIDE
-    KARMOTRINE
-    BLENDER
-    ADD_ICE
-    AGE
-    MIX
-}
 
 struct ResetAction { }
 
 struct SelectSlotAction {
-    1: ScreenElementType slot;
+    1: shared.ScreenElementType slot;
 }
 
 struct AddIngredientAction {
-    1: ScreenElementType ingredient;
-    2: i32 amount;
+    1: shared.ScreenElementType ingredient;
+    2: i32 quantity;
 }
 
 struct MixAction {
@@ -49,7 +35,7 @@ union RecipeAction {
 struct RecipeActionRequest {
     1: recipe.DrinkRecipe drinkRecipe;
     2: bool reset;
-    3: ScreenElementType slot;
+    3: shared.ScreenElementType slot;
     4: bool serve;
 }
 

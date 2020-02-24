@@ -12,7 +12,6 @@ from action.ttypes import RecipeAction
 from action.ttypes import RecipeActionRequest
 from action.ttypes import RecipeActionResponse
 from action.ttypes import ResetAction
-from action.ttypes import ScreenElementType
 from action.ttypes import SelectSlotAction
 from action.ttypes import ServeAction
 from command.ttypes import ClickCommand
@@ -23,6 +22,7 @@ from command.ttypes import Coord
 from command.ttypes import DragAndDropCommand
 from command.ttypes import TypeCommand
 from command.ttypes import WaitCommand
+from shared.ttypes import ScreenElementType
 from recipe.ttypes import DrinkName
 from recipe.ttypes import DrinkRecipe
 from recipe.ttypes import DrinkRecipeRequest
@@ -43,7 +43,7 @@ class ScreenElement:
         try:
             self.shortcut = str(chr(entry[SHORTCUT]))
         except KeyError:
-            print('Shortcut not available for {name} of type {category}'.format(name=name, category=entry[CATEGORY]))
+            sys.stderr.write('Shortcut not available for {name} of type {category}\n'.format(name=name, category=entry[CATEGORY]))
             self.shortcut = 'l'
 
     def getCentroid(self):
@@ -140,7 +140,7 @@ def getCommandsFromAction(use_shortcut, action):
     elif action.addIngredientAction:
         source = screen_elements[ScreenElementType._VALUES_TO_NAMES[action.addIngredientAction.ingredient]]
         destination = screen_elements[BLENDER]
-        for _ in range(action.addIngredientAction.amount):
+        for _ in range(action.addIngredientAction.quantity):
             shortcut = source.getShortcut()
             if use_shortcut and shortcut != '\x00':
                 commands.append(Command(typeCommand=TypeCommand(key=ord(shortcut))))
@@ -157,34 +157,34 @@ def getCommandsFromAction(use_shortcut, action):
     elif action.serveAction:
         commands.append(trigger(screen_elements[MIX], use_shortcut))
     else:
-        print('Unexpected recipe action type:', action.__class__.__name__)
+        sys.stderr.write('Unexpected recipe action type: {}\n'.format(action.__class__.__name__))
 
     return CommandResponse(commands=commands)
 
 def execute(command):
     if command.clickCommand:
         position = command.clickCommand.position
-        print('mousemove {x} {y} '.format(x=position.x, y=position.y), end='')
-        print('sleep 0.5 ', end='')
-        print('mousedown 1 ', end='')
-        print('sleep 0.5 ', end='')
-        print('mouseup 1 ', end='')
-        print('sleep 0.5 ', end='')
+        print('    mousemove {x} {y} \\'.format(x=position.x, y=position.y))
+        print('    sleep 0.5 \\')
+        print('    mousedown 1 \\')
+        print('    sleep 0.5 \\')
+        print('    mouseup 1 \\')
+        print('    sleep 0.5 \\')
     elif command.dragAndDropCommand:
         source = command.dragAndDropCommand.source
         destination = command.dragAndDropCommand.destination
-        print('mousemove {x} {y} '.format(x=source.x, y=source.y), end='')
-        print('sleep 0.5 ', end='')
-        print('mousedown 1 ', end='')
-        print('mousemove {x} {y} '.format(x=destination.x, y=destination.y), end='')
-        print('sleep 0.5 ', end='')
-        print('mouseup 1 ', end='')
+        print('    mousemove {x} {y} \\'.format(x=source.x, y=source.y))
+        print('    sleep 0.5 \\')
+        print('    mousedown 1 \\')
+        print('    mousemove {x} {y} \\'.format(x=destination.x, y=destination.y))
+        print('    sleep 0.5 \\')
+        print('    mouseup 1 \\')
     elif command.waitCommand:
-        print('sleep {seconds} '.format(seconds=command.waitCommand.durationInSeconds), end='')
+        print('    sleep {seconds} \\'.format(seconds=command.waitCommand.durationInSeconds))
     elif command.typeCommand:
-        print('key {shortcut} '.format(shortcut=chr(command.typeCommand.key), end=''))
+        print('    key {shortcut} \\'.format(shortcut=chr(command.typeCommand.key)))
     else:
-        print('Unexpected command type:', str(command))
+        sys.stderr.write('Unexpected command type: {}\n'.format(str(command)))
 
 def getDrinkRecipe(request):
     drink_recipe = Recipe(drink[DrinkName._VALUES_TO_NAMES[request.drinkName]][RECIPE])
@@ -198,13 +198,17 @@ def getDrinkRecipe(request):
     if request.addKarmotrine:
         drink_recipe.addOpt()
 
+    quantity = {
+        ScreenElementType.ADELHYDE: drink_recipe.getAdelhydeCount(),
+        ScreenElementType.BRONSON_EXTRACT: drink_recipe.getBronsonExtractCount(),
+        ScreenElementType.POWDERED_DELTA: drink_recipe.getPowderedDeltaCount(),
+        ScreenElementType.FLANERGIDE: drink_recipe.getFlanergideCount(),
+        ScreenElementType.KARMOTRINE: drink_recipe.getKarmotrineCount(),
+    }
+
     return DrinkRecipeResponse(
                drinkRecipe=DrinkRecipe(
-                   adelhyde=drink_recipe.getAdelhydeCount(),
-                   bronsonExtract=drink_recipe.getBronsonExtractCount(),
-                   flanergide=drink_recipe.getFlanergideCount(),
-                   powderedDelta=drink_recipe.getPowderedDeltaCount(),
-                   karmotrine=drink_recipe.getKarmotrineCount(),
+                   quantity=quantity,
                    addIce=drink_recipe.isOnTheRocks(),
                    age=drink_recipe.isAged(),
                    blend=drink_recipe.isBlended()))
@@ -279,7 +283,7 @@ def main():
                           serve=serve,
                           useShortcut=use_shortcut)
 
-    print('xdotool search --name "VA-11 Hall-A: Cyberpunk Bartender Action" ', end='')
+    print('xdotool search --name "VA-11 Hall-A: Cyberpunk Bartender Action" \\')
     for command in getCommands(command_request).commands:
         execute(command)
     print()

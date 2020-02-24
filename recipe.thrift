@@ -1,3 +1,5 @@
+include "shared.thrift"
+
 enum DrinkName {
     BAD_TOUCH
     BEER
@@ -33,14 +35,10 @@ struct DrinkRecipeRequest {
 }
 
 struct DrinkRecipe {
-    1: i32 adelhyde;
-    2: i32 bronsonExtract;
-    3: i32 powderedDelta;
-    4: i32 flanergide;
-    5: i32 karmotrine;
-    6: bool addIce;
-    7: bool age;
-    8: bool blend;
+    1: map<shared.ScreenElementType, i32> quantity;
+    2: bool addIce;
+    3: bool age;
+    4: bool blend;
 }
 
 struct DrinkRecipeResponse {
