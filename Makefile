@@ -1,13 +1,11 @@
 all: build
 
-build: main.sh
-
-main.sh: thrift main.py centroid.py drink.py
-	python3 main.py | tee 'main.sh'
+build: thrift centroid.py drink.py
 
 thrift: command.thrift recipe.thrift action.thrift
 	mkdir -p thrift
 	thrift -r --gen py --gen go:package_prefix=github.com/minawan/va-11-auto/thrift/gen-go/ -o thrift/ command.thrift
+	thrift -r --gen py --gen go:package_prefix=github.com/minawan/va-11-auto/thrift/gen-go/ -o thrift/ action.thrift
 
 centroid.py: ScreenElementBoilerplate ScreenElement.csv
 	./ScreenElementBoilerplate

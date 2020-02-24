@@ -1,5 +1,5 @@
 include "recipe.thrift"
-include "action.thrift"
+include "shared.thrift"
 
 struct Coord {
     1: i32 x;
@@ -35,7 +35,7 @@ struct CommandRequest {
     2: bool addKarmotrine;
     3: bool bigSize;
     4: bool reset;
-    5: action.ScreenElementType slot;
+    5: shared.ScreenElementType slot;
     6: bool serve;
     7: bool useShortcut;
 }

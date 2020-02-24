@@ -12,7 +12,7 @@ drink.py
 *.dyn_o
 *.hi
 *.o
-main.sh*
+*.sh*
 __pycache__
 thrift
 *.swp
