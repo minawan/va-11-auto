@@ -122,9 +122,6 @@ def getRecipeActions(request):
     transport.close()
     return response
 
-def getActionsFromDrinkRecipe(drink_recipe, slot, serve, reset):
-    return response.actions
-
 def getCommandsFromAction(use_shortcut, action):
     screen_elements = dict()
     for name in Recipe.ingredients:
