@@ -30,6 +30,7 @@ from recipe.ttypes import DrinkRecipeResponse
 from thrift.transport import TSocket
 from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
+from thrift.protocol import TMultiplexedProtocol
 
 from centroid import *
 from drink import *
@@ -115,7 +116,7 @@ def trigger(screen_element, use_shortcut):
 def getRecipeActions(request):
     socket = TSocket.TSocket('localhost', 9090)
     transport = TTransport.TBufferedTransport(socket)
-    protocol = TBinaryProtocol.TBinaryProtocol(transport)
+    protocol = TMultiplexedProtocol.TMultiplexedProtocol(TBinaryProtocol.TBinaryProtocol(transport), 'RecipeActionServer')
     client = RecipeActionServer.Client(protocol)
     transport.open()
     response = client.getRecipeActions(request)

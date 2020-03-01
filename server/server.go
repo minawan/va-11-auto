@@ -13,8 +13,8 @@ func runServer(transportFactory thrift.TTransportFactory, protocolFactory thrift
 		return err
 	}
 
-	handler := NewRecipeActionServerHandler()
-	processor := action.NewRecipeActionServerProcessor(handler)
+	processor := thrift.NewTMultiplexedProcessor()
+	processor.RegisterProcessor("RecipeActionServer", action.NewRecipeActionServerProcessor(NewRecipeActionServerHandler()))
 	server := thrift.NewTSimpleServer4(processor, transport, transportFactory, protocolFactory)
 
 	fmt.Println("Running RecipeActionServer on ", addr)
