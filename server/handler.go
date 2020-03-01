@@ -5,13 +5,13 @@ import (
 	"github.com/minawan/va-11-auto/thrift/gen-go/action"
 )
 
-type RecipeActionServerHandler struct{}
+type RecipeActionServiceHandler struct{}
 
-func NewRecipeActionServerHandler() *RecipeActionServerHandler {
-	return &RecipeActionServerHandler{}
+func NewRecipeActionServiceHandler() *RecipeActionServiceHandler {
+	return &RecipeActionServiceHandler{}
 }
 
-func (*RecipeActionServerHandler) GetRecipeActions(ctx context.Context, request *action.RecipeActionRequest) (*action.RecipeActionResponse, error) {
+func (*RecipeActionServiceHandler) GetRecipeActions(ctx context.Context, request *action.RecipeActionRequest) (*action.RecipeActionResponse, error) {
 	var actions []*action.RecipeAction
 
 	if request.Reset {

@@ -44,6 +44,6 @@ struct CommandResponse {
     1: list<Command> commands;
 }
 
-service CommandServer {
+service CommandService {
     CommandResponse getCommands(1:CommandRequest request)
 }

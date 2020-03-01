@@ -43,6 +43,6 @@ struct RecipeActionResponse {
     1: list<RecipeAction> actions;
 }
 
-service RecipeActionServer {
+service RecipeActionService {
     RecipeActionResponse getRecipeActions(1:RecipeActionRequest request)
 }

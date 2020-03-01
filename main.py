@@ -3,7 +3,7 @@ import os
 
 sys.path.append('thrift/gen-py')
 
-from action import RecipeActionServer
+from action import RecipeActionService
 from action.ttypes import AddIceAction
 from action.ttypes import AddIngredientAction
 from action.ttypes import AgeAction
@@ -217,8 +217,8 @@ def getCommands(command_request):
 
     socket = TSocket.TSocket('localhost', 9090)
     transport = TTransport.TBufferedTransport(socket)
-    protocol = TMultiplexedProtocol.TMultiplexedProtocol(TBinaryProtocol.TBinaryProtocol(transport), 'RecipeActionServer')
-    client = RecipeActionServer.Client(protocol)
+    protocol = TMultiplexedProtocol.TMultiplexedProtocol(TBinaryProtocol.TBinaryProtocol(transport), 'RecipeActionService')
+    client = RecipeActionService.Client(protocol)
     transport.open()
     recipe_action_response = client.getRecipeActions(recipe_action_request)
     transport.close()

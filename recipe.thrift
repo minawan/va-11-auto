@@ -45,6 +45,6 @@ struct DrinkRecipeResponse {
     1: DrinkRecipe drinkRecipe;
 }
 
-service DrinkRecipeServer {
+service DrinkRecipeService {
     DrinkRecipeResponse getDrinkRecipe(1:DrinkRecipeRequest request)
 }

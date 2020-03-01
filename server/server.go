@@ -14,9 +14,9 @@ func runServer(transportFactory thrift.TTransportFactory, protocolFactory thrift
 	}
 
 	processor := thrift.NewTMultiplexedProcessor()
-	processor.RegisterProcessor("RecipeActionServer", action.NewRecipeActionServerProcessor(NewRecipeActionServerHandler()))
+	processor.RegisterProcessor("RecipeActionService", action.NewRecipeActionServiceProcessor(NewRecipeActionServiceHandler()))
 	server := thrift.NewTSimpleServer4(processor, transport, transportFactory, protocolFactory)
 
-	fmt.Println("Running RecipeActionServer on ", addr)
+	fmt.Println("Running RecipeActionService on ", addr)
 	return server.Serve()
 }
