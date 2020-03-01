@@ -113,16 +113,6 @@ def trigger(screen_element, use_shortcut):
         return Command(typeCommand=TypeCommand(key=ord(shortcut)))
     return Command(clickCommand=ClickCommand(position=toCoord(screen_element.getCentroid())))
 
-def getRecipeActions(request):
-    socket = TSocket.TSocket('localhost', 9090)
-    transport = TTransport.TBufferedTransport(socket)
-    protocol = TMultiplexedProtocol.TMultiplexedProtocol(TBinaryProtocol.TBinaryProtocol(transport), 'RecipeActionServer')
-    client = RecipeActionServer.Client(protocol)
-    transport.open()
-    response = client.getRecipeActions(request)
-    transport.close()
-    return response
-
 def getCommandsFromAction(use_shortcut, action):
     screen_elements = dict()
     for name in Recipe.ingredients:
@@ -224,7 +214,15 @@ def getCommands(command_request):
                                 reset=command_request.reset,
                                 slot=command_request.slot,
                                 serve=command_request.serve)
-    recipe_action_response = getRecipeActions(recipe_action_request)
+
+    socket = TSocket.TSocket('localhost', 9090)
+    transport = TTransport.TBufferedTransport(socket)
+    protocol = TMultiplexedProtocol.TMultiplexedProtocol(TBinaryProtocol.TBinaryProtocol(transport), 'RecipeActionServer')
+    client = RecipeActionServer.Client(protocol)
+    transport.open()
+    recipe_action_response = client.getRecipeActions(recipe_action_request)
+    transport.close()
+
     commands = []
     for action in recipe_action_response.actions:
         commands.extend(getCommandsFromAction(
