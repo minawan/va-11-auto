@@ -23,6 +23,7 @@ from command.ttypes import DragAndDropCommand
 from command.ttypes import TypeCommand
 from command.ttypes import WaitCommand
 from shared.ttypes import ScreenElementType
+from recipe import DrinkRecipeService
 from recipe.ttypes import DrinkName
 from recipe.ttypes import DrinkRecipe
 from recipe.ttypes import DrinkRecipeRequest
@@ -202,10 +203,23 @@ def getDrinkRecipe(request):
                    blend=drink_recipe.isBlended()))
 
 def getCommands(command_request):
+    socket = TSocket.TSocket('localhost', 9090)
+    transport = TTransport.TBufferedTransport(socket)
+
+    protocol = TBinaryProtocol.TBinaryProtocol(transport)
+    drink_recipe_protocol = TMultiplexedProtocol.TMultiplexedProtocol(protocol, 'DrinkRecipeService')
+    recipe_action_protocol = TMultiplexedProtocol.TMultiplexedProtocol(protocol, 'RecipeActionService')
+
+    drink_recipe_client = DrinkRecipeService.Client(drink_recipe_protocol)
+    recipe_action_client = RecipeActionService.Client(recipe_action_protocol)
+
+    transport.open()
+
     drink_recipe_request = DrinkRecipeRequest(
                                drinkName=command_request.drinkName,
                                addKarmotrine=command_request.addKarmotrine,
                                bigSize=command_request.bigSize)
+    print(str(drink_recipe_client.getDrinkRecipe(drink_recipe_request)))
 
     drink_recipe_response = getDrinkRecipe(drink_recipe_request)
 
@@ -215,12 +229,7 @@ def getCommands(command_request):
                                 slot=command_request.slot,
                                 serve=command_request.serve)
 
-    socket = TSocket.TSocket('localhost', 9090)
-    transport = TTransport.TBufferedTransport(socket)
-    protocol = TMultiplexedProtocol.TMultiplexedProtocol(TBinaryProtocol.TBinaryProtocol(transport), 'RecipeActionService')
-    client = RecipeActionService.Client(protocol)
-    transport.open()
-    recipe_action_response = client.getRecipeActions(recipe_action_request)
+    recipe_action_response = recipe_action_client.getRecipeActions(recipe_action_request)
     transport.close()
 
     commands = []
