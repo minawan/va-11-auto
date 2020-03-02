@@ -1,6 +1,6 @@
 all: build
 
-build: thrift centroid.py drink.py
+build: thrift centroid.py
 
 thrift: command.thrift recipe.thrift action.thrift
 	mkdir -p thrift
@@ -10,14 +10,8 @@ thrift: command.thrift recipe.thrift action.thrift
 centroid.py: ScreenElementBoilerplate ScreenElement.csv
 	./ScreenElementBoilerplate
 
-drink.py: DrinkRecipe.json GenerateDrinkRecipe
-	./GenerateDrinkRecipe
-
 DrinkRecipe.json: convert_drink_recipe_to_json.py DrinkRecipe.ods
 	python3 convert_drink_recipe_to_json.py
-
-GenerateDrinkRecipe: GenerateDrinkRecipe.hs
-	ghc GenerateDrinkRecipe
 
 GenerateTableReader: GenerateTableReader.hs
 	ghc GenerateTableReader
@@ -36,7 +30,6 @@ ScreenElementBoilerplate: ScreenElement.o ScreenElementBoilerplate.hs
 clean:
 	rm -f DrinkRecipe.csv
 	rm -f DrinkRecipe.json
-	rm -f GenerateDrinkRecipe
 	rm -f GenerateScreenElement
 	rm -f GenerateScreenElement.hs
 	rm -f GenerateTableReader
@@ -44,7 +37,6 @@ clean:
 	rm -f ScreenElement.hs
 	rm -f ScreenElementBoilerplate
 	rm -f centroid.py
-	rm -f drink.py
 	rm -f *.dyn_hi
 	rm -f *.dyn_o
 	rm -f *.hi

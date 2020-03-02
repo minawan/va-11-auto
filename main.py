@@ -223,9 +223,9 @@ def main():
     reset = True
     #reset = False
 
-    drink_name = DrinkName.BAD_TOUCH
+    #drink_name = DrinkName.BAD_TOUCH
     #drink_name = DrinkName.BEER
-    #drink_name = DrinkName.BLEEDING_JANE
+    drink_name = DrinkName.BLEEDING_JANE
     #drink_name = DrinkName.BLOOM_LIGHT
     #drink_name = DrinkName.BLUE_FAIRY
     #drink_name = DrinkName.BRANDTINI
