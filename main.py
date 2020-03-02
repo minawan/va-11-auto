@@ -53,56 +53,6 @@ class ScreenElement:
     def getShortcut(self):
         return self.shortcut
 
-class Recipe:
-    ingredients = [ADELHYDE, BRONSON_EXTRACT, POWDERED_DELTA, FLANERGIDE, KARMOTRINE]
-    def __init__(self, recipe):
-        self.recipe = recipe
-
-    def _isBig(self):
-        total_amount = 0
-        for name in Recipe.ingredients:
-            individual_amount = self.recipe[name]
-            if individual_amount > 0:
-                total_amount += individual_amount
-        return total_amount > 10
-
-    def addOpt(self):
-        for name in Recipe.ingredients:
-            if self.recipe[name] < 0:
-                self.recipe[name] = 1
-
-    def doubleSize(self):
-        if not self._isBig():
-            for name in Recipe.ingredients:
-                self.recipe[name] *= 2
-
-    def _getIngredientCount(self, ingredient_name):
-        return self.recipe[ingredient_name]
-
-    def getAdelhydeCount(self):
-        return self._getIngredientCount(ADELHYDE)
-
-    def getBronsonExtractCount(self):
-        return self._getIngredientCount(BRONSON_EXTRACT)
-
-    def getPowderedDeltaCount(self):
-        return self._getIngredientCount(POWDERED_DELTA)
-
-    def getFlanergideCount(self):
-        return self._getIngredientCount(FLANERGIDE)
-
-    def getKarmotrineCount(self):
-        return self._getIngredientCount(KARMOTRINE)
-
-    def isOnTheRocks(self):
-        return self.recipe[ADD_ICE]
-
-    def isAged(self):
-        return self.recipe[AGE]
-
-    def isBlended(self):
-        return self.recipe[WAIT]
-
 
 def toCoord(centroid):
     return Coord(x=centroid[0], y=centroid[1])
@@ -115,7 +65,7 @@ def trigger(screen_element, use_shortcut):
 
 def getCommandsFromAction(use_shortcut, action):
     screen_elements = dict()
-    for name in Recipe.ingredients:
+    for name in [ADELHYDE, BRONSON_EXTRACT, POWDERED_DELTA, FLANERGIDE, KARMOTRINE]:
         screen_elements[name] = ScreenElement(centroid[name])
     for name in ScreenElement.elements:
         screen_elements[name] = ScreenElement(centroid[name])
@@ -210,14 +160,14 @@ def getCommands(command_request):
     return CommandResponse(commands=commands)
 
 def main():
-    add_opt = True
-    #add_opt = False
+    #add_opt = True
+    add_opt = False
     #serve = True
     serve = False
     #slot = ScreenElementType.LEFT_SLOT
     slot = ScreenElementType.RIGHT_SLOT
-    #double = True
-    double = False
+    double = True
+    #double = False
     #use_shortcut = True
     use_shortcut = False
     reset = True
@@ -225,12 +175,12 @@ def main():
 
     #drink_name = DrinkName.BAD_TOUCH
     #drink_name = DrinkName.BEER
-    drink_name = DrinkName.BLEEDING_JANE
+    #drink_name = DrinkName.BLEEDING_JANE
     #drink_name = DrinkName.BLOOM_LIGHT
     #drink_name = DrinkName.BLUE_FAIRY
     #drink_name = DrinkName.BRANDTINI
     #drink_name = DrinkName.COBALT_VELVET
-    #drink_name = DrinkName.CREVICE_SPIKE
+    drink_name = DrinkName.CREVICE_SPIKE
     #drink_name = DrinkName.FLUFFY_DREAM
     #drink_name = DrinkName.FRINGE_WEAVER
     #drink_name = DrinkName.FROTHY_WATER
