@@ -5,7 +5,6 @@ sys.path.append('thrift/gen-py')
 
 from action import RecipeActionService
 from action.ttypes import RecipeActionRequest
-from action.ttypes import RecipeActionResponse
 from command.ttypes import ClickCommand
 from command.ttypes import Command
 from command.ttypes import CommandRequest
@@ -18,7 +17,6 @@ from shared.ttypes import ScreenElementType
 from recipe import DrinkRecipeService
 from recipe.ttypes import DrinkName
 from recipe.ttypes import DrinkRecipeRequest
-from recipe.ttypes import DrinkRecipeResponse
 from thrift.transport import TSocket
 from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
