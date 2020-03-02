@@ -44,7 +44,7 @@ func (handler *DrinkRecipeServiceHandler) GetDrinkRecipe(ctx context.Context, re
 			karmotrine *= 2
 		}
 
-		if karmotrine == 0 && request.AddKarmotrine {
+		if karmotrine < 0 && request.AddKarmotrine {
 			karmotrine++
 		}
 
