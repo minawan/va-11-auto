@@ -4,16 +4,8 @@ import os
 sys.path.append('thrift/gen-py')
 
 from action import RecipeActionService
-from action.ttypes import AddIceAction
-from action.ttypes import AddIngredientAction
-from action.ttypes import AgeAction
-from action.ttypes import MixAction
-from action.ttypes import RecipeAction
 from action.ttypes import RecipeActionRequest
 from action.ttypes import RecipeActionResponse
-from action.ttypes import ResetAction
-from action.ttypes import SelectSlotAction
-from action.ttypes import ServeAction
 from command.ttypes import ClickCommand
 from command.ttypes import Command
 from command.ttypes import CommandRequest
@@ -25,7 +17,6 @@ from command.ttypes import WaitCommand
 from shared.ttypes import ScreenElementType
 from recipe import DrinkRecipeService
 from recipe.ttypes import DrinkName
-from recipe.ttypes import DrinkRecipe
 from recipe.ttypes import DrinkRecipeRequest
 from recipe.ttypes import DrinkRecipeResponse
 from thrift.transport import TSocket
