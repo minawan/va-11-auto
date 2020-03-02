@@ -34,7 +34,6 @@ from thrift.protocol import TBinaryProtocol
 from thrift.protocol import TMultiplexedProtocol
 
 from centroid import *
-from drink import *
 
 class ScreenElement:
     elements = [ADD_ICE, AGE, LEFT_SLOT, RIGHT_SLOT, RESET, MIX, BLENDER]
@@ -175,33 +174,6 @@ def execute(command):
     else:
         sys.stderr.write('Unexpected command type: {}\n'.format(str(command)))
 
-def getDrinkRecipe(request):
-    drink_recipe = Recipe(drink[DrinkName._VALUES_TO_NAMES[request.drinkName]][RECIPE])
-
-    if request.bigSize and request.drinkName == DrinkName.CREVICE_SPIKE:
-        request.addKarmotrine = True
-
-    if request.bigSize:
-        drink_recipe.doubleSize()
-
-    if request.addKarmotrine:
-        drink_recipe.addOpt()
-
-    quantity = {
-        ScreenElementType.ADELHYDE: drink_recipe.getAdelhydeCount(),
-        ScreenElementType.BRONSON_EXTRACT: drink_recipe.getBronsonExtractCount(),
-        ScreenElementType.POWDERED_DELTA: drink_recipe.getPowderedDeltaCount(),
-        ScreenElementType.FLANERGIDE: drink_recipe.getFlanergideCount(),
-        ScreenElementType.KARMOTRINE: drink_recipe.getKarmotrineCount(),
-    }
-
-    return DrinkRecipeResponse(
-               drinkRecipe=DrinkRecipe(
-                   quantity=quantity,
-                   addIce=drink_recipe.isOnTheRocks(),
-                   age=drink_recipe.isAged(),
-                   blend=drink_recipe.isBlended()))
-
 def getCommands(command_request):
     socket = TSocket.TSocket('localhost', 9090)
     transport = TTransport.TBufferedTransport(socket)
@@ -219,9 +191,7 @@ def getCommands(command_request):
                                drinkName=command_request.drinkName,
                                addKarmotrine=command_request.addKarmotrine,
                                bigSize=command_request.bigSize)
-    print(str(drink_recipe_client.getDrinkRecipe(drink_recipe_request)))
-
-    drink_recipe_response = getDrinkRecipe(drink_recipe_request)
+    drink_recipe_response = drink_recipe_client.getDrinkRecipe(drink_recipe_request)
 
     recipe_action_request = RecipeActionRequest(
                                 drinkRecipe=drink_recipe_response.drinkRecipe,

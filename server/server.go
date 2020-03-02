@@ -7,7 +7,7 @@ import (
 	"github.com/minawan/va-11-auto/thrift/gen-go/recipe"
 )
 
-func runServer(transportFactory thrift.TTransportFactory, protocolFactory thrift.TProtocolFactory, addr string) error {
+func runServer(transportFactory thrift.TTransportFactory, protocolFactory thrift.TProtocolFactory, addr string, recipes *[]DrinkRecipe) error {
 	transport, err := thrift.NewTServerSocket(addr)
 
 	if err != nil {
@@ -16,7 +16,7 @@ func runServer(transportFactory thrift.TTransportFactory, protocolFactory thrift
 
 	processor := thrift.NewTMultiplexedProcessor()
 	processor.RegisterProcessor("RecipeActionService", action.NewRecipeActionServiceProcessor(NewRecipeActionServiceHandler()))
-	processor.RegisterProcessor("DrinkRecipeService", recipe.NewDrinkRecipeServiceProcessor(NewDrinkRecipeServiceHandler()))
+	processor.RegisterProcessor("DrinkRecipeService", recipe.NewDrinkRecipeServiceProcessor(NewDrinkRecipeServiceHandler(recipes)))
 	server := thrift.NewTSimpleServer4(processor, transport, transportFactory, protocolFactory)
 
 	fmt.Println("Running RecipeActionService on ", addr)
