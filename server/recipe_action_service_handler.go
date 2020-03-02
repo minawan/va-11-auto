@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/minawan/va-11-auto/thrift/gen-go/action"
 )
 
@@ -12,6 +13,7 @@ func NewRecipeActionServiceHandler() *RecipeActionServiceHandler {
 }
 
 func (*RecipeActionServiceHandler) GetRecipeActions(ctx context.Context, request *action.RecipeActionRequest) (*action.RecipeActionResponse, error) {
+	fmt.Println(request)
 	var actions []*action.RecipeAction
 
 	if request.Reset {
@@ -60,5 +62,7 @@ func (*RecipeActionServiceHandler) GetRecipeActions(ctx context.Context, request
 		actions = append(actions, serveAction)
 	}
 
-	return &action.RecipeActionResponse{Actions: actions}, nil
+	response := action.RecipeActionResponse{Actions: actions}
+	fmt.Println(response)
+	return &response, nil
 }
