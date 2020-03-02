@@ -24,7 +24,6 @@ func (handler *DrinkRecipeServiceHandler) GetDrinkRecipe(ctx context.Context, re
 	}
 
 	var response recipe.DrinkRecipeResponse
-	found := false
 	for _, drinkRecipe := range *handler.Recipes {
 		if drinkRecipe.Name != request.DrinkName.String() {
 			continue
@@ -61,11 +60,6 @@ func (handler *DrinkRecipeServiceHandler) GetDrinkRecipe(ctx context.Context, re
 		response.DrinkRecipe.Age = recipeInfo.Age
 		response.DrinkRecipe.Blend = recipeInfo.Wait
 
-		found = true
-		break
-	}
-
-	if found {
 		fmt.Println(response)
 		return &response, nil
 	}
