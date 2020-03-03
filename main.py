@@ -149,14 +149,14 @@ def getCommands(command_request):
     return CommandResponse(commands=commands)
 
 def main():
-    #add_opt = True
-    add_opt = False
-    #serve = True
-    serve = False
-    #slot = ScreenElementType.LEFT_SLOT
-    slot = ScreenElementType.RIGHT_SLOT
-    double = True
-    #double = False
+    add_opt = True
+    #add_opt = False
+    serve = True
+    #serve = False
+    slot = ScreenElementType.LEFT_SLOT
+    #slot = ScreenElementType.RIGHT_SLOT
+    #double = True
+    double = False
     #use_shortcut = True
     use_shortcut = False
     reset = True
@@ -169,9 +169,9 @@ def main():
     #drink_name = DrinkName.BLUE_FAIRY
     #drink_name = DrinkName.BRANDTINI
     #drink_name = DrinkName.COBALT_VELVET
-    drink_name = DrinkName.CREVICE_SPIKE
+    #drink_name = DrinkName.CREVICE_SPIKE
     #drink_name = DrinkName.FLUFFY_DREAM
-    #drink_name = DrinkName.FRINGE_WEAVER
+    drink_name = DrinkName.FRINGE_WEAVER
     #drink_name = DrinkName.FROTHY_WATER
     #drink_name = DrinkName.GRIZZLY_TEMPLE
     #drink_name = DrinkName.GUT_PUNCH
