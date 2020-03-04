@@ -1,16 +1,7 @@
 DrinkRecipe.json
-GenerateScreenElement
-GenerateScreenElement.hs
-GenerateTableReader
 ScreenElement.hs
-ScreenElementBoilerplate
-centroid.py
 *.pyc
 *.csv
-*.dyn_hi
-*.dyn_o
-*.hi
-*.o
 *.sh*
 __pycache__
 thrift
