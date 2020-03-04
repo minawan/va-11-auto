@@ -1,0 +1,4 @@
+*.swp
+server
+*.json
+wire_gen.go

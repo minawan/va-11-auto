@@ -34,7 +34,17 @@ func main() {
 	protocolFactory := thrift.NewTBinaryProtocolFactoryDefault()
 	transportFactory := thrift.NewTBufferedTransportFactory(bufferSize)
 
-	if err := runServer(transportFactory, protocolFactory, *addr, &recipes); err != nil {
+	serverSocket, err := thrift.NewTServerSocket(*addr)
+	if err != nil {
+		fmt.Println("error creating server socket:", err)
+		return
+	}
+
+	fmt.Println("Running RecipeActionService on", *addr)
+	commandServer, err := CreateCommandServer(transportFactory, protocolFactory, serverSocket, &recipes)
+	if err != nil {
+		fmt.Println("error creating server:", err)
+	} else if err := commandServer.Serve(); err != nil {
 		fmt.Println("error running server:", err)
 	}
 }

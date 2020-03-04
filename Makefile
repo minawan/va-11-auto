@@ -1,6 +1,6 @@
 all: build
 
-build: thrift DrinkRecipe.json ScreenElement.csv
+build: thrift DrinkRecipe.json ScreenElement.csv server
 
 thrift: command.thrift recipe.thrift action.thrift
 	mkdir -p thrift
@@ -13,6 +13,9 @@ DrinkRecipe.json: convert_drink_recipe_to_json.py DrinkRecipe.ods
 ScreenElement.csv: ScreenElement.ods
 	libreoffice --headless --convert-to csv ScreenElement.ods
 
+server: thrift
+	$(MAKE) -C server
+
 clean:
 	rm -f DrinkRecipe.csv
 	rm -f DrinkRecipe.json
@@ -20,3 +23,4 @@ clean:
 	rm -f output.sh
 	rm -rf __pycache__/
 	rm -rf thrift/
+	$(MAKE) clean -C server
