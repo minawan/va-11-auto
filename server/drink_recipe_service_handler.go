@@ -12,7 +12,7 @@ type DrinkRecipeServiceHandler struct {
 	Recipes *[]DrinkRecipe
 }
 
-func NewDrinkRecipeServiceHandler(recipes *[]DrinkRecipe) *DrinkRecipeServiceHandler {
+func NewDrinkRecipeServiceHandler(recipes *[]DrinkRecipe) recipe.DrinkRecipeService {
 	return &DrinkRecipeServiceHandler{Recipes: recipes}
 }
 

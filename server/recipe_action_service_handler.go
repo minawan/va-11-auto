@@ -8,7 +8,7 @@ import (
 
 type RecipeActionServiceHandler struct{}
 
-func NewRecipeActionServiceHandler() *RecipeActionServiceHandler {
+func NewRecipeActionServiceHandler() action.RecipeActionService {
 	return &RecipeActionServiceHandler{}
 }
 
