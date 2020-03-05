@@ -21,10 +21,10 @@ type DrinkRecipe struct {
 }
 
 type ScreenElement struct {
-	Name string
+	Name     string
 	Category string
-	XCoord int32
-	YCoord int32
+	XCoord   int32
+	YCoord   int32
 	Shortcut int32
 }
 
