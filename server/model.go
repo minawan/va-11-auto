@@ -16,8 +16,16 @@ type DrinkRecipe struct {
 	Flavor string
 	Kind   string
 	Trait  string
-	Price  int
+	Price  int32
 	Recipe RecipeInfo
+}
+
+type ScreenElement struct {
+	Name string
+	Category string
+	XCoord int32
+	YCoord int32
+	Shortcut int32
 }
 
 func (drinkRecipe *DrinkRecipe) IsBig() bool {

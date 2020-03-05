@@ -21,15 +21,24 @@ func main() {
 	flag.Usage = Usage
 	addr := flag.String("addr", "localhost:9090", "Address to listen to")
 	recipePath := flag.String("recipe-path", "./DrinkRecipe.json", "Path to recipe json")
+	screenElementPath := flag.String("screen-element-path", "./ScreenElement.json", "Path to screen element json")
 	flag.Parse()
 
 	fmt.Println("Reading drink recipe from", *recipePath)
-	content, err := ioutil.ReadFile(*recipePath)
+	recipeContent, err := ioutil.ReadFile(*recipePath)
 	if err != nil {
 		panic(err)
 	}
 	var recipes []DrinkRecipe
-	json.Unmarshal(content, &recipes)
+	json.Unmarshal(recipeContent, &recipes)
+
+	fmt.Println("Reading screen element from", *screenElementPath)
+	screenElementContent, err := ioutil.ReadFile(*screenElementPath)
+	if err != nil {
+		panic(err)
+	}
+	var screenElements []ScreenElement
+	json.Unmarshal(screenElementContent, &screenElements)
 
 	protocolFactory := thrift.NewTBinaryProtocolFactoryDefault()
 	transportFactory := thrift.NewTBufferedTransportFactory(bufferSize)
@@ -41,7 +50,7 @@ func main() {
 	}
 
 	fmt.Println("Running RecipeActionService on", *addr)
-	commandServer, err := CreateCommandServer(transportFactory, protocolFactory, serverSocket, &recipes)
+	commandServer, err := CreateCommandServer(transportFactory, protocolFactory, serverSocket, &recipes, &screenElements)
 	if err != nil {
 		fmt.Println("error creating server:", err)
 	} else if err := commandServer.Serve(); err != nil {

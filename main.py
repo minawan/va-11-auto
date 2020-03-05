@@ -9,10 +9,12 @@ from command.ttypes import ClickCommand
 from command.ttypes import Command
 from command.ttypes import CommandRequest
 from command.ttypes import CommandResponse
-from command.ttypes import Coord
 from command.ttypes import DragAndDropCommand
 from command.ttypes import TypeCommand
 from command.ttypes import WaitCommand
+from element import ScreenElementService
+from element.ttypes import ScreenElementRequest
+from shared.ttypes import Coord
 from shared.ttypes import ScreenElementType
 from recipe import DrinkRecipeService
 from recipe.ttypes import DrinkName
@@ -22,67 +24,38 @@ from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 from thrift.protocol import TMultiplexedProtocol
 
-from centroid import *
-
-class ScreenElement:
-    elements = [ADD_ICE, AGE, LEFT_SLOT, RIGHT_SLOT, RESET, MIX, BLENDER]
-    def __init__(self, entry):
-        x = entry[X_COORD]
-        y = entry[Y_COORD]
-        self.centroid = (x, y)
-        try:
-            self.shortcut = str(chr(entry[SHORTCUT]))
-        except KeyError:
-            sys.stderr.write('Shortcut not available for {name} of type {category}\n'.format(name=name, category=entry[CATEGORY]))
-            self.shortcut = 'l'
-
-    def getCentroid(self):
-        return self.centroid
-
-    def getShortcut(self):
-        return self.shortcut
-
-
-def toCoord(centroid):
-    return Coord(x=centroid[0], y=centroid[1])
 
 def trigger(screen_element, use_shortcut):
-    shortcut = screen_element.getShortcut()
+    shortcut = screen_element.shortcut
     if use_shortcut and shortcut != '\x00':
         return Command(typeCommand=TypeCommand(key=ord(shortcut)))
-    return Command(clickCommand=ClickCommand(position=toCoord(screen_element.getCentroid())))
+    return Command(clickCommand=ClickCommand(position=screen_element.centroid))
 
-def getCommandsFromAction(use_shortcut, action):
-    screen_elements = dict()
-    for name in [ADELHYDE, BRONSON_EXTRACT, POWDERED_DELTA, FLANERGIDE, KARMOTRINE]:
-        screen_elements[name] = ScreenElement(centroid[name])
-    for name in ScreenElement.elements:
-        screen_elements[name] = ScreenElement(centroid[name])
-
+def getCommandsFromAction(screen_elements, use_shortcut, action):
     commands = []
     if action.resetAction:
-        commands.append(trigger(screen_elements[RESET], use_shortcut))
+        commands.append(trigger(screen_elements[ScreenElementType.RESET], use_shortcut))
     elif action.selectSlotAction:
-        commands.append(trigger(screen_elements[ScreenElementType._VALUES_TO_NAMES[action.selectSlotAction.slot]], use_shortcut))
+        commands.append(trigger(screen_elements[action.selectSlotAction.slot], use_shortcut))
     elif action.addIngredientAction:
-        source = screen_elements[ScreenElementType._VALUES_TO_NAMES[action.addIngredientAction.ingredient]]
-        destination = screen_elements[BLENDER]
+        source = screen_elements[action.addIngredientAction.ingredient]
+        destination = screen_elements[ScreenElementType.BLENDER]
         for _ in range(action.addIngredientAction.quantity):
-            shortcut = source.getShortcut()
+            shortcut = source.shortcut
             if use_shortcut and shortcut != '\x00':
                 commands.append(Command(typeCommand=TypeCommand(key=ord(shortcut))))
-            else:
-                commands.append(Command(dragAndDropCommand=DragAndDropCommand(source=toCoord(source.getCentroid()), destination=toCoord(destination.getCentroid()))))
+                continue
+            commands.append(Command(dragAndDropCommand=DragAndDropCommand(source=source.centroid, destination=destination.centroid)))
     elif action.addIceAction:
-        commands.append(trigger(screen_elements[ADD_ICE], use_shortcut))
+        commands.append(trigger(screen_elements[ScreenElementType.ADD_ICE], use_shortcut))
     elif action.ageAction:
-        commands.append(trigger(screen_elements[AGE], use_shortcut))
+        commands.append(trigger(screen_elements[ScreenElementType.AGE], use_shortcut))
     elif action.mixAction:
-        commands.append(trigger(screen_elements[MIX], use_shortcut))
+        commands.append(trigger(screen_elements[ScreenElementType.MIX], use_shortcut))
         commands.append(Command(waitCommand=WaitCommand(durationInSeconds=action.mixAction.durationInSeconds)))
-        commands.append(trigger(screen_elements[MIX], use_shortcut))
+        commands.append(trigger(screen_elements[ScreenElementType.MIX], use_shortcut))
     elif action.serveAction:
-        commands.append(trigger(screen_elements[MIX], use_shortcut))
+        commands.append(trigger(screen_elements[ScreenElementType.MIX], use_shortcut))
     else:
         sys.stderr.write('Unexpected recipe action type: {}\n'.format(action.__class__.__name__))
 
@@ -120,9 +93,11 @@ def getCommands(command_request):
     protocol = TBinaryProtocol.TBinaryProtocol(transport)
     drink_recipe_protocol = TMultiplexedProtocol.TMultiplexedProtocol(protocol, 'DrinkRecipeService')
     recipe_action_protocol = TMultiplexedProtocol.TMultiplexedProtocol(protocol, 'RecipeActionService')
+    screen_element_protocol = TMultiplexedProtocol.TMultiplexedProtocol(protocol, 'ScreenElementService')
 
     drink_recipe_client = DrinkRecipeService.Client(drink_recipe_protocol)
     recipe_action_client = RecipeActionService.Client(recipe_action_protocol)
+    screen_element_client = ScreenElementService.Client(screen_element_protocol)
 
     transport.open()
 
@@ -139,11 +114,29 @@ def getCommands(command_request):
                                 serve=command_request.serve)
 
     recipe_action_response = recipe_action_client.getRecipeActions(recipe_action_request)
+
+    screen_elements = dict()
+    for name in [ ScreenElementType.ADELHYDE,
+                  ScreenElementType.BRONSON_EXTRACT,
+                  ScreenElementType.POWDERED_DELTA,
+                  ScreenElementType.FLANERGIDE,
+                  ScreenElementType.KARMOTRINE,
+                  ScreenElementType.ADD_ICE,
+                  ScreenElementType.AGE,
+                  ScreenElementType.LEFT_SLOT,
+                  ScreenElementType.RIGHT_SLOT,
+                  ScreenElementType.RESET,
+                  ScreenElementType.MIX,
+                  ScreenElementType.BLENDER]:
+        screen_element_request = ScreenElementRequest(screenElementName=name)
+        screen_elements[name] = screen_element_client.getScreenElement(screen_element_request)
+
     transport.close()
 
     commands = []
     for action in recipe_action_response.actions:
         commands.extend(getCommandsFromAction(
+                            screen_elements,
                             command_request.useShortcut,
                             action).commands)
     return CommandResponse(commands=commands)

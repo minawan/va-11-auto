@@ -12,3 +12,9 @@ enum ScreenElementType {
     AGE
     MIX
 }
+
+struct Coord {
+    1: i32 x;
+    2: i32 y;
+}
+

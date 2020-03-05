@@ -1,18 +1,13 @@
 include "recipe.thrift"
 include "shared.thrift"
 
-struct Coord {
-    1: i32 x;
-    2: i32 y;
-}
-
 struct ClickCommand {
-    1: Coord position;
+    1: shared.Coord position;
 }
 
 struct DragAndDropCommand {
-    1: Coord source;
-    2: Coord destination;
+    1: shared.Coord source;
+    2: shared.Coord destination;
 }
 
 struct TypeCommand {
