@@ -14,11 +14,11 @@ from command.ttypes import TypeCommand
 from command.ttypes import WaitCommand
 from element import ScreenElementService
 from element.ttypes import ScreenElementRequest
-from shared.ttypes import Coord
-from shared.ttypes import ScreenElementType
 from recipe import DrinkRecipeService
 from recipe.ttypes import DrinkName
 from recipe.ttypes import DrinkRecipeRequest
+from shared.ttypes import Coord
+from shared.ttypes import ScreenElementType
 from thrift.transport import TSocket
 from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
