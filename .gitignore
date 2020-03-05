@@ -4,5 +4,4 @@ ScreenElement.hs
 *.csv
 *.sh*
 __pycache__
-thrift
 *.swp
