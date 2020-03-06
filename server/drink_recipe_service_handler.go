@@ -16,16 +16,15 @@ func NewDrinkRecipeServiceHandler(recipes *[]DrinkRecipe) recipe.DrinkRecipeServ
 	return &DrinkRecipeServiceHandler{Recipes: recipes}
 }
 
-func (handler *DrinkRecipeServiceHandler) GetDrinkRecipe(ctx context.Context, request *recipe.DrinkRecipeRequest) (*recipe.DrinkRecipeResponse, error) {
-	fmt.Println(request)
-
-	if request.BigSize && request.DrinkName == recipe.DrinkName_CREVICE_SPIKE {
-		request.AddKarmotrine = true
+func (handler *DrinkRecipeServiceHandler) GetDrinkRecipe(ctx context.Context, drinkName recipe.DrinkName, addKarmotrine bool, bigSize bool) (*recipe.DrinkRecipe, error) {
+	fmt.Println(drinkName.String())
+	if bigSize && drinkName == recipe.DrinkName_CREVICE_SPIKE {
+		addKarmotrine = true
 	}
 
-	var response recipe.DrinkRecipeResponse
+	response := recipe.NewDrinkRecipe()
 	for _, drinkRecipe := range *handler.Recipes {
-		if drinkRecipe.Name != request.DrinkName.String() {
+		if drinkRecipe.Name != drinkName.String() {
 			continue
 		}
 		recipeInfo := drinkRecipe.Recipe
@@ -36,7 +35,7 @@ func (handler *DrinkRecipeServiceHandler) GetDrinkRecipe(ctx context.Context, re
 		flanergide := recipeInfo.Flanergide
 		karmotrine := recipeInfo.Karmotrine
 
-		if request.BigSize && !drinkRecipe.IsBig() {
+		if bigSize && !drinkRecipe.IsBig() {
 			adelhyde *= 2
 			bronsonExtract *= 2
 			powderedDelta *= 2
@@ -44,25 +43,24 @@ func (handler *DrinkRecipeServiceHandler) GetDrinkRecipe(ctx context.Context, re
 			karmotrine *= 2
 		}
 
-		if karmotrine < 0 && request.AddKarmotrine {
+		if karmotrine < 0 && addKarmotrine {
 			karmotrine = 1
 		}
 
-		response.DrinkRecipe = recipe.NewDrinkRecipe()
-		response.DrinkRecipe.Quantity = make(map[shared.ScreenElementType]int32)
-		response.DrinkRecipe.Quantity[shared.ScreenElementType_ADELHYDE] = adelhyde
-		response.DrinkRecipe.Quantity[shared.ScreenElementType_BRONSON_EXTRACT] = bronsonExtract
-		response.DrinkRecipe.Quantity[shared.ScreenElementType_POWDERED_DELTA] = powderedDelta
-		response.DrinkRecipe.Quantity[shared.ScreenElementType_FLANERGIDE] = flanergide
-		response.DrinkRecipe.Quantity[shared.ScreenElementType_KARMOTRINE] = karmotrine
+		response.Quantity = make(map[shared.ScreenElementType]int32)
+		response.Quantity[shared.ScreenElementType_ADELHYDE] = adelhyde
+		response.Quantity[shared.ScreenElementType_BRONSON_EXTRACT] = bronsonExtract
+		response.Quantity[shared.ScreenElementType_POWDERED_DELTA] = powderedDelta
+		response.Quantity[shared.ScreenElementType_FLANERGIDE] = flanergide
+		response.Quantity[shared.ScreenElementType_KARMOTRINE] = karmotrine
 
-		response.DrinkRecipe.AddIce = recipeInfo.AddIce
-		response.DrinkRecipe.Age = recipeInfo.Age
-		response.DrinkRecipe.Blend = recipeInfo.Wait
+		response.AddIce = recipeInfo.AddIce
+		response.Age = recipeInfo.Age
+		response.Blend = recipeInfo.Wait
 
-		fmt.Println(response)
-		return &response, nil
+		fmt.Println(*response)
+		return response, nil
 	}
 
-	return nil, errors.New(fmt.Sprintf("Recipe for %s not found!", request.DrinkName.String()))
+	return nil, errors.New(fmt.Sprintf("Recipe for %s not found!", drinkName.String()))
 }

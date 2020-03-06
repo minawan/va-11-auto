@@ -17,7 +17,6 @@ from element import ScreenElementService
 from element.ttypes import ScreenElementRequest
 from recipe import DrinkRecipeService
 from recipe.ttypes import DrinkName
-from recipe.ttypes import DrinkRecipeRequest
 from shared.ttypes import Coord
 from shared.ttypes import ScreenElementType
 from thrift.transport import TSocket
@@ -74,14 +73,13 @@ def getCommands(command_request):
 
     transport.open()
 
-    drink_recipe_request = DrinkRecipeRequest(
-                               drinkName=command_request.drinkName,
-                               addKarmotrine=command_request.addKarmotrine,
-                               bigSize=command_request.bigSize)
-    drink_recipe_response = drink_recipe_client.getDrinkRecipe(drink_recipe_request)
+    drink_recipe = drink_recipe_client.getDrinkRecipe(
+                       drinkName=command_request.drinkName,
+                       addKarmotrine=command_request.addKarmotrine,
+                       bigSize=command_request.bigSize)
 
     recipe_action_request = RecipeActionRequest(
-                                drinkRecipe=drink_recipe_response.drinkRecipe,
+                                drinkRecipe=drink_recipe,
                                 reset=command_request.reset,
                                 slot=command_request.slot,
                                 serve=command_request.serve)

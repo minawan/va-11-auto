@@ -46,5 +46,5 @@ struct DrinkRecipeResponse {
 }
 
 service DrinkRecipeService {
-    DrinkRecipeResponse getDrinkRecipe(1:DrinkRecipeRequest request)
+    DrinkRecipe getDrinkRecipe(1:DrinkName drinkName, 2:bool addKarmotrine, 3:bool bigSize)
 }
