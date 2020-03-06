@@ -18,3 +18,7 @@ struct Coord {
     2: i32 y;
 }
 
+struct ScreenElement {
+    1: Coord centroid;
+    2: i32 shortcut;
+}

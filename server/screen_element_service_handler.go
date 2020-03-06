@@ -27,8 +27,9 @@ func (handler *ScreenElementServiceHandler) GetScreenElement(ctx context.Context
 		centroid := shared.NewCoord()
 		centroid.X = screenElement.XCoord
 		centroid.Y = screenElement.YCoord
-		response.Centroid = centroid
-		response.Shortcut = screenElement.Shortcut
+		response.ScreenElement = shared.NewScreenElement()
+		response.ScreenElement.Centroid = centroid
+		response.ScreenElement.Shortcut = screenElement.Shortcut
 		fmt.Println(response)
 		return &response, nil
 	}

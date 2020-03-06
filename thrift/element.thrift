@@ -5,8 +5,7 @@ struct ScreenElementRequest {
 }
 
 struct ScreenElementResponse {
-    1: shared.Coord centroid;
-    2: i32 shortcut;
+    1: shared.ScreenElement screenElement;
 }
 
 service ScreenElementService {

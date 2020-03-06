@@ -118,7 +118,8 @@ def getCommands(command_request):
     screen_elements = dict()
     for name in [name for name in ScreenElementType._VALUES_TO_NAMES]:
         screen_element_request = ScreenElementRequest(screenElementName=name)
-        screen_elements[name] = screen_element_client.getScreenElement(screen_element_request)
+        screen_element_response = screen_element_client.getScreenElement(screen_element_request)
+        screen_elements[name] = screen_element_response.screenElement
 
     transport.close()
 
