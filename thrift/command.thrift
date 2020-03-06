@@ -1,3 +1,4 @@
+include "action.thrift"
 include "recipe.thrift"
 include "shared.thrift"
 
@@ -41,4 +42,5 @@ struct CommandResponse {
 
 service CommandService {
     CommandResponse getCommands(1:CommandRequest request)
+    CommandResponse convertActionToCommands(1:map<shared.ScreenElementType, shared.ScreenElement> screenElements, 2:action.RecipeAction action, 3:bool useShortcut)
 }

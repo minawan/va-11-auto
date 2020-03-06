@@ -5,6 +5,7 @@ sys.path.append('thrift/gen-py')
 
 from action import RecipeActionService
 from action.ttypes import RecipeActionRequest
+from command import CommandService
 from command.ttypes import ClickCommand
 from command.ttypes import Command
 from command.ttypes import CommandRequest
@@ -30,36 +31,6 @@ def trigger(screen_element, use_shortcut):
     if use_shortcut and shortcut != '\x00':
         return Command(typeCommand=TypeCommand(key=ord(shortcut)))
     return Command(clickCommand=ClickCommand(position=screen_element.centroid))
-
-def getCommandsFromAction(screen_elements, use_shortcut, action):
-    commands = []
-    if action.resetAction:
-        commands.append(trigger(screen_elements[ScreenElementType.RESET], use_shortcut))
-    elif action.selectSlotAction:
-        commands.append(trigger(screen_elements[action.selectSlotAction.slot], use_shortcut))
-    elif action.addIngredientAction:
-        source = screen_elements[action.addIngredientAction.ingredient]
-        destination = screen_elements[ScreenElementType.BLENDER]
-        for _ in range(action.addIngredientAction.quantity):
-            shortcut = source.shortcut
-            if use_shortcut and shortcut != '\x00':
-                commands.append(Command(typeCommand=TypeCommand(key=ord(shortcut))))
-                continue
-            commands.append(Command(dragAndDropCommand=DragAndDropCommand(source=source.centroid, destination=destination.centroid)))
-    elif action.addIceAction:
-        commands.append(trigger(screen_elements[ScreenElementType.ADD_ICE], use_shortcut))
-    elif action.ageAction:
-        commands.append(trigger(screen_elements[ScreenElementType.AGE], use_shortcut))
-    elif action.mixAction:
-        commands.append(trigger(screen_elements[ScreenElementType.MIX], use_shortcut))
-        commands.append(Command(waitCommand=WaitCommand(durationInSeconds=action.mixAction.durationInSeconds)))
-        commands.append(trigger(screen_elements[ScreenElementType.MIX], use_shortcut))
-    elif action.serveAction:
-        commands.append(trigger(screen_elements[ScreenElementType.MIX], use_shortcut))
-    else:
-        sys.stderr.write('Unexpected recipe action type: {}\n'.format(action.__class__.__name__))
-
-    return CommandResponse(commands=commands)
 
 def execute(command):
     if command.clickCommand:
@@ -94,10 +65,12 @@ def getCommands(command_request):
     drink_recipe_protocol = TMultiplexedProtocol.TMultiplexedProtocol(protocol, 'DrinkRecipeService')
     recipe_action_protocol = TMultiplexedProtocol.TMultiplexedProtocol(protocol, 'RecipeActionService')
     screen_element_protocol = TMultiplexedProtocol.TMultiplexedProtocol(protocol, 'ScreenElementService')
+    command_protocol = TMultiplexedProtocol.TMultiplexedProtocol(protocol, 'CommandService')
 
     drink_recipe_client = DrinkRecipeService.Client(drink_recipe_protocol)
     recipe_action_client = RecipeActionService.Client(recipe_action_protocol)
     screen_element_client = ScreenElementService.Client(screen_element_protocol)
+    command_client = CommandService.Client(command_protocol)
 
     transport.open()
 
@@ -121,14 +94,14 @@ def getCommands(command_request):
         screen_element_response = screen_element_client.getScreenElement(screen_element_request)
         screen_elements[name] = screen_element_response.screenElement
 
-    transport.close()
 
     commands = []
     for action in recipe_action_response.actions:
-        commands.extend(getCommandsFromAction(
-                            screen_elements,
-                            command_request.useShortcut,
-                            action).commands)
+        command_response = command_client.convertActionToCommands(screen_elements, action, command_request.useShortcut)
+        commands.extend(command_response.commands)
+
+    transport.close()
+
     return CommandResponse(commands=commands)
 
 def main():
