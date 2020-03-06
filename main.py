@@ -116,18 +116,7 @@ def getCommands(command_request):
     recipe_action_response = recipe_action_client.getRecipeActions(recipe_action_request)
 
     screen_elements = dict()
-    for name in [ ScreenElementType.ADELHYDE,
-                  ScreenElementType.BRONSON_EXTRACT,
-                  ScreenElementType.POWDERED_DELTA,
-                  ScreenElementType.FLANERGIDE,
-                  ScreenElementType.KARMOTRINE,
-                  ScreenElementType.ADD_ICE,
-                  ScreenElementType.AGE,
-                  ScreenElementType.LEFT_SLOT,
-                  ScreenElementType.RIGHT_SLOT,
-                  ScreenElementType.RESET,
-                  ScreenElementType.MIX,
-                  ScreenElementType.BLENDER]:
+    for name in [name for name in ScreenElementType._VALUES_TO_NAMES]:
         screen_element_request = ScreenElementRequest(screenElementName=name)
         screen_elements[name] = screen_element_client.getScreenElement(screen_element_request)
 
