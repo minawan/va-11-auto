@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/minawan/va-11-auto/thrift/gen-go/action"
 	"github.com/minawan/va-11-auto/thrift/gen-go/command"
+	"github.com/minawan/va-11-auto/thrift/gen-go/recipe"
 	"github.com/minawan/va-11-auto/thrift/gen-go/shared"
 )
 
@@ -15,13 +16,13 @@ func NewCommandServiceHandler() command.CommandService {
 	return &CommandServiceHandler{}
 }
 
-func (*CommandServiceHandler) GetCommands(ctx context.Context, request *command.CommandRequest) (*command.CommandResponse, error) {
+func (*CommandServiceHandler) GetCommands(ctx context.Context, drinkName recipe.DrinkName, addKarmotrine bool, bigSize bool, reset bool, slot shared.ScreenElementType, serve bool, useShortcut bool) ([]*command.Command, error) {
 	return nil, nil
 }
 
-func (*CommandServiceHandler) ConvertActionToCommands(ctx context.Context, screenElements map[shared.ScreenElementType]*shared.ScreenElement, recipeAction *action.RecipeAction, useShortcut bool) (*command.CommandResponse, error) {
+func (*CommandServiceHandler) ConvertActionToCommands(ctx context.Context, screenElements map[shared.ScreenElementType]*shared.ScreenElement, recipeAction *action.RecipeAction, useShortcut bool) ([]*command.Command, error) {
 	fmt.Println(recipeAction)
-	var commands []*command.Command
+	commands := []*command.Command{}
 
 	if recipeAction.ResetAction != nil {
 		commands = append(commands, Trigger(screenElements[shared.ScreenElementType_RESET], useShortcut))
@@ -61,9 +62,8 @@ func (*CommandServiceHandler) ConvertActionToCommands(ctx context.Context, scree
 		return nil, errors.New(fmt.Sprintf("Unexpected Action type: %#v", recipeAction))
 	}
 
-	response := command.CommandResponse{Commands: commands}
-	fmt.Println(response)
-	return &response, nil
+	fmt.Println(commands)
+	return commands, nil
 }
 
 func Trigger(screenElement *shared.ScreenElement, useShortcut bool) *command.Command {

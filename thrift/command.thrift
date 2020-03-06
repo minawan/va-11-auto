@@ -26,21 +26,18 @@ union Command {
     4: WaitCommand waitCommand;
 }
 
-struct CommandRequest {
-    1: recipe.DrinkName drinkName;
-    2: bool addKarmotrine;
-    3: bool bigSize;
-    4: bool reset;
-    5: shared.ScreenElementType slot;
-    6: bool serve;
-    7: bool useShortcut;
-}
-
-struct CommandResponse {
-    1: list<Command> commands;
-}
-
 service CommandService {
-    CommandResponse getCommands(1:CommandRequest request)
-    CommandResponse convertActionToCommands(1:map<shared.ScreenElementType, shared.ScreenElement> screenElements, 2:action.RecipeAction action, 3:bool useShortcut)
+    list<Command> getCommands(
+                      1:recipe.DrinkName drinkName,
+                      2:bool addKarmotrine,
+                      3:bool bigSize,
+                      4:bool reset,
+                      5:shared.ScreenElementType slot,
+                      6:bool serve,
+                      7:bool useShortcut)
+    list<Command> convertActionToCommands(
+                      1:map<shared.ScreenElementType, shared.ScreenElement>
+                          screenElements,
+                      2:action.RecipeAction action,
+                      3:bool useShortcut)
 }

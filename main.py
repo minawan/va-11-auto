@@ -6,13 +6,6 @@ sys.path.append('thrift/gen-py')
 from action import RecipeActionService
 from action.ttypes import RecipeActionRequest
 from command import CommandService
-from command.ttypes import ClickCommand
-from command.ttypes import Command
-from command.ttypes import CommandRequest
-from command.ttypes import CommandResponse
-from command.ttypes import DragAndDropCommand
-from command.ttypes import TypeCommand
-from command.ttypes import WaitCommand
 from element import ScreenElementService
 from element.ttypes import ScreenElementRequest
 from recipe import DrinkRecipeService
@@ -24,12 +17,6 @@ from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 from thrift.protocol import TMultiplexedProtocol
 
-
-def trigger(screen_element, use_shortcut):
-    shortcut = screen_element.shortcut
-    if use_shortcut and shortcut != '\x00':
-        return Command(typeCommand=TypeCommand(key=ord(shortcut)))
-    return Command(clickCommand=ClickCommand(position=screen_element.centroid))
 
 def execute(command):
     if command.clickCommand:
@@ -56,7 +43,7 @@ def execute(command):
     else:
         sys.stderr.write('Unexpected command type: {}\n'.format(str(command)))
 
-def getCommands(command_request):
+def getCommands(drink_name, add_opt, double, reset, slot, serve, use_shortcut):
     socket = TSocket.TSocket('localhost', 9090)
     transport = TTransport.TBufferedTransport(socket)
 
@@ -74,15 +61,15 @@ def getCommands(command_request):
     transport.open()
 
     drink_recipe = drink_recipe_client.getDrinkRecipe(
-                       drinkName=command_request.drinkName,
-                       addKarmotrine=command_request.addKarmotrine,
-                       bigSize=command_request.bigSize)
+                       drinkName=drink_name,
+                       addKarmotrine=add_opt,
+                       bigSize=double)
 
     recipe_action_request = RecipeActionRequest(
                                 drinkRecipe=drink_recipe,
-                                reset=command_request.reset,
-                                slot=command_request.slot,
-                                serve=command_request.serve)
+                                reset=reset,
+                                slot=slot,
+                                serve=serve)
 
     recipe_action_response = recipe_action_client.getRecipeActions(recipe_action_request)
 
@@ -95,12 +82,12 @@ def getCommands(command_request):
 
     commands = []
     for action in recipe_action_response.actions:
-        command_response = command_client.convertActionToCommands(screen_elements, action, command_request.useShortcut)
-        commands.extend(command_response.commands)
+        cmds = command_client.convertActionToCommands(screen_elements, action, use_shortcut)
+        commands.extend(cmds)
 
     transport.close()
 
-    return CommandResponse(commands=commands)
+    return commands
 
 def main():
     add_opt = True
@@ -142,17 +129,8 @@ def main():
     #drink_name = DrinkName.ZEN_STAR
     #drink_name = DrinkName.FLAMING_MOAI
 
-    command_request = CommandRequest(
-                          drinkName=drink_name,
-                          addKarmotrine=add_opt,
-                          bigSize=double,
-                          reset=reset,
-                          slot=slot,
-                          serve=serve,
-                          useShortcut=use_shortcut)
-
     print('xdotool search --name "VA-11 Hall-A: Cyberpunk Bartender Action" \\')
-    for command in getCommands(command_request).commands:
+    for command in getCommands(drink_name, add_opt, double, reset, slot, serve, use_shortcut):
         execute(command)
     print()
 
