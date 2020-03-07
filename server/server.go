@@ -20,7 +20,7 @@ func CreateMultiplexedProcessor(recipeActionServiceProcessor *action.RecipeActio
 	return processor
 }
 
-func CreateCommandServer(transportFactory thrift.TTransportFactory, protocolFactory thrift.TProtocolFactory, serverSocket thrift.TServerTransport, recipes *[]DrinkRecipe, screenElements *[]ScreenElement) (*thrift.TSimpleServer, error) {
+func CreateCommandServer(transportFactory thrift.TTransportFactory, protocolFactory thrift.TProtocolFactory, serverSocket thrift.TServerTransport, recipes *map[string]DrinkRecipe, screenElements *[]ScreenElement) (*thrift.TSimpleServer, error) {
 	wire.Build(thrift.NewTSimpleServer4, CreateMultiplexedProcessor, action.NewRecipeActionServiceProcessor, recipe.NewDrinkRecipeServiceProcessor, shared.NewScreenElementServiceProcessor, command.NewCommandServiceProcessor, NewRecipeActionServiceHandler, NewDrinkRecipeServiceHandler, NewScreenElementServiceHandler, NewCommandServiceHandler)
 	return nil, nil
 }

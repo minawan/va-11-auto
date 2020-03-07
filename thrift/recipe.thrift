@@ -1,6 +1,7 @@
 include "shared.thrift"
 
 enum DrinkName {
+    A_FEDORA_WITH_PERFUME_AND_A_PLUM
     BAD_TOUCH
     BEER
     BLEEDING_JANE
@@ -9,6 +10,7 @@ enum DrinkName {
     BRANDTINI
     COBALT_VELVET
     CREVICE_SPIKE
+    FLAMING_MOAI
     FLUFFY_DREAM
     FRINGE_WEAVER
     FROTHY_WATER
@@ -25,7 +27,6 @@ enum DrinkName {
     SUNSHINE_CLOUD
     SUPLEX
     ZEN_STAR
-    FLAMING_MOAI
 }
 
 struct DrinkRecipe {

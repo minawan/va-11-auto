@@ -9,10 +9,10 @@ import (
 )
 
 type DrinkRecipeServiceHandler struct {
-	Recipes *[]DrinkRecipe
+	Recipes *map[string]DrinkRecipe
 }
 
-func NewDrinkRecipeServiceHandler(recipes *[]DrinkRecipe) recipe.DrinkRecipeService {
+func NewDrinkRecipeServiceHandler(recipes *map[string]DrinkRecipe) recipe.DrinkRecipeService {
 	return &DrinkRecipeServiceHandler{Recipes: recipes}
 }
 
@@ -22,45 +22,43 @@ func (handler *DrinkRecipeServiceHandler) GetDrinkRecipe(ctx context.Context, dr
 		addKarmotrine = true
 	}
 
-	response := recipe.NewDrinkRecipe()
-	for _, drinkRecipe := range *handler.Recipes {
-		if drinkRecipe.Name != drinkName.String() {
-			continue
-		}
-		recipeInfo := drinkRecipe.Recipe
-
-		adelhyde := recipeInfo.Adelhyde
-		bronsonExtract := recipeInfo.BronsonExtract
-		powderedDelta := recipeInfo.PowderedDelta
-		flanergide := recipeInfo.Flanergide
-		karmotrine := recipeInfo.Karmotrine
-
-		if bigSize && !drinkRecipe.IsBig() {
-			adelhyde *= 2
-			bronsonExtract *= 2
-			powderedDelta *= 2
-			flanergide *= 2
-			karmotrine *= 2
-		}
-
-		if karmotrine < 0 && addKarmotrine {
-			karmotrine = 1
-		}
-
-		response.Quantity = make(map[shared.ScreenElementType]int32)
-		response.Quantity[shared.ScreenElementType_ADELHYDE] = adelhyde
-		response.Quantity[shared.ScreenElementType_BRONSON_EXTRACT] = bronsonExtract
-		response.Quantity[shared.ScreenElementType_POWDERED_DELTA] = powderedDelta
-		response.Quantity[shared.ScreenElementType_FLANERGIDE] = flanergide
-		response.Quantity[shared.ScreenElementType_KARMOTRINE] = karmotrine
-
-		response.AddIce = recipeInfo.AddIce
-		response.Age = recipeInfo.Age
-		response.Blend = recipeInfo.Wait
-
-		fmt.Println(*response)
-		return response, nil
+	drinkRecipe, ok := (*handler.Recipes)[drinkName.String()]
+	if !ok {
+		return nil, errors.New(fmt.Sprintf("Recipe for %s not found!", drinkName.String()))
 	}
 
-	return nil, errors.New(fmt.Sprintf("Recipe for %s not found!", drinkName.String()))
+	response := recipe.NewDrinkRecipe()
+	recipeInfo := drinkRecipe.Recipe
+
+	adelhyde := recipeInfo.Adelhyde
+	bronsonExtract := recipeInfo.BronsonExtract
+	powderedDelta := recipeInfo.PowderedDelta
+	flanergide := recipeInfo.Flanergide
+	karmotrine := recipeInfo.Karmotrine
+
+	if bigSize && !drinkRecipe.IsBig() {
+		adelhyde *= 2
+		bronsonExtract *= 2
+		powderedDelta *= 2
+		flanergide *= 2
+		karmotrine *= 2
+	}
+
+	if karmotrine < 0 && addKarmotrine {
+		karmotrine = 1
+	}
+
+	response.Quantity = make(map[shared.ScreenElementType]int32)
+	response.Quantity[shared.ScreenElementType_ADELHYDE] = adelhyde
+	response.Quantity[shared.ScreenElementType_BRONSON_EXTRACT] = bronsonExtract
+	response.Quantity[shared.ScreenElementType_POWDERED_DELTA] = powderedDelta
+	response.Quantity[shared.ScreenElementType_FLANERGIDE] = flanergide
+	response.Quantity[shared.ScreenElementType_KARMOTRINE] = karmotrine
+
+	response.AddIce = recipeInfo.AddIce
+	response.Age = recipeInfo.Age
+	response.Blend = recipeInfo.Wait
+
+	fmt.Println(*response)
+	return response, nil
 }

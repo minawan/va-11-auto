@@ -29,7 +29,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	var recipes []DrinkRecipe
+
+	var recipes map[string]DrinkRecipe
 	json.Unmarshal(recipeContent, &recipes)
 
 	fmt.Println("Reading screen element from", *screenElementPath)
@@ -49,7 +50,7 @@ func main() {
 		return
 	}
 
-	fmt.Println("Running RecipeActionService on", *addr)
+	fmt.Println("Running command server on", *addr)
 	commandServer, err := CreateCommandServer(transportFactory, protocolFactory, serverSocket, &recipes, &screenElements)
 	if err != nil {
 		fmt.Println("error creating server:", err)

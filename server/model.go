@@ -12,7 +12,6 @@ type RecipeInfo struct {
 }
 
 type DrinkRecipe struct {
-	Name   string
 	Flavor string
 	Kind   string
 	Trait  string
