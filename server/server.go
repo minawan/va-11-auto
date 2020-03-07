@@ -12,10 +12,10 @@ import (
 )
 
 func CreateMultiplexedProcessor(
-		recipeActionServiceProcessor *action.RecipeActionServiceProcessor,
-		drinkRecipeServiceProcessor *recipe.DrinkRecipeServiceProcessor,
-		screenElementServiceProcessor *shared.ScreenElementServiceProcessor,
-		commandServiceProcessor *command.CommandServiceProcessor) thrift.TProcessor {
+	recipeActionServiceProcessor *action.RecipeActionServiceProcessor,
+	drinkRecipeServiceProcessor *recipe.DrinkRecipeServiceProcessor,
+	screenElementServiceProcessor *shared.ScreenElementServiceProcessor,
+	commandServiceProcessor *command.CommandServiceProcessor) thrift.TProcessor {
 	processor := thrift.NewTMultiplexedProcessor()
 	processor.RegisterProcessor("RecipeActionService", recipeActionServiceProcessor)
 	processor.RegisterProcessor("DrinkRecipeService", drinkRecipeServiceProcessor)
@@ -25,11 +25,11 @@ func CreateMultiplexedProcessor(
 }
 
 func CreateCommandServer(
-		transportFactory thrift.TTransportFactory,
-		protocolFactory thrift.TProtocolFactory,
-		serverSocket thrift.TServerTransport,
-		recipes *map[string]DrinkRecipe,
-		screenElements *map[string]ScreenElement) (*thrift.TSimpleServer, error) {
+	transportFactory thrift.TTransportFactory,
+	protocolFactory thrift.TProtocolFactory,
+	serverSocket thrift.TServerTransport,
+	recipes *map[string]DrinkRecipe,
+	screenElements *map[string]ScreenElement) (*thrift.TSimpleServer, error) {
 	wire.Build(
 		thrift.NewTSimpleServer4,
 		CreateMultiplexedProcessor,
