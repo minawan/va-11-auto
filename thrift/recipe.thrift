@@ -28,21 +28,11 @@ enum DrinkName {
     FLAMING_MOAI
 }
 
-struct DrinkRecipeRequest {
-    1: DrinkName drinkName;
-    2: bool addKarmotrine;
-    3: bool bigSize;
-}
-
 struct DrinkRecipe {
     1: map<shared.ScreenElementType, i32> quantity;
     2: bool addIce;
     3: bool age;
     4: bool blend;
-}
-
-struct DrinkRecipeResponse {
-    1: DrinkRecipe drinkRecipe;
 }
 
 service DrinkRecipeService {
