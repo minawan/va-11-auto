@@ -4,13 +4,11 @@ import os
 sys.path.append('thrift/gen-py')
 
 from action import RecipeActionService
-from action.ttypes import RecipeActionRequest
 from command import CommandService
 from element import ScreenElementService
 from element.ttypes import ScreenElementRequest
 from recipe import DrinkRecipeService
 from recipe.ttypes import DrinkName
-from shared.ttypes import Coord
 from shared.ttypes import ScreenElementType
 from thrift.transport import TSocket
 from thrift.transport import TTransport
@@ -65,24 +63,15 @@ def getCommands(drink_name, add_opt, double, reset, slot, serve, use_shortcut):
                        addKarmotrine=add_opt,
                        bigSize=double)
 
-    recipe_action_request = RecipeActionRequest(
-                                drinkRecipe=drink_recipe,
-                                reset=reset,
-                                slot=slot,
-                                serve=serve)
-
-    recipe_action_response = recipe_action_client.getRecipeActions(recipe_action_request)
-
     screen_elements = dict()
     for name in [name for name in ScreenElementType._VALUES_TO_NAMES]:
         screen_element_request = ScreenElementRequest(screenElementName=name)
         screen_element_response = screen_element_client.getScreenElement(screen_element_request)
         screen_elements[name] = screen_element_response.screenElement
 
-
     commands = []
-    for action in recipe_action_response.actions:
-        cmds = command_client.convertActionToCommands(screen_elements, action, use_shortcut)
+    for action in recipe_action_client.getRecipeActions(drinkRecipe=drink_recipe, reset=reset, slot=slot, serve=serve):
+        cmds = command_client.convertActionToCommands(screenElements=screen_elements, action=action, useShortcut=use_shortcut)
         commands.extend(cmds)
 
     transport.close()

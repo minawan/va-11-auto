@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/minawan/va-11-auto/thrift/gen-go/action"
+	"github.com/minawan/va-11-auto/thrift/gen-go/recipe"
+	"github.com/minawan/va-11-auto/thrift/gen-go/shared"
 )
 
 type RecipeActionServiceHandler struct{}
@@ -12,11 +14,11 @@ func NewRecipeActionServiceHandler() action.RecipeActionService {
 	return &RecipeActionServiceHandler{}
 }
 
-func (*RecipeActionServiceHandler) GetRecipeActions(ctx context.Context, request *action.RecipeActionRequest) (*action.RecipeActionResponse, error) {
-	fmt.Println(request)
-	var actions []*action.RecipeAction
+func (*RecipeActionServiceHandler) GetRecipeActions(ctx context.Context, drinkRecipe *recipe.DrinkRecipe, reset bool, slot shared.ScreenElementType, serve bool) ([]*action.RecipeAction, error) {
+	fmt.Println(drinkRecipe)
+	actions := []*action.RecipeAction{}
 
-	if request.Reset {
+	if reset {
 		resetAction := action.NewRecipeAction()
 		resetAction.ResetAction = action.NewResetAction()
 		actions = append(actions, resetAction)
@@ -24,10 +26,9 @@ func (*RecipeActionServiceHandler) GetRecipeActions(ctx context.Context, request
 
 	selectSlotAction := action.NewRecipeAction()
 	selectSlotAction.SelectSlotAction = action.NewSelectSlotAction()
-	selectSlotAction.SelectSlotAction.Slot = request.Slot
+	selectSlotAction.SelectSlotAction.Slot = slot
 	actions = append(actions, selectSlotAction)
 
-	drinkRecipe := request.DrinkRecipe
 	for ingredient, quantity := range drinkRecipe.Quantity {
 		addIngredientAction := action.NewRecipeAction()
 		addIngredientAction.AddIngredientAction = action.NewAddIngredientAction()
@@ -56,13 +57,12 @@ func (*RecipeActionServiceHandler) GetRecipeActions(ctx context.Context, request
 	}
 	actions = append(actions, mixAction)
 
-	if request.Serve {
+	if serve {
 		serveAction := action.NewRecipeAction()
 		serveAction.ServeAction = action.NewServeAction()
 		actions = append(actions, serveAction)
 	}
 
-	response := action.RecipeActionResponse{Actions: actions}
-	fmt.Println(response)
-	return &response, nil
+	fmt.Println(actions)
+	return actions, nil
 }
