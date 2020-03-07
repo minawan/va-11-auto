@@ -16,15 +16,22 @@ func NewDrinkRecipeServiceHandler(recipes *map[string]DrinkRecipe) recipe.DrinkR
 	return &DrinkRecipeServiceHandler{Recipes: recipes}
 }
 
+func (handler *DrinkRecipeServiceHandler) Find(name recipe.DrinkName) (*DrinkRecipe, error) {
+	if drinkRecipe, ok := (*handler.Recipes)[name.String()]; ok {
+		return &drinkRecipe, nil
+	}
+	return nil, errors.New(fmt.Sprintf("Recipe for %s not found!", name.String()))
+}
+
 func (handler *DrinkRecipeServiceHandler) GetDrinkRecipe(ctx context.Context, drinkName recipe.DrinkName, addKarmotrine bool, bigSize bool) (*recipe.DrinkRecipe, error) {
 	fmt.Println(drinkName.String())
 	if bigSize && drinkName == recipe.DrinkName_CREVICE_SPIKE {
 		addKarmotrine = true
 	}
 
-	drinkRecipe, ok := (*handler.Recipes)[drinkName.String()]
-	if !ok {
-		return nil, errors.New(fmt.Sprintf("Recipe for %s not found!", drinkName.String()))
+	drinkRecipe, err := handler.Find(drinkName)
+	if err != nil {
+		return nil, err
 	}
 
 	response := recipe.NewDrinkRecipe()
