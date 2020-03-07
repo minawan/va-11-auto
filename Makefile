@@ -1,26 +1,25 @@
-.PHONY: all thrift clean
+export input_directory := data
+export output_directory := output
+
+.PHONY: all thrift clean data
 
 all: build
 
-build: DrinkRecipe.json ScreenElement.csv server
+build: server data
 
 thrift:
 	$(MAKE) -C thrift
 
-DrinkRecipe.json: convert_drink_recipe_to_json.py DrinkRecipe.ods
-	python3 convert_drink_recipe_to_json.py
-
-ScreenElement.csv: ScreenElement.ods
-	libreoffice --headless --convert-to csv ScreenElement.ods
+data:
+	mkdir $(output_directory)
+	$(MAKE) -C script
 
 server: thrift
 	$(MAKE) -C server
 
 clean:
-	rm -f DrinkRecipe.csv
-	rm -f DrinkRecipe.json
-	rm -f ScreenElement.csv
-	rm -f output.sh
+	rm -rf output/
+	rm -f output.txt
 	rm -rf __pycache__/
 	$(MAKE) clean -C server
 	$(MAKE) clean -C thrift

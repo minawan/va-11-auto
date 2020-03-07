@@ -76,10 +76,10 @@ def getCommands(drink_name, add_opt, double, reset, slot, serve, use_shortcut):
     return commands
 
 def main():
-    add_opt = True
-    #add_opt = False
-    serve = True
-    #serve = False
+    #add_opt = True
+    add_opt = False
+    #serve = True
+    serve = False
     slot = ScreenElementType.LEFT_SLOT
     #slot = ScreenElementType.RIGHT_SLOT
     #double = True
@@ -90,7 +90,7 @@ def main():
     #reset = False
 
     #drink_name = DrinkName.BAD_TOUCH
-    #drink_name = DrinkName.BEER
+    drink_name = DrinkName.BEER
     #drink_name = DrinkName.BLEEDING_JANE
     #drink_name = DrinkName.BLOOM_LIGHT
     #drink_name = DrinkName.BLUE_FAIRY
@@ -98,7 +98,7 @@ def main():
     #drink_name = DrinkName.COBALT_VELVET
     #drink_name = DrinkName.CREVICE_SPIKE
     #drink_name = DrinkName.FLUFFY_DREAM
-    drink_name = DrinkName.FRINGE_WEAVER
+    #drink_name = DrinkName.FRINGE_WEAVER
     #drink_name = DrinkName.FROTHY_WATER
     #drink_name = DrinkName.GRIZZLY_TEMPLE
     #drink_name = DrinkName.GUT_PUNCH

@@ -20,8 +20,8 @@ func Usage() {
 func main() {
 	flag.Usage = Usage
 	addr := flag.String("addr", "localhost:9090", "Address to listen to")
-	recipePath := flag.String("recipe-path", "./DrinkRecipe.json", "Path to recipe json")
-	screenElementPath := flag.String("screen-element-path", "./ScreenElement.json", "Path to screen element json")
+	recipePath := flag.String("recipe-path", "../output/DrinkRecipe.json", "Path to recipe json")
+	screenElementPath := flag.String("screen-element-path", "../output/ScreenElement.json", "Path to screen element json")
 	flag.Parse()
 
 	fmt.Println("Reading drink recipe from", *recipePath)

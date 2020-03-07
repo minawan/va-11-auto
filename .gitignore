@@ -1,7 +1,5 @@
-DrinkRecipe.json
-ScreenElement.hs
+output
 *.pyc
-*.csv
-*.sh*
+*.txt*
 __pycache__
 *.swp
