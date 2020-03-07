@@ -18,25 +18,25 @@ from thrift.protocol import TMultiplexedProtocol
 def execute(command):
     if command.clickCommand:
         position = command.clickCommand.position
-        print('    mousemove {x} {y} \\'.format(x=position.x, y=position.y))
-        print('    sleep 0.5 \\')
-        print('    mousedown 1 \\')
-        print('    sleep 0.5 \\')
-        print('    mouseup 1 \\')
-        print('    sleep 0.5 \\')
+        print('mousemove {x} {y}'.format(x=position.x, y=position.y))
+        print('sleep 0.5')
+        print('mousedown 1')
+        print('sleep 0.5')
+        print('mouseup 1')
+        print('sleep 0.5')
     elif command.dragAndDropCommand:
         source = command.dragAndDropCommand.source
         destination = command.dragAndDropCommand.destination
-        print('    mousemove {x} {y} \\'.format(x=source.x, y=source.y))
-        print('    sleep 0.5 \\')
-        print('    mousedown 1 \\')
-        print('    mousemove {x} {y} \\'.format(x=destination.x, y=destination.y))
-        print('    sleep 0.5 \\')
-        print('    mouseup 1 \\')
+        print('mousemove {x} {y}'.format(x=source.x, y=source.y))
+        print('sleep 0.5')
+        print('mousedown 1')
+        print('mousemove {x} {y}'.format(x=destination.x, y=destination.y))
+        print('sleep 0.5')
+        print('mouseup 1')
     elif command.waitCommand:
-        print('    sleep {seconds} \\'.format(seconds=command.waitCommand.durationInSeconds))
+        print('sleep {seconds}'.format(seconds=command.waitCommand.durationInSeconds))
     elif command.typeCommand:
-        print('    key {shortcut} \\'.format(shortcut=chr(command.typeCommand.key)))
+        print('key {shortcut}'.format(shortcut=chr(command.typeCommand.key)))
     else:
         sys.stderr.write('Unexpected command type: {}\n'.format(str(command)))
 
@@ -115,10 +115,9 @@ def main():
     #drink_name = DrinkName.ZEN_STAR
     #drink_name = DrinkName.FLAMING_MOAI
 
-    print('xdotool search --name "VA-11 Hall-A: Cyberpunk Bartender Action" \\')
+    print('search --name "VA-11 Hall-A: Cyberpunk Bartender Action"')
     for command in getCommands(drink_name, add_opt, double, reset, slot, serve, use_shortcut):
         execute(command)
-    print()
 
 if __name__ == '__main__':
     main()
