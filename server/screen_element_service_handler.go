@@ -8,29 +8,27 @@ import (
 )
 
 type ScreenElementServiceHandler struct {
-	ScreenElements *[]ScreenElement
+	ScreenElements *map[string]ScreenElement
 }
 
-func NewScreenElementServiceHandler(screenElements *[]ScreenElement) shared.ScreenElementService {
+func NewScreenElementServiceHandler(screenElements *map[string]ScreenElement) shared.ScreenElementService {
 	return &ScreenElementServiceHandler{ScreenElements: screenElements}
 }
 
 func (handler *ScreenElementServiceHandler) GetScreenElement(ctx context.Context, screenElementName shared.ScreenElementType) (*shared.ScreenElement, error) {
 	fmt.Println(screenElementName)
 
-	for _, screenElement := range *handler.ScreenElements {
-		if screenElement.Name != screenElementName.String() {
-			continue
-		}
-		centroid := shared.NewCoord()
-		centroid.X = screenElement.XCoord
-		centroid.Y = screenElement.YCoord
-		screenElement := shared.NewScreenElement()
-		screenElement.Centroid = centroid
-		screenElement.Shortcut = screenElement.Shortcut
-		fmt.Println(screenElement)
-		return screenElement, nil
+	screenElement, ok := (*handler.ScreenElements)[screenElementName.String()]
+	if !ok {
+		return nil, errors.New(fmt.Sprintf("ScreenElement for %s not found!", screenElementName.String()))
 	}
+	centroid := shared.NewCoord()
+	centroid.X = screenElement.XCoord
+	centroid.Y = screenElement.YCoord
+	response := shared.NewScreenElement()
+	response.Centroid = centroid
+	response.Shortcut = screenElement.Shortcut
 
-	return nil, errors.New(fmt.Sprintf("ScreenElement for %s not found!", screenElementName.String()))
+	fmt.Println(response)
+	return response, nil
 }

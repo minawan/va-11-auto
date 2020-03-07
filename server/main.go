@@ -38,7 +38,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	var screenElements []ScreenElement
+	var screenElements map[string]ScreenElement
 	json.Unmarshal(screenElementContent, &screenElements)
 
 	protocolFactory := thrift.NewTBinaryProtocolFactoryDefault()
