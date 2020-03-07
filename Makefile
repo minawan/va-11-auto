@@ -1,7 +1,7 @@
 export input_directory := data
 export output_directory := output
 
-.PHONY: all thrift clean data
+.PHONY: all thrift clean
 
 all: build
 
