@@ -5,7 +5,7 @@ export output_directory := output
 
 all: build
 
-build: server data
+build: server
 
 thrift:
 	$(MAKE) -C thrift
