@@ -15,12 +15,19 @@ func NewScreenElementServiceHandler(screenElements *map[string]ScreenElement) sh
 	return &ScreenElementServiceHandler{ScreenElements: screenElements}
 }
 
+func (handler *ScreenElementServiceHandler) Find(name shared.ScreenElementType) (*ScreenElement, error) {
+	if screenElement, ok := (*handler.ScreenElements)[name.String()]; ok {
+		return &screenElement, nil
+	}
+	return nil, errors.New(fmt.Sprintf("ScreenElement for %s not found!", name.String()))
+}
+
 func (handler *ScreenElementServiceHandler) GetScreenElement(ctx context.Context, screenElementName shared.ScreenElementType) (*shared.ScreenElement, error) {
 	fmt.Println(screenElementName)
 
-	screenElement, ok := (*handler.ScreenElements)[screenElementName.String()]
-	if !ok {
-		return nil, errors.New(fmt.Sprintf("ScreenElement for %s not found!", screenElementName.String()))
+	screenElement, err := handler.Find(screenElementName)
+	if err != nil {
+		return nil, err
 	}
 	centroid := shared.NewCoord()
 	centroid.X = screenElement.XCoord
