@@ -10,8 +10,8 @@ build: server data
 thrift:
 	$(MAKE) -C thrift
 
-data:
-	mkdir $(output_directory)
+data: $(input_directory)/DrinkRecipe.ods $(input_directory)/ScreenElement.ods
+	mkdir -p $(output_directory)
 	$(MAKE) -C script
 
 server: thrift
