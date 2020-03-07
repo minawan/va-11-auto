@@ -6,7 +6,6 @@ sys.path.append('thrift/gen-py')
 from action import RecipeActionService
 from command import CommandService
 from element import ScreenElementService
-from element.ttypes import ScreenElementRequest
 from recipe import DrinkRecipeService
 from recipe.ttypes import DrinkName
 from shared.ttypes import ScreenElementType
@@ -63,11 +62,9 @@ def getCommands(drink_name, add_opt, double, reset, slot, serve, use_shortcut):
                        addKarmotrine=add_opt,
                        bigSize=double)
 
-    screen_elements = dict()
-    for name in [name for name in ScreenElementType._VALUES_TO_NAMES]:
-        screen_element_request = ScreenElementRequest(screenElementName=name)
-        screen_element_response = screen_element_client.getScreenElement(screen_element_request)
-        screen_elements[name] = screen_element_response.screenElement
+    screen_elements = {
+      name: screen_element_client.getScreenElement(screenElementName=name) for name in ScreenElementType._VALUES_TO_NAMES
+    }
 
     commands = []
     for action in recipe_action_client.getRecipeActions(drinkRecipe=drink_recipe, reset=reset, slot=slot, serve=serve):
