@@ -5,9 +5,9 @@ sys.path.append('thrift/gen-py')
 
 from action import RecipeActionService
 from command import CommandService
-from element import ScreenElementService
 from recipe import DrinkRecipeService
 from recipe.ttypes import DrinkName
+from shared import ScreenElementService
 from shared.ttypes import ScreenElementType
 from thrift.transport import TSocket
 from thrift.transport import TTransport

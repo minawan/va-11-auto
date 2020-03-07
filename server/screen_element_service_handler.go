@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/minawan/va-11-auto/thrift/gen-go/element"
 	"github.com/minawan/va-11-auto/thrift/gen-go/shared"
 )
 
@@ -12,7 +11,7 @@ type ScreenElementServiceHandler struct {
 	ScreenElements *[]ScreenElement
 }
 
-func NewScreenElementServiceHandler(screenElements *[]ScreenElement) element.ScreenElementService {
+func NewScreenElementServiceHandler(screenElements *[]ScreenElement) shared.ScreenElementService {
 	return &ScreenElementServiceHandler{ScreenElements: screenElements}
 }
 
