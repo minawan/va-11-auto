@@ -36,7 +36,10 @@ def execute(command):
     elif command.waitCommand:
         print('sleep {seconds}'.format(seconds=command.waitCommand.durationInSeconds))
     elif command.typeCommand:
-        print('key {shortcut}'.format(shortcut=chr(command.typeCommand.key)))
+        key = chr(command.typeCommand.key)
+        if key == ' ':
+            key = 'space'
+        print('key --delay 100 {shortcut}'.format(shortcut=key))
     else:
         sys.stderr.write('Unexpected command type: {}\n'.format(str(command)))
 
@@ -84,8 +87,8 @@ def main():
     #slot = ScreenElementType.RIGHT_SLOT
     #double = True
     double = False
-    #use_shortcut = True
-    use_shortcut = False
+    use_shortcut = True
+    #use_shortcut = False
     reset = True
     #reset = False
 
@@ -115,7 +118,6 @@ def main():
     #drink_name = DrinkName.ZEN_STAR
     #drink_name = DrinkName.FLAMING_MOAI
 
-    print('search --name "VA-11 Hall-A: Cyberpunk Bartender Action"')
     for command in getCommands(drink_name, add_opt, double, reset, slot, serve, use_shortcut):
         execute(command)
 
