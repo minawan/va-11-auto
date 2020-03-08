@@ -71,7 +71,7 @@ def getCommands(drink_name, add_opt, double, reset, slot, serve, use_shortcut):
 
     commands = []
     for action in recipe_action_client.getRecipeActions(drinkRecipe=drink_recipe, reset=reset, slot=slot, serve=serve):
-        cmds = command_client.convertActionToCommands(screenElements=screen_elements, action=action, useShortcut=use_shortcut)
+        cmds = command_client.getCommands(screenElements=screen_elements, action=action, useShortcut=use_shortcut)
         commands.extend(cmds)
 
     transport.close()
