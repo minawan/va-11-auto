@@ -4,6 +4,7 @@ package main
 
 import (
 	"github.com/apache/thrift/lib/go/thrift"
+	"github.com/go-redis/redis/v7"
 	"github.com/google/wire"
 	"github.com/minawan/va-11-auto/thrift/gen-go/action"
 	"github.com/minawan/va-11-auto/thrift/gen-go/command"
@@ -28,7 +29,7 @@ func CreateCommandServer(
 	transportFactory thrift.TTransportFactory,
 	protocolFactory thrift.TProtocolFactory,
 	serverSocket thrift.TServerTransport,
-	recipes *map[string]DrinkRecipe,
+	redisClient *redis.Client,
 	screenElements *map[string]ScreenElement) (*thrift.TSimpleServer, error) {
 	wire.Build(
 		thrift.NewTSimpleServer4,
