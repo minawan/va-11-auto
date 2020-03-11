@@ -29,8 +29,7 @@ func CreateCommandServer(
 	transportFactory thrift.TTransportFactory,
 	protocolFactory thrift.TProtocolFactory,
 	serverSocket thrift.TServerTransport,
-	redisClient *redis.Client,
-	screenElements *map[string]ScreenElement) (*thrift.TSimpleServer, error) {
+	redisClient *redis.Client) (*thrift.TSimpleServer, error) {
 	wire.Build(
 		thrift.NewTSimpleServer4,
 		CreateMultiplexedProcessor,

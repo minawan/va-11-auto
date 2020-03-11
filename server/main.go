@@ -27,9 +27,9 @@ func main() {
 	flag.Parse()
 
 	redisClient := redis.NewClient(&redis.Options{
-			Addr: "localhost:6379",
-			Password: "",
-			DB: 0,
+		Addr:     "localhost:6379",
+		Password: "",
+		DB:       0,
 	})
 
 	pong, err := redisClient.Ping().Result()
@@ -48,7 +48,7 @@ func main() {
 	json.Unmarshal(recipeContent, &recipes)
 
 	for k, v := range recipes {
-		redisClient.HSet("recipe:" + k, "adelhyde", strconv.FormatInt(int64(v.Recipe.Adelhyde), 10), "bronson_extract", strconv.FormatInt(int64(v.Recipe.BronsonExtract), 10), "powdered_delta", strconv.FormatInt(int64(v.Recipe.PowderedDelta), 10), "flanergide", strconv.FormatInt(int64(v.Recipe.Flanergide), 10), "karmotrine", strconv.FormatInt(int64(v.Recipe.Karmotrine), 10), "add_ice", strconv.FormatBool(v.Recipe.AddIce), "age", strconv.FormatBool(v.Recipe.Age), "wait", strconv.FormatBool(v.Recipe.Wait))
+		redisClient.HSet("recipe:"+k, "adelhyde", strconv.FormatInt(int64(v.Recipe.Adelhyde), 10), "bronson_extract", strconv.FormatInt(int64(v.Recipe.BronsonExtract), 10), "powdered_delta", strconv.FormatInt(int64(v.Recipe.PowderedDelta), 10), "flanergide", strconv.FormatInt(int64(v.Recipe.Flanergide), 10), "karmotrine", strconv.FormatInt(int64(v.Recipe.Karmotrine), 10), "add_ice", strconv.FormatBool(v.Recipe.AddIce), "age", strconv.FormatBool(v.Recipe.Age), "wait", strconv.FormatBool(v.Recipe.Wait))
 	}
 
 	fmt.Println("Reading screen element from", *screenElementPath)
@@ -58,6 +58,10 @@ func main() {
 	}
 	var screenElements map[string]ScreenElement
 	json.Unmarshal(screenElementContent, &screenElements)
+
+	for k, v := range screenElements {
+		redisClient.HSet("element:"+k, "x_coord", strconv.FormatInt(int64(v.XCoord), 10), "y_coord", strconv.FormatInt(int64(v.YCoord), 10), "shortcut", strconv.FormatInt(int64(v.Shortcut), 10))
+	}
 
 	protocolFactory := thrift.NewTBinaryProtocolFactoryDefault()
 	transportFactory := thrift.NewTBufferedTransportFactory(bufferSize)
@@ -69,7 +73,7 @@ func main() {
 	}
 
 	fmt.Println("Running command server on", *addr)
-	commandServer, err := CreateCommandServer(transportFactory, protocolFactory, serverSocket, redisClient, &screenElements)
+	commandServer, err := CreateCommandServer(transportFactory, protocolFactory, serverSocket, redisClient)
 	if err != nil {
 		fmt.Println("error creating server:", err)
 	} else if err := commandServer.Serve(); err != nil {

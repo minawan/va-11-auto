@@ -2,24 +2,50 @@ package main
 
 import (
 	"context"
-	"errors"
 	"fmt"
+	"github.com/go-redis/redis/v7"
 	"github.com/minawan/va-11-auto/thrift/gen-go/shared"
+	"strconv"
 )
 
 type ScreenElementServiceHandler struct {
-	ScreenElements *map[string]ScreenElement
+	RedisClient *redis.Client
 }
 
-func NewScreenElementServiceHandler(screenElements *map[string]ScreenElement) shared.ScreenElementService {
-	return &ScreenElementServiceHandler{ScreenElements: screenElements}
+func NewScreenElementServiceHandler(redisClient *redis.Client) shared.ScreenElementService {
+	return &ScreenElementServiceHandler{RedisClient: redisClient}
 }
 
 func (handler *ScreenElementServiceHandler) Find(name shared.ScreenElementType) (*ScreenElement, error) {
-	if screenElement, ok := (*handler.ScreenElements)[name.String()]; ok {
-		return &screenElement, nil
+	var screenElement ScreenElement
+	screenElementMap, err := handler.RedisClient.HGetAll("element:" + name.String()).Result()
+	if err != nil {
+		return nil, err
 	}
-	return nil, errors.New(fmt.Sprintf("ScreenElement for %s not found!", name.String()))
+
+	if xCoordValue, ok := screenElementMap["x_coord"]; ok {
+		xCoord, err := strconv.ParseInt(xCoordValue, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		screenElement.XCoord = int32(xCoord)
+	}
+	if yCoordValue, ok := screenElementMap["y_coord"]; ok {
+		yCoord, err := strconv.ParseInt(yCoordValue, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		screenElement.YCoord = int32(yCoord)
+	}
+	if shortcutValue, ok := screenElementMap["shortcut"]; ok {
+		shortcut, err := strconv.ParseInt(shortcutValue, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		screenElement.Shortcut = int32(shortcut)
+	}
+
+	return &screenElement, nil
 }
 
 func (handler *ScreenElementServiceHandler) GetScreenElement(ctx context.Context, screenElementName shared.ScreenElementType) (*shared.ScreenElement, error) {
