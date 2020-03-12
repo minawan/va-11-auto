@@ -27,8 +27,5 @@ union Command {
 }
 
 service CommandService {
-  list<Command> getCommands(
-    1: map<shared.ScreenElementType, shared.ScreenElement> screenElements,
-    2: action.RecipeAction action,
-    3: bool useShortcut)
+  list<Command> getCommands(1: action.RecipeAction action, 2: bool useShortcut)
 }
