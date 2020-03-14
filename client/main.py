@@ -62,10 +62,8 @@ def getCommands(drink_name, add_opt, double, reset, slot, serve, use_shortcut):
                        addKarmotrine=add_opt,
                        bigSize=double)
 
-    commands = []
-    for action in recipe_action_client.getRecipeActions(drinkRecipe=drink_recipe, reset=reset, slot=slot, serve=serve):
-        cmds = command_client.getCommands(action=action, useShortcut=use_shortcut)
-        commands.extend(cmds)
+    transaction_id = recipe_action_client.getRecipeActions(drinkRecipe=drink_recipe, reset=reset, slot=slot, serve=serve)
+    commands = command_client.getCommands(transactionId=transaction_id, useShortcut=use_shortcut)
 
     transport.close()
 

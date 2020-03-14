@@ -27,5 +27,5 @@ union Command {
 }
 
 service CommandService {
-  list<Command> getCommands(1: action.RecipeAction action, 2: bool useShortcut)
+  list<Command> getCommands(1: i32 transactionId, 2: bool useShortcut)
 }
