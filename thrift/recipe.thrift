@@ -39,6 +39,9 @@ struct DrinkRecipe {
 service DrinkRecipeService {
   i32 getDrinkRecipe(
     1: DrinkName drinkName,
-	2: bool addKarmotrine,
-	3: bool bigSize)
+    2: bool addKarmotrine,
+    3: bool bigSize,
+    4: bool reset,
+    5: shared.ScreenElementType slot,
+    6: bool serve)
 }

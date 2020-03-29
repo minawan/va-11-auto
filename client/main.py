@@ -60,13 +60,12 @@ def getCommands(drink_name, add_opt, double, reset, slot, serve, use_shortcut):
     transaction_id = drink_recipe_client.getDrinkRecipe(
                          drinkName=drink_name,
                          addKarmotrine=add_opt,
-                         bigSize=double)
-
-    transaction_id = recipe_action_client.getRecipeActions(
-                         transactionId=transaction_id,
+                         bigSize=double,
                          reset=reset,
                          slot=slot,
                          serve=serve)
+
+    transaction_id = recipe_action_client.getRecipeActions()
 
     commands = command_client.getCommands(
                    transactionId=transaction_id,

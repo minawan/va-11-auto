@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/go-redis/redis/v7"
 	"github.com/minawan/va-11-auto/thrift/gen-go/recipe"
+	"github.com/minawan/va-11-auto/thrift/gen-go/shared"
 	"strconv"
 )
 
@@ -110,7 +111,7 @@ func (handler *DrinkRecipeServiceHandler) emitRecipeInfo(key string, recipeInfo 
 		"wait", strconv.FormatBool(recipeInfo.Wait))
 }
 
-func (handler *DrinkRecipeServiceHandler) GetDrinkRecipe(ctx context.Context, drinkName recipe.DrinkName, addKarmotrine bool, bigSize bool) (int32, error) {
+func (handler *DrinkRecipeServiceHandler) GetDrinkRecipe(ctx context.Context, drinkName recipe.DrinkName, addKarmotrine bool, bigSize bool, reset bool, slot shared.ScreenElementType, serve bool) (int32, error) {
 	fmt.Println(drinkName.String())
 
 	transactionId := handler.getNextTransactionId()
@@ -140,6 +141,11 @@ func (handler *DrinkRecipeServiceHandler) GetDrinkRecipe(ctx context.Context, dr
 	}
 
 	handler.emitRecipeInfo(key, &recipeInfo)
+
+	err = handler.RedisClient.Publish("recipe.queue", fmt.Sprintf("%d %s %d %s", transactionId, strconv.FormatBool(reset), slot, strconv.FormatBool(serve))).Err()
+	if err != nil {
+		return 0, err
+	}
 
 	return transactionId, nil
 }

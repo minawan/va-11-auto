@@ -9,15 +9,17 @@ import (
 	"github.com/minawan/va-11-auto/thrift/gen-go/recipe"
 	"github.com/minawan/va-11-auto/thrift/gen-go/shared"
 	"strconv"
+	"strings"
 )
 
 type RecipeActionServiceHandler struct {
 	RedisClient       *redis.Client
 	NextTransactionId int32
+	recipeQueue       <-chan *redis.Message
 }
 
 func NewRecipeActionServiceHandler(redisClient *redis.Client) action.RecipeActionService {
-	return &RecipeActionServiceHandler{RedisClient: redisClient, NextTransactionId: 0}
+	return &RecipeActionServiceHandler{RedisClient: redisClient, NextTransactionId: 0, recipeQueue: redisClient.Subscribe("recipe.queue").Channel()}
 }
 
 func (handler *RecipeActionServiceHandler) getNextTransactionId() int32 {
@@ -119,7 +121,36 @@ func (handler *RecipeActionServiceHandler) loadDrinkRecipe(transactionId int32) 
 	return drinkRecipe, nil
 }
 
-func (handler *RecipeActionServiceHandler) GetRecipeActions(ctx context.Context, drinkRecipeTransactionId int32, reset bool, slot shared.ScreenElementType, serve bool) (int32, error) {
+func (handler *RecipeActionServiceHandler) receiveDrinkRecipe() (int32, bool, shared.ScreenElementType, bool, error) {
+	for msg := range handler.recipeQueue {
+		fmt.Println(msg.Channel, msg.Payload)
+		tokens := strings.SplitN(msg.Payload, " ", 4)
+		if len(tokens) < 4 {
+			return 0, false, 0, false, fmt.Errorf("Invalid number of tokens for a message in %s: %s - Expected: 4, Received: %d", msg.Channel, msg.Payload, len(tokens))
+		}
+		transactionId, err := strconv.ParseInt(tokens[0], 10, 32)
+		if err != nil {
+			return 0, false, 0, false, err
+		}
+		reset, err := strconv.ParseBool(tokens[1])
+		if err != nil {
+			return 0, false, 0, false, err
+		}
+		slot, err := strconv.ParseInt(tokens[2], 10, 32)
+		if err != nil {
+			return 0, false, 0, false, err
+		}
+		serve, err := strconv.ParseBool(tokens[3])
+		if err != nil {
+			return 0, false, 0, false, err
+		}
+		return int32(transactionId), reset, shared.ScreenElementType(slot), serve, nil
+	}
+	return 0, false, 0, false, errors.New("Failed to receive drink recipe")
+}
+
+func (handler *RecipeActionServiceHandler) GetRecipeActions(ctx context.Context) (int32, error) {
+	drinkRecipeTransactionId, reset, slot, serve, err := handler.receiveDrinkRecipe()
 	recipeActionTransactionId := handler.getNextTransactionId()
 	key := fmt.Sprintf("actions:%d", recipeActionTransactionId)
 	drinkRecipe, err := handler.loadDrinkRecipe(drinkRecipeTransactionId)
