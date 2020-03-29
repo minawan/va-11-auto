@@ -14,10 +14,16 @@ import (
 
 type CommandServiceHandler struct {
 	RedisClient *redis.Client
+	actionsQueue <-chan *redis.Message
+}
+
+type commandSpec struct {
+	transactionId int32
+	useShortcut bool
 }
 
 func NewCommandServiceHandler(redisClient *redis.Client) command.CommandService {
-	return &CommandServiceHandler{RedisClient: redisClient}
+	return &CommandServiceHandler{RedisClient: redisClient, actionsQueue: redisClient.Subscribe("actions.queue").Channel()}
 }
 
 func (handler *CommandServiceHandler) find(name shared.ScreenElementType) (*ScreenElement, error) {
@@ -120,7 +126,37 @@ func (handler *CommandServiceHandler) loadRecipeActions(transactionId int32) ([]
 	return recipeActions, nil
 }
 
-func (handler *CommandServiceHandler) GetCommands(ctx context.Context, transactionId int32, useShortcut bool) ([]*command.Command, error) {
+func (handler *CommandServiceHandler) receiveRecipeActions() (*commandSpec, error) {
+	for msg := range handler.actionsQueue {
+		fmt.Println(msg.Channel, msg.Payload)
+		numTokens := 2
+		tokens := strings.SplitN(msg.Payload, " ", numTokens)
+		if len(tokens) < numTokens {
+			return nil, fmt.Errorf("Invalid number of tokens for a message in %s: %s - Expected: %d, Received: %d", msg.Channel, msg.Payload, numTokens, len(tokens))
+		}
+		transactionId, err := strconv.ParseInt(tokens[0], 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		useShortcut, err := strconv.ParseBool(tokens[1])
+		if err != nil {
+			return nil, err
+		}
+		return &commandSpec{transactionId: int32(transactionId), useShortcut: useShortcut}, nil
+	}
+	return nil, errors.New("Failed to receive recipe actions")
+}
+
+func (handler *CommandServiceHandler) GetCommands(ctx context.Context) ([]*command.Command, error) {
+	spec, err := handler.receiveRecipeActions()
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	transactionId := spec.transactionId
+	useShortcut := spec.useShortcut
+
 	recipeActions, err := handler.loadRecipeActions(transactionId)
 	if err != nil {
 		return nil, err

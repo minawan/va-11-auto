@@ -63,13 +63,12 @@ def getCommands(drink_name, add_opt, double, reset, slot, serve, use_shortcut):
                          bigSize=double,
                          reset=reset,
                          slot=slot,
-                         serve=serve)
+                         serve=serve,
+                         useShortcut=use_shortcut)
 
     transaction_id = recipe_action_client.getRecipeActions()
 
-    commands = command_client.getCommands(
-                   transactionId=transaction_id,
-                   useShortcut=use_shortcut)
+    commands = command_client.getCommands()
 
     transport.close()
 

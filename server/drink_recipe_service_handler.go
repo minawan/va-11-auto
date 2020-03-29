@@ -99,6 +99,7 @@ func convertInt32ToString(value int32) string {
 }
 
 func (handler *DrinkRecipeServiceHandler) emitRecipeInfo(key string, recipeInfo *RecipeInfo) {
+	handler.RedisClient.Del(key)
 	handler.RedisClient.HSet(
 		key,
 		"adelhyde", convertInt32ToString(recipeInfo.Adelhyde),
@@ -111,7 +112,7 @@ func (handler *DrinkRecipeServiceHandler) emitRecipeInfo(key string, recipeInfo 
 		"wait", strconv.FormatBool(recipeInfo.Wait))
 }
 
-func (handler *DrinkRecipeServiceHandler) GetDrinkRecipe(ctx context.Context, drinkName recipe.DrinkName, addKarmotrine bool, bigSize bool, reset bool, slot shared.ScreenElementType, serve bool) (int32, error) {
+func (handler *DrinkRecipeServiceHandler) GetDrinkRecipe(ctx context.Context, drinkName recipe.DrinkName, addKarmotrine bool, bigSize bool, reset bool, slot shared.ScreenElementType, serve bool, useShortcut bool) (int32, error) {
 	fmt.Println(drinkName.String())
 
 	transactionId := handler.getNextTransactionId()
@@ -142,7 +143,7 @@ func (handler *DrinkRecipeServiceHandler) GetDrinkRecipe(ctx context.Context, dr
 
 	handler.emitRecipeInfo(key, &recipeInfo)
 
-	err = handler.RedisClient.Publish("recipe.queue", fmt.Sprintf("%d %s %d %s", transactionId, strconv.FormatBool(reset), slot, strconv.FormatBool(serve))).Err()
+	err = handler.RedisClient.Publish("recipe.queue", fmt.Sprintf("%d %s %d %s %s", transactionId, strconv.FormatBool(reset), slot, strconv.FormatBool(serve), strconv.FormatBool(useShortcut))).Err()
 	if err != nil {
 		return 0, err
 	}
