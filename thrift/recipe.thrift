@@ -36,9 +36,4 @@ struct DrinkRecipe {
   4: bool blend;
 }
 
-service DrinkRecipeService {
-  DrinkRecipe getDrinkRecipe(
-    1: DrinkName drinkName,
-	2: bool addKarmotrine,
-	3: bool bigSize)
-}
+service DrinkRecipeService {}

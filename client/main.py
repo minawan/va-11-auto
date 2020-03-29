@@ -1,13 +1,10 @@
-import sys
 import os
+import sys
 
 sys.path.append('thrift/gen-py')
 
-from action import RecipeActionService
 from command import CommandService
-from recipe import DrinkRecipeService
 from recipe.ttypes import DrinkName
-from shared import ScreenElementService
 from shared.ttypes import ScreenElementType
 from thrift.transport import TSocket
 from thrift.transport import TTransport
@@ -48,31 +45,20 @@ def getCommands(drink_name, add_opt, double, reset, slot, serve, use_shortcut):
     transport = TTransport.TBufferedTransport(socket)
 
     protocol = TBinaryProtocol.TBinaryProtocol(transport)
-    drink_recipe_protocol = TMultiplexedProtocol.TMultiplexedProtocol(protocol, 'DrinkRecipeService')
-    recipe_action_protocol = TMultiplexedProtocol.TMultiplexedProtocol(protocol, 'RecipeActionService')
-    screen_element_protocol = TMultiplexedProtocol.TMultiplexedProtocol(protocol, 'ScreenElementService')
     command_protocol = TMultiplexedProtocol.TMultiplexedProtocol(protocol, 'CommandService')
 
-    drink_recipe_client = DrinkRecipeService.Client(drink_recipe_protocol)
-    recipe_action_client = RecipeActionService.Client(recipe_action_protocol)
-    screen_element_client = ScreenElementService.Client(screen_element_protocol)
     command_client = CommandService.Client(command_protocol)
 
     transport.open()
 
-    drink_recipe = drink_recipe_client.getDrinkRecipe(
-                       drinkName=drink_name,
-                       addKarmotrine=add_opt,
-                       bigSize=double)
-
-    screen_elements = {
-      name: screen_element_client.getScreenElement(screenElementName=name) for name in ScreenElementType._VALUES_TO_NAMES
-    }
-
-    commands = []
-    for action in recipe_action_client.getRecipeActions(drinkRecipe=drink_recipe, reset=reset, slot=slot, serve=serve):
-        cmds = command_client.getCommands(screenElements=screen_elements, action=action, useShortcut=use_shortcut)
-        commands.extend(cmds)
+    commands = command_client.getCommands(
+                         drinkName=drink_name,
+                         addKarmotrine=add_opt,
+                         bigSize=double,
+                         reset=reset,
+                         slot=slot,
+                         serve=serve,
+                         useShortcut=use_shortcut)
 
     transport.close()
 

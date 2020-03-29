@@ -28,7 +28,11 @@ union Command {
 
 service CommandService {
   list<Command> getCommands(
-    1: map<shared.ScreenElementType, shared.ScreenElement> screenElements,
-    2: action.RecipeAction action,
-    3: bool useShortcut)
+    1: recipe.DrinkName drinkName,
+    2: bool addKarmotrine,
+    3: bool bigSize,
+    4: bool reset,
+    5: shared.ScreenElementType slot,
+    6: bool serve,
+    7: bool useShortcut)
 }

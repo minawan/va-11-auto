@@ -1,26 +1,32 @@
 include "shared.thrift"
-include "recipe.thrift"
 
 struct ResetAction {}
 
 struct SelectSlotAction {
-  1: shared.ScreenElementType slot;
+  1: shared.ScreenElementType name;
 }
 
 struct AddIngredientAction {
-  1: shared.ScreenElementType ingredient;
+  1: shared.ScreenElementType name;
   2: i32 quantity;
 }
 
 struct MixAction {
-  1: i32 durationInSeconds;
+  1: shared.ScreenElementType name;
+  2: i32 durationInSeconds;
 }
 
-struct AddIceAction {}
+struct AddIceAction {
+  1: shared.ScreenElementType name;
+}
 
-struct AgeAction {}
+struct AgeAction {
+  1: shared.ScreenElementType name;
+}
 
-struct ServeAction {}
+struct ServeAction {
+  1: shared.ScreenElementType name;
+}
 
 union RecipeAction {
   1: ResetAction resetAction;
@@ -32,10 +38,4 @@ union RecipeAction {
   7: ServeAction serveAction;
 }
 
-service RecipeActionService {
-  list<RecipeAction> getRecipeActions(
-    1: recipe.DrinkRecipe drinkRecipe,
-    2: bool reset,
-    3: shared.ScreenElementType slot,
-    4: bool serve)
-}
+service RecipeActionService {}
