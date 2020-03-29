@@ -1,9 +1,8 @@
-import sys
 import os
+import sys
 
 sys.path.append('thrift/gen-py')
 
-from action import RecipeActionService
 from command import CommandService
 from recipe import DrinkRecipeService
 from recipe.ttypes import DrinkName
@@ -48,11 +47,9 @@ def getCommands(drink_name, add_opt, double, reset, slot, serve, use_shortcut):
 
     protocol = TBinaryProtocol.TBinaryProtocol(transport)
     drink_recipe_protocol = TMultiplexedProtocol.TMultiplexedProtocol(protocol, 'DrinkRecipeService')
-    recipe_action_protocol = TMultiplexedProtocol.TMultiplexedProtocol(protocol, 'RecipeActionService')
     command_protocol = TMultiplexedProtocol.TMultiplexedProtocol(protocol, 'CommandService')
 
     drink_recipe_client = DrinkRecipeService.Client(drink_recipe_protocol)
-    recipe_action_client = RecipeActionService.Client(recipe_action_protocol)
     command_client = CommandService.Client(command_protocol)
 
     transport.open()
@@ -65,8 +62,6 @@ def getCommands(drink_name, add_opt, double, reset, slot, serve, use_shortcut):
                          slot=slot,
                          serve=serve,
                          useShortcut=use_shortcut)
-
-    transaction_id = recipe_action_client.getRecipeActions()
 
     commands = command_client.getCommands()
 

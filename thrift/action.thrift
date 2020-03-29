@@ -1,5 +1,4 @@
 include "shared.thrift"
-include "recipe.thrift"
 
 struct ResetAction {}
 
@@ -39,6 +38,4 @@ union RecipeAction {
   7: ServeAction serveAction;
 }
 
-service RecipeActionService {
-  i32 getRecipeActions()
-}
+service RecipeActionService {}

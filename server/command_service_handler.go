@@ -127,24 +127,22 @@ func (handler *CommandServiceHandler) loadRecipeActions(transactionId int32) ([]
 }
 
 func (handler *CommandServiceHandler) receiveRecipeActions() (*commandSpec, error) {
-	for msg := range handler.actionsQueue {
-		fmt.Println(msg.Channel, msg.Payload)
-		numTokens := 2
-		tokens := strings.SplitN(msg.Payload, " ", numTokens)
-		if len(tokens) < numTokens {
-			return nil, fmt.Errorf("Invalid number of tokens for a message in %s: %s - Expected: %d, Received: %d", msg.Channel, msg.Payload, numTokens, len(tokens))
-		}
-		transactionId, err := strconv.ParseInt(tokens[0], 10, 32)
-		if err != nil {
-			return nil, err
-		}
-		useShortcut, err := strconv.ParseBool(tokens[1])
-		if err != nil {
-			return nil, err
-		}
-		return &commandSpec{transactionId: int32(transactionId), useShortcut: useShortcut}, nil
+	msg := <-handler.actionsQueue
+	fmt.Println(msg.Channel, msg.Payload)
+	numTokens := 2
+	tokens := strings.SplitN(msg.Payload, " ", numTokens)
+	if len(tokens) < numTokens {
+		return nil, fmt.Errorf("Invalid number of tokens for a message in %s: %s - Expected: %d, Received: %d", msg.Channel, msg.Payload, numTokens, len(tokens))
 	}
-	return nil, errors.New("Failed to receive recipe actions")
+	transactionId, err := strconv.ParseInt(tokens[0], 10, 32)
+	if err != nil {
+		return nil, err
+	}
+	useShortcut, err := strconv.ParseBool(tokens[1])
+	if err != nil {
+		return nil, err
+	}
+	return &commandSpec{transactionId: int32(transactionId), useShortcut: useShortcut}, nil
 }
 
 func (handler *CommandServiceHandler) GetCommands(ctx context.Context) ([]*command.Command, error) {

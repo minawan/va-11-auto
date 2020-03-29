@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"github.com/go-redis/redis/v7"
@@ -26,7 +25,9 @@ type recipeActionSpec struct {
 }
 
 func NewRecipeActionServiceHandler(redisClient *redis.Client) action.RecipeActionService {
-	return &RecipeActionServiceHandler{RedisClient: redisClient, recipeQueue: redisClient.Subscribe("recipe.queue").Channel()}
+	handler := RecipeActionServiceHandler{RedisClient: redisClient, recipeQueue: redisClient.Subscribe("recipe.queue").Channel()}
+	go handler.run()
+	return &handler
 }
 
 func (handler *RecipeActionServiceHandler) emitResetAction(key string) {
@@ -120,39 +121,37 @@ func (handler *RecipeActionServiceHandler) loadDrinkRecipe(transactionId int32) 
 }
 
 func (handler *RecipeActionServiceHandler) receiveDrinkRecipe() (*recipeActionSpec, error) {
-	for msg := range handler.recipeQueue {
-		fmt.Println(msg.Channel, msg.Payload)
-		numTokens := 5
-		tokens := strings.SplitN(msg.Payload, " ", numTokens)
-		if len(tokens) < numTokens {
-			return nil, fmt.Errorf("Invalid number of tokens for a message in %s: %s - Expected: %d, Received: %d", msg.Channel, msg.Payload, numTokens, len(tokens))
-		}
-		transactionId, err := strconv.ParseInt(tokens[0], 10, 32)
-		if err != nil {
-			return nil, err
-		}
-		reset, err := strconv.ParseBool(tokens[1])
-		if err != nil {
-			return nil, err
-		}
-		slot, err := strconv.ParseInt(tokens[2], 10, 32)
-		if err != nil {
-			return nil, err
-		}
-		serve, err := strconv.ParseBool(tokens[3])
-		if err != nil {
-			return nil, err
-		}
-		useShortcut, err := strconv.ParseBool(tokens[4])
-		if err != nil {
-			return nil, err
-		}
-		return &recipeActionSpec{transactionId: int32(transactionId), reset: reset, slot: shared.ScreenElementType(slot), serve: serve, useShortcut: useShortcut}, nil
+	msg := <-handler.recipeQueue
+	fmt.Println(msg.Channel, msg.Payload)
+	numTokens := 5
+	tokens := strings.SplitN(msg.Payload, " ", numTokens)
+	if len(tokens) < numTokens {
+		return nil, fmt.Errorf("Invalid number of tokens for a message in %s: %s - Expected: %d, Received: %d", msg.Channel, msg.Payload, numTokens, len(tokens))
 	}
-	return nil, errors.New("Failed to receive drink recipe")
+	transactionId, err := strconv.ParseInt(tokens[0], 10, 32)
+	if err != nil {
+		return nil, err
+	}
+	reset, err := strconv.ParseBool(tokens[1])
+	if err != nil {
+		return nil, err
+	}
+	slot, err := strconv.ParseInt(tokens[2], 10, 32)
+	if err != nil {
+		return nil, err
+	}
+	serve, err := strconv.ParseBool(tokens[3])
+	if err != nil {
+		return nil, err
+	}
+	useShortcut, err := strconv.ParseBool(tokens[4])
+	if err != nil {
+		return nil, err
+	}
+	return &recipeActionSpec{transactionId: int32(transactionId), reset: reset, slot: shared.ScreenElementType(slot), serve: serve, useShortcut: useShortcut}, nil
 }
 
-func (handler *RecipeActionServiceHandler) GetRecipeActions(ctx context.Context) (int32, error) {
+func (handler *RecipeActionServiceHandler) getRecipeActions() (int32, error) {
 	spec, err := handler.receiveDrinkRecipe()
 	if err != nil {
 		fmt.Println(err)
@@ -204,4 +203,15 @@ func (handler *RecipeActionServiceHandler) GetRecipeActions(ctx context.Context)
 	}
 
 	return transactionId, nil
+}
+
+func (handler *RecipeActionServiceHandler) run() {
+	for {
+		id, err := handler.getRecipeActions()
+		if err != nil {
+			fmt.Println(err)
+		} else {
+			fmt.Println("RecipeActionService processed transaction", id)
+		}
+	}
 }
