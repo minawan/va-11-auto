@@ -22,7 +22,3 @@ struct ScreenElement {
   1: Coord centroid;
   2: i32 shortcut;
 }
-
-service ScreenElementService {
-  ScreenElement getScreenElement(1: ScreenElementType screenElementName)
-}
