@@ -13,14 +13,14 @@ import (
 
 const bufferSize = 8192
 
-func Usage() {
+func usage() {
 	fmt.Fprint(os.Stderr, "Usage of ", os.Args[0], ":\n")
 	flag.PrintDefaults()
 	fmt.Fprint(os.Stderr, "\n")
 }
 
 func main() {
-	flag.Usage = Usage
+	flag.Usage = usage
 	addr := flag.String("addr", "localhost:9090", "Address to listen to")
 	recipePath := flag.String("recipe-path", "../output/DrinkRecipe.json", "Path to recipe json")
 	screenElementPath := flag.String("screen-element-path", "../output/ScreenElement.json", "Path to screen element json")

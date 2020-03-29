@@ -16,7 +16,7 @@ func NewScreenElementServiceHandler(redisClient *redis.Client) shared.ScreenElem
 	return &ScreenElementServiceHandler{RedisClient: redisClient}
 }
 
-func (handler *ScreenElementServiceHandler) Find(name shared.ScreenElementType) (*ScreenElement, error) {
+func (handler *ScreenElementServiceHandler) find(name shared.ScreenElementType) (*ScreenElement, error) {
 	var screenElement ScreenElement
 	screenElementMap, err := handler.RedisClient.HGetAll("element:" + name.String()).Result()
 	if err != nil {
@@ -51,7 +51,7 @@ func (handler *ScreenElementServiceHandler) Find(name shared.ScreenElementType) 
 func (handler *ScreenElementServiceHandler) GetScreenElement(ctx context.Context, screenElementName shared.ScreenElementType) (*shared.ScreenElement, error) {
 	fmt.Println(screenElementName)
 
-	screenElement, err := handler.Find(screenElementName)
+	screenElement, err := handler.find(screenElementName)
 	if err != nil {
 		return nil, err
 	}

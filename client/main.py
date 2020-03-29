@@ -69,8 +69,8 @@ def getCommands(drink_name, add_opt, double, reset, slot, serve, use_shortcut):
                          serve=serve)
 
     commands = command_client.getCommands(
-	               transactionId=transaction_id,
-				   useShortcut=use_shortcut)
+                   transactionId=transaction_id,
+                   useShortcut=use_shortcut)
 
     transport.close()
 

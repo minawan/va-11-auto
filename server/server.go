@@ -12,7 +12,7 @@ import (
 	"github.com/minawan/va-11-auto/thrift/gen-go/shared"
 )
 
-func CreateMultiplexedProcessor(
+func createMultiplexedProcessor(
 	recipeActionServiceProcessor *action.RecipeActionServiceProcessor,
 	drinkRecipeServiceProcessor *recipe.DrinkRecipeServiceProcessor,
 	screenElementServiceProcessor *shared.ScreenElementServiceProcessor,
@@ -32,7 +32,7 @@ func CreateCommandServer(
 	redisClient *redis.Client) (*thrift.TSimpleServer, error) {
 	wire.Build(
 		thrift.NewTSimpleServer4,
-		CreateMultiplexedProcessor,
+		createMultiplexedProcessor,
 		action.NewRecipeActionServiceProcessor,
 		recipe.NewDrinkRecipeServiceProcessor,
 		shared.NewScreenElementServiceProcessor,

@@ -20,7 +20,7 @@ func NewRecipeActionServiceHandler(redisClient *redis.Client) action.RecipeActio
 	return &RecipeActionServiceHandler{RedisClient: redisClient, NextTransactionId: 0}
 }
 
-func (handler *RecipeActionServiceHandler) GetNextTransactionId() int32 {
+func (handler *RecipeActionServiceHandler) getNextTransactionId() int32 {
 	transactionId := handler.NextTransactionId
 	handler.NextTransactionId++
 	if handler.NextTransactionId > 30000 {
@@ -29,27 +29,27 @@ func (handler *RecipeActionServiceHandler) GetNextTransactionId() int32 {
 	return transactionId
 }
 
-func (handler *RecipeActionServiceHandler) EmitResetAction(key string) {
+func (handler *RecipeActionServiceHandler) emitResetAction(key string) {
 	handler.RedisClient.LPush(key, "RESET")
 }
 
-func (handler *RecipeActionServiceHandler) EmitSelectSlotAction(key string, slot shared.ScreenElementType) {
+func (handler *RecipeActionServiceHandler) emitSelectSlotAction(key string, slot shared.ScreenElementType) {
 	handler.RedisClient.LPush(key, fmt.Sprintf("SELECT_SLOT %d", slot))
 }
 
-func (handler *RecipeActionServiceHandler) EmitAddIngredientAction(key string, ingredient shared.ScreenElementType, quantity int32) {
+func (handler *RecipeActionServiceHandler) emitAddIngredientAction(key string, ingredient shared.ScreenElementType, quantity int32) {
 	handler.RedisClient.LPush(key, fmt.Sprintf("ADD_INGREDIENT %d %d", ingredient, quantity))
 }
 
-func (handler *RecipeActionServiceHandler) EmitAddIceAction(key string) {
+func (handler *RecipeActionServiceHandler) emitAddIceAction(key string) {
 	handler.RedisClient.LPush(key, "ADD_ICE")
 }
 
-func (handler *RecipeActionServiceHandler) EmitAgeAction(key string) {
+func (handler *RecipeActionServiceHandler) emitAgeAction(key string) {
 	handler.RedisClient.LPush(key, "AGE")
 }
 
-func (handler *RecipeActionServiceHandler) EmitMixAction(key string, blend bool) {
+func (handler *RecipeActionServiceHandler) emitMixAction(key string, blend bool) {
 	durationInSeconds := 1
 	if blend {
 		durationInSeconds = 5
@@ -57,7 +57,7 @@ func (handler *RecipeActionServiceHandler) EmitMixAction(key string, blend bool)
 	handler.RedisClient.LPush(key, fmt.Sprintf("MIX %d", durationInSeconds))
 }
 
-func (handler *RecipeActionServiceHandler) EmitServeAction(key string) {
+func (handler *RecipeActionServiceHandler) emitServeAction(key string) {
 	handler.RedisClient.LPush(key, "SERVE")
 }
 
@@ -120,7 +120,7 @@ func (handler *RecipeActionServiceHandler) loadDrinkRecipe(transactionId int32) 
 }
 
 func (handler *RecipeActionServiceHandler) GetRecipeActions(ctx context.Context, drinkRecipeTransactionId int32, reset bool, slot shared.ScreenElementType, serve bool) (int32, error) {
-	recipeActionTransactionId := handler.GetNextTransactionId()
+	recipeActionTransactionId := handler.getNextTransactionId()
 	key := fmt.Sprintf("actions:%d", recipeActionTransactionId)
 	drinkRecipe, err := handler.loadDrinkRecipe(drinkRecipeTransactionId)
 	if err != nil {
@@ -130,27 +130,27 @@ func (handler *RecipeActionServiceHandler) GetRecipeActions(ctx context.Context,
 	fmt.Println(drinkRecipe)
 
 	if reset {
-		handler.EmitResetAction(key)
+		handler.emitResetAction(key)
 	}
 
-	handler.EmitSelectSlotAction(key, slot)
+	handler.emitSelectSlotAction(key, slot)
 
 	for ingredient, quantity := range drinkRecipe.Quantity {
-		handler.EmitAddIngredientAction(key, ingredient, quantity)
+		handler.emitAddIngredientAction(key, ingredient, quantity)
 	}
 
 	if drinkRecipe.AddIce {
-		handler.EmitAddIceAction(key)
+		handler.emitAddIceAction(key)
 	}
 
 	if drinkRecipe.Age {
-		handler.EmitAgeAction(key)
+		handler.emitAgeAction(key)
 	}
 
-	handler.EmitMixAction(key, drinkRecipe.Blend)
+	handler.emitMixAction(key, drinkRecipe.Blend)
 
 	if serve {
-		handler.EmitServeAction(key)
+		handler.emitServeAction(key)
 	}
 
 	return recipeActionTransactionId, nil
