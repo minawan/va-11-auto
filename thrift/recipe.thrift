@@ -37,7 +37,7 @@ struct DrinkRecipe {
 }
 
 service DrinkRecipeService {
-  DrinkRecipe getDrinkRecipe(
+  i32 getDrinkRecipe(
     1: DrinkName drinkName,
 	2: bool addKarmotrine,
 	3: bool bigSize)

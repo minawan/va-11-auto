@@ -57,13 +57,20 @@ def getCommands(drink_name, add_opt, double, reset, slot, serve, use_shortcut):
 
     transport.open()
 
-    drink_recipe = drink_recipe_client.getDrinkRecipe(
-                       drinkName=drink_name,
-                       addKarmotrine=add_opt,
-                       bigSize=double)
+    transaction_id = drink_recipe_client.getDrinkRecipe(
+                         drinkName=drink_name,
+                         addKarmotrine=add_opt,
+                         bigSize=double)
 
-    transaction_id = recipe_action_client.getRecipeActions(drinkRecipe=drink_recipe, reset=reset, slot=slot, serve=serve)
-    commands = command_client.getCommands(transactionId=transaction_id, useShortcut=use_shortcut)
+    transaction_id = recipe_action_client.getRecipeActions(
+                         transactionId=transaction_id,
+                         reset=reset,
+                         slot=slot,
+                         serve=serve)
+
+    commands = command_client.getCommands(
+	               transactionId=transaction_id,
+				   useShortcut=use_shortcut)
 
     transport.close()
 

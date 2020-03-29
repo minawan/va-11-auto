@@ -41,7 +41,7 @@ union RecipeAction {
 
 service RecipeActionService {
   i32 getRecipeActions(
-    1: recipe.DrinkRecipe drinkRecipe,
+    1: i32 transactionId,
     2: bool reset,
     3: shared.ScreenElementType slot,
     4: bool serve)

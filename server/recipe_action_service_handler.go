@@ -2,11 +2,13 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/go-redis/redis/v7"
 	"github.com/minawan/va-11-auto/thrift/gen-go/action"
 	"github.com/minawan/va-11-auto/thrift/gen-go/recipe"
 	"github.com/minawan/va-11-auto/thrift/gen-go/shared"
+	"strconv"
 )
 
 type RecipeActionServiceHandler struct {
@@ -59,11 +61,73 @@ func (handler *RecipeActionServiceHandler) EmitServeAction(key string) {
 	handler.RedisClient.LPush(key, "SERVE")
 }
 
-func (handler *RecipeActionServiceHandler) GetRecipeActions(ctx context.Context, drinkRecipe *recipe.DrinkRecipe, reset bool, slot shared.ScreenElementType, serve bool) (int32, error) {
-	fmt.Println(drinkRecipe)
+func getIngredientFromDrinkRecipeMap(drinkRecipeMap map[string]string, ingredientName string) (int32, error) {
+	if ingredientValue, ok := drinkRecipeMap[ingredientName]; ok {
+		ingredientCount, err := strconv.ParseInt(ingredientValue, 10, 32)
+		if err != nil {
+			return 0, err
+		}
+		return int32(ingredientCount), nil
+	}
+	return 0, errors.New(fmt.Sprintf("Ingredient %s not found.", ingredientName))
+}
 
-	transactionId := handler.GetNextTransactionId()
-	key := fmt.Sprintf("actions:%d", transactionId)
+func getOptionFromDrinkRecipeMap(drinkRecipeMap map[string]string, optionName string) (bool, error) {
+	if optionValue, ok := drinkRecipeMap[optionName]; ok {
+		return strconv.ParseBool(optionValue)
+	}
+	return false, errors.New(fmt.Sprintf("Option %s not found.", optionName))
+}
+
+func (handler *RecipeActionServiceHandler) loadDrinkRecipe(transactionId int32) (drinkRecipe *recipe.DrinkRecipe, err error) {
+	drinkRecipe = recipe.NewDrinkRecipe()
+	drinkRecipe.Quantity = make(map[shared.ScreenElementType]int32)
+	key := fmt.Sprintf("recipe:%d", transactionId)
+	drinkRecipeMap := handler.RedisClient.HGetAll(key).Val()
+	drinkRecipe.Quantity[shared.ScreenElementType_ADELHYDE], err = getIngredientFromDrinkRecipeMap(drinkRecipeMap, "adelhyde")
+	if err != nil {
+		return nil, err
+	}
+	drinkRecipe.Quantity[shared.ScreenElementType_BRONSON_EXTRACT], err = getIngredientFromDrinkRecipeMap(drinkRecipeMap, "bronson_extract")
+	if err != nil {
+		return nil, err
+	}
+	drinkRecipe.Quantity[shared.ScreenElementType_POWDERED_DELTA], err = getIngredientFromDrinkRecipeMap(drinkRecipeMap, "powdered_delta")
+	if err != nil {
+		return nil, err
+	}
+	drinkRecipe.Quantity[shared.ScreenElementType_FLANERGIDE], err = getIngredientFromDrinkRecipeMap(drinkRecipeMap, "flanergide")
+	if err != nil {
+		return nil, err
+	}
+	drinkRecipe.Quantity[shared.ScreenElementType_KARMOTRINE], err = getIngredientFromDrinkRecipeMap(drinkRecipeMap, "karmotrine")
+	if err != nil {
+		return nil, err
+	}
+	drinkRecipe.AddIce, err = getOptionFromDrinkRecipeMap(drinkRecipeMap, "add_ice")
+	if err != nil {
+		return nil, err
+	}
+	drinkRecipe.Age, err = getOptionFromDrinkRecipeMap(drinkRecipeMap, "age")
+	if err != nil {
+		return nil, err
+	}
+	drinkRecipe.Blend, err = getOptionFromDrinkRecipeMap(drinkRecipeMap, "wait")
+	if err != nil {
+		return nil, err
+	}
+	return drinkRecipe, nil
+}
+
+func (handler *RecipeActionServiceHandler) GetRecipeActions(ctx context.Context, drinkRecipeTransactionId int32, reset bool, slot shared.ScreenElementType, serve bool) (int32, error) {
+	recipeActionTransactionId := handler.GetNextTransactionId()
+	key := fmt.Sprintf("actions:%d", recipeActionTransactionId)
+	drinkRecipe, err := handler.loadDrinkRecipe(drinkRecipeTransactionId)
+	if err != nil {
+		fmt.Println(err)
+		return 0, err
+	}
+	fmt.Println(drinkRecipe)
 
 	if reset {
 		handler.EmitResetAction(key)
@@ -89,5 +153,5 @@ func (handler *RecipeActionServiceHandler) GetRecipeActions(ctx context.Context,
 		handler.EmitServeAction(key)
 	}
 
-	return transactionId, nil
+	return recipeActionTransactionId, nil
 }

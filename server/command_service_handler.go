@@ -20,7 +20,7 @@ func NewCommandServiceHandler(redisClient *redis.Client) command.CommandService 
 	return &CommandServiceHandler{RedisClient: redisClient}
 }
 
-func (handler *CommandServiceHandler) Find(name shared.ScreenElementType) (*ScreenElement, error) {
+func (handler *CommandServiceHandler) find(name shared.ScreenElementType) (*ScreenElement, error) {
 	var screenElement ScreenElement
 	screenElementMap, err := handler.RedisClient.HGetAll("element:" + name.String()).Result()
 	if err != nil {
@@ -52,7 +52,7 @@ func (handler *CommandServiceHandler) Find(name shared.ScreenElementType) (*Scre
 	return &screenElement, nil
 }
 
-func (handler *CommandServiceHandler) LoadRecipeActions(transactionId int32) ([]*action.RecipeAction, error) {
+func (handler *CommandServiceHandler) loadRecipeActions(transactionId int32) ([]*action.RecipeAction, error) {
 	recipeActions := []*action.RecipeAction{}
 	key := fmt.Sprintf("actions:%d", transactionId)
 	length := handler.RedisClient.LLen(key).Val()
@@ -121,7 +121,7 @@ func (handler *CommandServiceHandler) LoadRecipeActions(transactionId int32) ([]
 }
 
 func (handler *CommandServiceHandler) GetCommands(ctx context.Context, transactionId int32, useShortcut bool) ([]*command.Command, error) {
-	recipeActions, err := handler.LoadRecipeActions(transactionId)
+	recipeActions, err := handler.loadRecipeActions(transactionId)
 	if err != nil {
 		return nil, err
 	}
@@ -130,23 +130,23 @@ func (handler *CommandServiceHandler) GetCommands(ctx context.Context, transacti
 
 	for _, recipeAction := range recipeActions {
 		if recipeAction.ResetAction != nil {
-			reset, err := handler.Find(shared.ScreenElementType_RESET)
+			reset, err := handler.find(shared.ScreenElementType_RESET)
 			if err != nil {
 				return nil, err
 			}
-			commands = append(commands, Trigger(reset, useShortcut))
+			commands = append(commands, trigger(reset, useShortcut))
 		} else if recipeAction.SelectSlotAction != nil {
-			slot, err := handler.Find(recipeAction.SelectSlotAction.Name)
+			slot, err := handler.find(recipeAction.SelectSlotAction.Name)
 			if err != nil {
 				return nil, err
 			}
-			commands = append(commands, Trigger(slot, useShortcut))
+			commands = append(commands, trigger(slot, useShortcut))
 		} else if recipeAction.AddIngredientAction != nil {
-			source, err := handler.Find(recipeAction.AddIngredientAction.Name)
+			source, err := handler.find(recipeAction.AddIngredientAction.Name)
 			if err != nil {
 				return nil, err
 			}
-			destination, err := handler.Find(shared.ScreenElementType_BLENDER)
+			destination, err := handler.find(shared.ScreenElementType_BLENDER)
 			if err != nil {
 				return nil, err
 			}
@@ -171,34 +171,34 @@ func (handler *CommandServiceHandler) GetCommands(ctx context.Context, transacti
 				commands = append(commands, cmd)
 			}
 		} else if recipeAction.AddIceAction != nil {
-			addIce, err := handler.Find(shared.ScreenElementType_ADD_ICE)
+			addIce, err := handler.find(shared.ScreenElementType_ADD_ICE)
 			if err != nil {
 				return nil, err
 			}
-			commands = append(commands, Trigger(addIce, useShortcut))
+			commands = append(commands, trigger(addIce, useShortcut))
 		} else if recipeAction.AgeAction != nil {
-			age, err := handler.Find(shared.ScreenElementType_AGE)
+			age, err := handler.find(shared.ScreenElementType_AGE)
 			if err != nil {
 				return nil, err
 			}
-			commands = append(commands, Trigger(age, useShortcut))
+			commands = append(commands, trigger(age, useShortcut))
 		} else if recipeAction.MixAction != nil {
-			mix, err := handler.Find(shared.ScreenElementType_MIX)
+			mix, err := handler.find(shared.ScreenElementType_MIX)
 			if err != nil {
 				return nil, err
 			}
-			commands = append(commands, Trigger(mix, useShortcut))
+			commands = append(commands, trigger(mix, useShortcut))
 			cmd := command.NewCommand()
 			cmd.WaitCommand = command.NewWaitCommand()
 			cmd.WaitCommand.DurationInSeconds = recipeAction.MixAction.DurationInSeconds
 			commands = append(commands, cmd)
-			commands = append(commands, Trigger(mix, useShortcut))
+			commands = append(commands, trigger(mix, useShortcut))
 		} else if recipeAction.ServeAction != nil {
-			mix, err := handler.Find(shared.ScreenElementType_MIX)
+			mix, err := handler.find(shared.ScreenElementType_MIX)
 			if err != nil {
 				return nil, err
 			}
-			commands = append(commands, Trigger(mix, useShortcut))
+			commands = append(commands, trigger(mix, useShortcut))
 		} else {
 			return nil, errors.New(fmt.Sprintf("Unexpected Action type: %#v", recipeAction))
 		}
@@ -208,7 +208,7 @@ func (handler *CommandServiceHandler) GetCommands(ctx context.Context, transacti
 	return commands, nil
 }
 
-func Trigger(screenElement *ScreenElement, useShortcut bool) *command.Command {
+func trigger(screenElement *ScreenElement, useShortcut bool) *command.Command {
 	cmd := command.NewCommand()
 
 	shortcut := screenElement.Shortcut

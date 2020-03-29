@@ -5,19 +5,28 @@ import (
 	"fmt"
 	"github.com/go-redis/redis/v7"
 	"github.com/minawan/va-11-auto/thrift/gen-go/recipe"
-	"github.com/minawan/va-11-auto/thrift/gen-go/shared"
 	"strconv"
 )
 
 type DrinkRecipeServiceHandler struct {
-	RedisClient *redis.Client
+	RedisClient       *redis.Client
+	NextTransactionId int32
 }
 
 func NewDrinkRecipeServiceHandler(redisClient *redis.Client) recipe.DrinkRecipeService {
-	return &DrinkRecipeServiceHandler{RedisClient: redisClient}
+	return &DrinkRecipeServiceHandler{RedisClient: redisClient, NextTransactionId: 0}
 }
 
-func (handler *DrinkRecipeServiceHandler) Find(name recipe.DrinkName) (*DrinkRecipe, error) {
+func (handler *DrinkRecipeServiceHandler) getNextTransactionId() int32 {
+	transactionId := handler.NextTransactionId
+	handler.NextTransactionId++
+	if handler.NextTransactionId > 30000 {
+		handler.NextTransactionId = 0
+	}
+	return transactionId
+}
+
+func (handler *DrinkRecipeServiceHandler) find(name recipe.DrinkName) (*DrinkRecipe, error) {
 	var drinkRecipe DrinkRecipe
 	drinkRecipeMap, err := handler.RedisClient.HGetAll("recipe:" + name.String()).Result()
 	if err != nil {
@@ -84,49 +93,53 @@ func (handler *DrinkRecipeServiceHandler) Find(name recipe.DrinkName) (*DrinkRec
 	return &drinkRecipe, nil
 }
 
-func (handler *DrinkRecipeServiceHandler) GetDrinkRecipe(ctx context.Context, drinkName recipe.DrinkName, addKarmotrine bool, bigSize bool) (*recipe.DrinkRecipe, error) {
+func convertInt32ToString(value int32) string {
+	return strconv.FormatInt(int64(value), 10)
+}
+
+func (handler *DrinkRecipeServiceHandler) emitRecipeInfo(key string, recipeInfo *RecipeInfo) {
+	handler.RedisClient.HSet(
+		key,
+		"adelhyde", convertInt32ToString(recipeInfo.Adelhyde),
+		"bronson_extract", convertInt32ToString(recipeInfo.BronsonExtract),
+		"powdered_delta", convertInt32ToString(recipeInfo.PowderedDelta),
+		"flanergide", convertInt32ToString(recipeInfo.Flanergide),
+		"karmotrine", convertInt32ToString(recipeInfo.Karmotrine),
+		"add_ice", strconv.FormatBool(recipeInfo.AddIce),
+		"age", strconv.FormatBool(recipeInfo.Age),
+		"wait", strconv.FormatBool(recipeInfo.Wait))
+}
+
+func (handler *DrinkRecipeServiceHandler) GetDrinkRecipe(ctx context.Context, drinkName recipe.DrinkName, addKarmotrine bool, bigSize bool) (int32, error) {
 	fmt.Println(drinkName.String())
+
+	transactionId := handler.getNextTransactionId()
+	key := fmt.Sprintf("recipe:%d", transactionId)
+
 	if bigSize && drinkName == recipe.DrinkName_CREVICE_SPIKE {
 		addKarmotrine = true
 	}
 
-	drinkRecipe, err := handler.Find(drinkName)
+	drinkRecipe, err := handler.find(drinkName)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
-	response := recipe.NewDrinkRecipe()
 	recipeInfo := drinkRecipe.Recipe
 
-	adelhyde := recipeInfo.Adelhyde
-	bronsonExtract := recipeInfo.BronsonExtract
-	powderedDelta := recipeInfo.PowderedDelta
-	flanergide := recipeInfo.Flanergide
-	karmotrine := recipeInfo.Karmotrine
-
 	if bigSize && !drinkRecipe.IsBig() {
-		adelhyde *= 2
-		bronsonExtract *= 2
-		powderedDelta *= 2
-		flanergide *= 2
-		karmotrine *= 2
+		recipeInfo.Adelhyde *= 2
+		recipeInfo.BronsonExtract *= 2
+		recipeInfo.PowderedDelta *= 2
+		recipeInfo.Flanergide *= 2
+		recipeInfo.Karmotrine *= 2
 	}
 
-	if karmotrine < 0 && addKarmotrine {
-		karmotrine = 1
+	if recipeInfo.Karmotrine < 0 && addKarmotrine {
+		recipeInfo.Karmotrine = 1
 	}
 
-	response.Quantity = make(map[shared.ScreenElementType]int32)
-	response.Quantity[shared.ScreenElementType_ADELHYDE] = adelhyde
-	response.Quantity[shared.ScreenElementType_BRONSON_EXTRACT] = bronsonExtract
-	response.Quantity[shared.ScreenElementType_POWDERED_DELTA] = powderedDelta
-	response.Quantity[shared.ScreenElementType_FLANERGIDE] = flanergide
-	response.Quantity[shared.ScreenElementType_KARMOTRINE] = karmotrine
+	handler.emitRecipeInfo(key, &recipeInfo)
 
-	response.AddIce = recipeInfo.AddIce
-	response.Age = recipeInfo.Age
-	response.Blend = recipeInfo.Wait
-
-	fmt.Println(*response)
-	return response, nil
+	return transactionId, nil
 }
