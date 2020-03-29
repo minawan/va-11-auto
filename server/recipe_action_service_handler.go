@@ -197,7 +197,7 @@ func (handler *RecipeActionServiceHandler) getRecipeActions() (int64, error) {
 		handler.emitServeAction(key)
 	}
 
-	err = handler.RedisClient.Publish("actions.queue", fmt.Sprintf("%d %s", transactionId, strconv.FormatBool(useShortcut))).Err()
+	err = handler.RedisClient.Publish(fmt.Sprintf("actions.queue.%d", transactionId), fmt.Sprintf("%d %s", transactionId, strconv.FormatBool(useShortcut))).Err()
 	if err != nil {
 		return 0, err
 	}
