@@ -7,23 +7,38 @@ import (
 	"github.com/go-redis/redis/v7"
 	"github.com/minawan/va-11-auto/thrift/gen-go/action"
 	"github.com/minawan/va-11-auto/thrift/gen-go/command"
+	"github.com/minawan/va-11-auto/thrift/gen-go/recipe"
 	"github.com/minawan/va-11-auto/thrift/gen-go/shared"
 	"strconv"
 	"strings"
 )
 
 type CommandServiceHandler struct {
-	RedisClient *redis.Client
-	actionsQueue <-chan *redis.Message
+	RedisClient       *redis.Client
+	actionsQueue      <-chan *redis.Message
+	nextTransactionId int64
 }
 
 type commandSpec struct {
-	transactionId int32
-	useShortcut bool
+	transactionId int64
+	useShortcut   bool
 }
 
 func NewCommandServiceHandler(redisClient *redis.Client) command.CommandService {
-	return &CommandServiceHandler{RedisClient: redisClient, actionsQueue: redisClient.Subscribe("actions.queue").Channel()}
+	return &CommandServiceHandler{
+		RedisClient:       redisClient,
+		actionsQueue:      redisClient.Subscribe("actions.queue").Channel(),
+		nextTransactionId: 0,
+	}
+}
+
+func (handler *CommandServiceHandler) getNextTransactionId() int64 {
+	transactionId := handler.nextTransactionId
+	handler.nextTransactionId++
+	if handler.nextTransactionId > 30000 {
+		handler.nextTransactionId = 0
+	}
+	return transactionId
 }
 
 func (handler *CommandServiceHandler) find(name shared.ScreenElementType) (*ScreenElement, error) {
@@ -58,7 +73,7 @@ func (handler *CommandServiceHandler) find(name shared.ScreenElementType) (*Scre
 	return &screenElement, nil
 }
 
-func (handler *CommandServiceHandler) loadRecipeActions(transactionId int32) ([]*action.RecipeAction, error) {
+func (handler *CommandServiceHandler) loadRecipeActions(transactionId int64) ([]*action.RecipeAction, error) {
 	recipeActions := []*action.RecipeAction{}
 	key := fmt.Sprintf("actions:%d", transactionId)
 	length := handler.RedisClient.LLen(key).Val()
@@ -134,7 +149,7 @@ func (handler *CommandServiceHandler) receiveRecipeActions() (*commandSpec, erro
 	if len(tokens) < numTokens {
 		return nil, fmt.Errorf("Invalid number of tokens for a message in %s: %s - Expected: %d, Received: %d", msg.Channel, msg.Payload, numTokens, len(tokens))
 	}
-	transactionId, err := strconv.ParseInt(tokens[0], 10, 32)
+	transactionId, err := strconv.ParseInt(tokens[0], 10, 64)
 	if err != nil {
 		return nil, err
 	}
@@ -142,18 +157,23 @@ func (handler *CommandServiceHandler) receiveRecipeActions() (*commandSpec, erro
 	if err != nil {
 		return nil, err
 	}
-	return &commandSpec{transactionId: int32(transactionId), useShortcut: useShortcut}, nil
+	return &commandSpec{transactionId: transactionId, useShortcut: useShortcut}, nil
 }
 
-func (handler *CommandServiceHandler) GetCommands(ctx context.Context) ([]*command.Command, error) {
+func (handler *CommandServiceHandler) GetCommands(ctx context.Context, drinkName recipe.DrinkName, addKarmotrine bool, bigSize bool, reset bool, slot shared.ScreenElementType, serve bool, useShortcut bool) ([]*command.Command, error) {
+	transactionId := handler.getNextTransactionId()
+	err := handler.RedisClient.Publish("request.queue", fmt.Sprintf("%d %d %s %s %s %d %s %s", transactionId, drinkName, strconv.FormatBool(addKarmotrine), strconv.FormatBool(bigSize), strconv.FormatBool(reset), slot, strconv.FormatBool(serve), strconv.FormatBool(useShortcut))).Err()
+	if err != nil {
+		return nil, err
+	}
 	spec, err := handler.receiveRecipeActions()
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
 	}
 
-	transactionId := spec.transactionId
-	useShortcut := spec.useShortcut
+	transactionId = spec.transactionId
+	useShortcut = spec.useShortcut
 
 	recipeActions, err := handler.loadRecipeActions(transactionId)
 	if err != nil {

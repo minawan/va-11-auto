@@ -27,5 +27,12 @@ union Command {
 }
 
 service CommandService {
-  list<Command> getCommands()
+  list<Command> getCommands(
+    1: recipe.DrinkName drinkName,
+    2: bool addKarmotrine,
+    3: bool bigSize,
+    4: bool reset,
+    5: shared.ScreenElementType slot,
+    6: bool serve,
+    7: bool useShortcut)
 }

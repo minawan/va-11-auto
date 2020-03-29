@@ -4,7 +4,6 @@ import sys
 sys.path.append('thrift/gen-py')
 
 from command import CommandService
-from recipe import DrinkRecipeService
 from recipe.ttypes import DrinkName
 from shared.ttypes import ScreenElementType
 from thrift.transport import TSocket
@@ -46,15 +45,13 @@ def getCommands(drink_name, add_opt, double, reset, slot, serve, use_shortcut):
     transport = TTransport.TBufferedTransport(socket)
 
     protocol = TBinaryProtocol.TBinaryProtocol(transport)
-    drink_recipe_protocol = TMultiplexedProtocol.TMultiplexedProtocol(protocol, 'DrinkRecipeService')
     command_protocol = TMultiplexedProtocol.TMultiplexedProtocol(protocol, 'CommandService')
 
-    drink_recipe_client = DrinkRecipeService.Client(drink_recipe_protocol)
     command_client = CommandService.Client(command_protocol)
 
     transport.open()
 
-    transaction_id = drink_recipe_client.getDrinkRecipe(
+    commands = command_client.getCommands(
                          drinkName=drink_name,
                          addKarmotrine=add_opt,
                          bigSize=double,
@@ -62,8 +59,6 @@ def getCommands(drink_name, add_opt, double, reset, slot, serve, use_shortcut):
                          slot=slot,
                          serve=serve,
                          useShortcut=use_shortcut)
-
-    commands = command_client.getCommands()
 
     transport.close()
 

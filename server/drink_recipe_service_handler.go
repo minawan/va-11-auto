@@ -1,30 +1,37 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"github.com/go-redis/redis/v7"
 	"github.com/minawan/va-11-auto/thrift/gen-go/recipe"
 	"github.com/minawan/va-11-auto/thrift/gen-go/shared"
 	"strconv"
+	"strings"
 )
 
 type DrinkRecipeServiceHandler struct {
-	RedisClient       *redis.Client
-	NextTransactionId int32
+	RedisClient  *redis.Client
+	requestQueue <-chan *redis.Message
+}
+
+type drinkRecipeSpec struct {
+	transactionId int64
+	drinkName     recipe.DrinkName
+	addKarmotrine bool
+	bigSize       bool
+	reset         bool
+	slot          shared.ScreenElementType
+	serve         bool
+	useShortcut   bool
 }
 
 func NewDrinkRecipeServiceHandler(redisClient *redis.Client) recipe.DrinkRecipeService {
-	return &DrinkRecipeServiceHandler{RedisClient: redisClient, NextTransactionId: 0}
-}
-
-func (handler *DrinkRecipeServiceHandler) getNextTransactionId() int32 {
-	transactionId := handler.NextTransactionId
-	handler.NextTransactionId++
-	if handler.NextTransactionId > 30000 {
-		handler.NextTransactionId = 0
+	handler := &DrinkRecipeServiceHandler{
+		RedisClient:  redisClient,
+		requestQueue: redisClient.Subscribe("request.queue").Channel(),
 	}
-	return transactionId
+	go handler.run()
+	return &handler
 }
 
 func (handler *DrinkRecipeServiceHandler) find(name recipe.DrinkName) (*DrinkRecipe, error) {
@@ -112,10 +119,75 @@ func (handler *DrinkRecipeServiceHandler) emitRecipeInfo(key string, recipeInfo 
 		"wait", strconv.FormatBool(recipeInfo.Wait))
 }
 
-func (handler *DrinkRecipeServiceHandler) GetDrinkRecipe(ctx context.Context, drinkName recipe.DrinkName, addKarmotrine bool, bigSize bool, reset bool, slot shared.ScreenElementType, serve bool, useShortcut bool) (int32, error) {
-	fmt.Println(drinkName.String())
+func (handler *DrinkRecipeServiceHandler) receiveDrinkRecipeRequest() (*drinkRecipeSpec, error) {
+	msg := <-handler.requestQueue
+	fmt.Println(msg.Channel, msg.Payload)
+	numTokens := 8
+	tokens := strings.SplitN(msg.Payload, " ", numTokens)
+	if len(tokens) < numTokens {
+		return nil, fmt.Errorf("Invalid number of tokens for a message in %s: %s - Expected: %d, Received: %d", msg.Channel, msg.Payload, numTokens, len(tokens))
+	}
+	transactionId, err := strconv.ParseInt(tokens[0], 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	drinkName, err := strconv.ParseInt(tokens[1], 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	addKarmotrine, err := strconv.ParseBool(tokens[2])
+	if err != nil {
+		return nil, err
+	}
+	bigSize, err := strconv.ParseBool(tokens[3])
+	if err != nil {
+		return nil, err
+	}
+	reset, err := strconv.ParseBool(tokens[4])
+	if err != nil {
+		return nil, err
+	}
+	slot, err := strconv.ParseInt(tokens[5], 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	serve, err := strconv.ParseBool(tokens[6])
+	if err != nil {
+		return nil, err
+	}
+	useShortcut, err := strconv.ParseBool(tokens[7])
+	if err != nil {
+		return nil, err
+	}
+	return &drinkRecipeSpec{
+		transactionId: transactionId,
+		drinkName:     recipe.DrinkName(drinkName),
+		addKarmotrine: addKarmotrine,
+		bigSize:       bigSize,
+		reset:         reset,
+		slot:          shared.ScreenElementType(slot),
+		serve:         serve,
+		useShortcut:   useShortcut,
+	}, nil
+}
 
-	transactionId := handler.getNextTransactionId()
+func (handler *DrinkRecipeServiceHandler) getDrinkRecipe() (int64, error) {
+	spec, err := handler.receiveDrinkRecipeRequest()
+	if err != nil {
+		fmt.Println(err)
+		return 0, err
+	}
+
+	transactionId := spec.transactionId
+	drinkName := spec.drinkName
+	addKarmotrine := spec.addKarmotrine
+	bigSize := spec.bigSize
+	reset := spec.reset
+	slot := spec.slot
+	serve := spec.serve
+	useShortcut := spec.useShortcut
+
+	fmt.Println(drinkName.String())
 	key := fmt.Sprintf("recipe:%d", transactionId)
 
 	if bigSize && drinkName == recipe.DrinkName_CREVICE_SPIKE {
@@ -149,4 +221,15 @@ func (handler *DrinkRecipeServiceHandler) GetDrinkRecipe(ctx context.Context, dr
 	}
 
 	return transactionId, nil
+}
+
+func (handler *DrinkRecipeServiceHandler) run() {
+	for {
+		id, err := handler.getDrinkRecipe()
+		if err != nil {
+			fmt.Println(err)
+		} else {
+			fmt.Println("DrinkRecipeService processed transaction", id)
+		}
+	}
 }

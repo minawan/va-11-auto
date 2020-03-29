@@ -12,16 +12,16 @@ import (
 )
 
 type RecipeActionServiceHandler struct {
-	RedisClient       *redis.Client
-	recipeQueue       <-chan *redis.Message
+	RedisClient *redis.Client
+	recipeQueue <-chan *redis.Message
 }
 
 type recipeActionSpec struct {
-	transactionId int32
-	reset bool
-	slot shared.ScreenElementType
-	serve bool
-	useShortcut bool
+	transactionId int64
+	reset         bool
+	slot          shared.ScreenElementType
+	serve         bool
+	useShortcut   bool
 }
 
 func NewRecipeActionServiceHandler(redisClient *redis.Client) action.RecipeActionService {
@@ -80,7 +80,7 @@ func getFlagFromDrinkRecipeMap(drinkRecipeMap map[string]string, flagName string
 	return false, errors.New(fmt.Sprintf("Flag %s not found.", flagName))
 }
 
-func (handler *RecipeActionServiceHandler) loadDrinkRecipe(transactionId int32) (drinkRecipe *recipe.DrinkRecipe, err error) {
+func (handler *RecipeActionServiceHandler) loadDrinkRecipe(transactionId int64) (drinkRecipe *recipe.DrinkRecipe, err error) {
 	drinkRecipe = recipe.NewDrinkRecipe()
 	drinkRecipe.Quantity = make(map[shared.ScreenElementType]int32)
 	key := fmt.Sprintf("recipe:%d", transactionId)
@@ -128,7 +128,7 @@ func (handler *RecipeActionServiceHandler) receiveDrinkRecipe() (*recipeActionSp
 	if len(tokens) < numTokens {
 		return nil, fmt.Errorf("Invalid number of tokens for a message in %s: %s - Expected: %d, Received: %d", msg.Channel, msg.Payload, numTokens, len(tokens))
 	}
-	transactionId, err := strconv.ParseInt(tokens[0], 10, 32)
+	transactionId, err := strconv.ParseInt(tokens[0], 10, 64)
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +136,7 @@ func (handler *RecipeActionServiceHandler) receiveDrinkRecipe() (*recipeActionSp
 	if err != nil {
 		return nil, err
 	}
-	slot, err := strconv.ParseInt(tokens[2], 10, 32)
+	slot, err := strconv.ParseInt(tokens[2], 10, 64)
 	if err != nil {
 		return nil, err
 	}
@@ -148,10 +148,10 @@ func (handler *RecipeActionServiceHandler) receiveDrinkRecipe() (*recipeActionSp
 	if err != nil {
 		return nil, err
 	}
-	return &recipeActionSpec{transactionId: int32(transactionId), reset: reset, slot: shared.ScreenElementType(slot), serve: serve, useShortcut: useShortcut}, nil
+	return &recipeActionSpec{transactionId: transactionId, reset: reset, slot: shared.ScreenElementType(slot), serve: serve, useShortcut: useShortcut}, nil
 }
 
-func (handler *RecipeActionServiceHandler) getRecipeActions() (int32, error) {
+func (handler *RecipeActionServiceHandler) getRecipeActions() (int64, error) {
 	spec, err := handler.receiveDrinkRecipe()
 	if err != nil {
 		fmt.Println(err)
