@@ -1,7 +1,0 @@
-output
-*.pyc
-*.txt*
-__pycache__
-*.swp
-go.mod
-go.sum
