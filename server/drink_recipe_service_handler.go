@@ -41,31 +41,31 @@ func (handler *DrinkRecipeServiceHandler) find(name shared.DrinkName) (*DrinkRec
 	}
 
 	if adelhydeValue, ok := drinkRecipeMap["adelhyde"]; ok {
-		drinkRecipe.Recipe.Adelhyde, err = strconv.ParseInt(adelhydeValue, 10, 32)
+		drinkRecipe.Recipe.Adelhyde, err = strconv.ParseInt(adelhydeValue, 10, 64)
 		if err != nil {
 			return nil, err
 		}
 	}
 	if bronsonExtractValue, ok := drinkRecipeMap["bronson_extract"]; ok {
-		drinkRecipe.Recipe.BronsonExtract, err = strconv.ParseInt(bronsonExtractValue, 10, 32)
+		drinkRecipe.Recipe.BronsonExtract, err = strconv.ParseInt(bronsonExtractValue, 10, 64)
 		if err != nil {
 			return nil, err
 		}
 	}
 	if powderedDeltaValue, ok := drinkRecipeMap["powdered_delta"]; ok {
-		drinkRecipe.Recipe.PowderedDelta, err = strconv.ParseInt(powderedDeltaValue, 10, 32)
+		drinkRecipe.Recipe.PowderedDelta, err = strconv.ParseInt(powderedDeltaValue, 10, 64)
 		if err != nil {
 			return nil, err
 		}
 	}
 	if flanergideValue, ok := drinkRecipeMap["flanergide"]; ok {
-		drinkRecipe.Recipe.Flanergide, err = strconv.ParseInt(flanergideValue, 10, 32)
+		drinkRecipe.Recipe.Flanergide, err = strconv.ParseInt(flanergideValue, 10, 64)
 		if err != nil {
 			return nil, err
 		}
 	}
 	if karmotrineValue, ok := drinkRecipeMap["karmotrine"]; ok {
-		drinkRecipe.Recipe.Karmotrine, err = strconv.ParseInt(karmotrineValue, 10, 32)
+		drinkRecipe.Recipe.Karmotrine, err = strconv.ParseInt(karmotrineValue, 10, 64)
 		if err != nil {
 			return nil, err
 		}
