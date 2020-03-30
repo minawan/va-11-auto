@@ -19,20 +19,14 @@ with open(input_filename, 'r') as csv_file:
     reader = csv.DictReader(csv_file)
     for row in reader:
         drink = dict()
-        drink['flavor'] = row['flavor']
-        drink['kind'] = row['kind']
-        drink['trait'] = row['trait']
-        drink['price'] = int(row['price'])
-        recipe = dict()
-        recipe['adelhyde'] = int(row['adelhyde']) if row['adelhyde'] else 0
-        recipe['bronsonExtract'] = int(row['bronson_extract']) if row['bronson_extract'] else 0
-        recipe['powderedDelta'] = int(row['powdered_delta']) if row['powdered_delta'] else 0
-        recipe['flanergide'] = int(row['flanergide']) if row['flanergide'] else 0
-        recipe['karmotrine'] = -1 if row['karmotrine'] == 'opt' else int(row['karmotrine']) if row['karmotrine'] else 0
-        recipe['addIce'] = row['add_ice'] == 'Y'
-        recipe['age'] = row['age'] == 'Y'
-        recipe['wait'] = row['wait'] == 'Y'
-        drink['recipe'] = recipe
+        drink['adelhyde'] = int(row['adelhyde']) if row['adelhyde'] else 0
+        drink['bronsonExtract'] = int(row['bronson_extract']) if row['bronson_extract'] else 0
+        drink['powderedDelta'] = int(row['powdered_delta']) if row['powdered_delta'] else 0
+        drink['flanergide'] = int(row['flanergide']) if row['flanergide'] else 0
+        drink['karmotrine'] = -1 if row['karmotrine'] == 'opt' else int(row['karmotrine']) if row['karmotrine'] else 0
+        drink['addIce'] = row['add_ice'] == 'Y'
+        drink['age'] = row['age'] == 'Y'
+        drink['wait'] = row['wait'] == 'Y'
         items[row['name']] = drink
 
 with open(output_filename, 'w') as output_file:
