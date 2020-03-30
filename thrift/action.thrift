@@ -37,5 +37,3 @@ union RecipeAction {
   6: MixAction mixAction;
   7: ServeAction serveAction;
 }
-
-service RecipeActionService {}

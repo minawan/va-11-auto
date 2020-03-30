@@ -65,7 +65,7 @@ func main() {
 	//drinkName := recipe.DrinkName_FLAMING_MOAI
 
 	transportFactory := thrift.NewTBufferedTransportFactory(bufferSize)
-	//protocolFactory := thrift.NewTBinaryProtocolFactoryDefault()
+	protocolFactory := thrift.NewTBinaryProtocolFactoryDefault()
 	socket, err := thrift.NewTSocket(*addr)
 	if err != nil {
 		panic(fmt.Sprintf("Error opening socket: %s", err))
@@ -78,10 +78,8 @@ func main() {
 	if err := transport.Open(); err != nil {
 		panic(fmt.Sprintf("Error opening transport: %s", err))
 	}
-	protocol := thrift.NewTBinaryProtocolTransport(transport)
-	commandProtocol := thrift.NewTMultiplexedProtocol(protocol, "CommandService")
 	defaultContext := context.Background()
-	client := command.NewCommandServiceClientProtocol(transport, commandProtocol, commandProtocol)
+	client := command.NewCommandServiceClientFactory(transport, protocolFactory)
 	commands, err := client.GetCommands(defaultContext, drinkName, addKarmotrine, bigSize, reset, slot, serve, useShortcut)
 	if err != nil {
 		panic(err)

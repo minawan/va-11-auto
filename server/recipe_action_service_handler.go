@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-redis/redis/v7"
-	"github.com/minawan/va-11-auto/thrift/gen-go/action"
 	"github.com/minawan/va-11-auto/thrift/gen-go/recipe"
 	"github.com/minawan/va-11-auto/thrift/gen-go/shared"
 	"strconv"
@@ -24,7 +23,7 @@ type recipeActionSpec struct {
 	useShortcut   bool
 }
 
-func NewRecipeActionServiceHandler(redisClient *redis.Client) action.RecipeActionService {
+func NewRecipeActionServiceHandler(redisClient *redis.Client) *RecipeActionServiceHandler {
 	handler := RecipeActionServiceHandler{RedisClient: redisClient, recipeQueue: redisClient.Subscribe("recipe.queue").Channel()}
 	go handler.run()
 	return &handler

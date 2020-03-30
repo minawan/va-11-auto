@@ -35,5 +35,3 @@ struct DrinkRecipe {
   3: bool age;
   4: bool blend;
 }
-
-service DrinkRecipeService {}

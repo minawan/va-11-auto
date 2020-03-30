@@ -25,8 +25,8 @@ type drinkRecipeSpec struct {
 	useShortcut   bool
 }
 
-func NewDrinkRecipeServiceHandler(redisClient *redis.Client) recipe.DrinkRecipeService {
-	handler := &DrinkRecipeServiceHandler{
+func NewDrinkRecipeServiceHandler(redisClient *redis.Client) *DrinkRecipeServiceHandler {
+	handler := DrinkRecipeServiceHandler{
 		RedisClient:  redisClient,
 		requestQueue: redisClient.Subscribe("request.queue").Channel(),
 	}
