@@ -19,11 +19,11 @@ with open(input_filename, 'r') as csv_file:
     reader = csv.DictReader(csv_file)
     for row in reader:
         drink = dict()
-        drink['adelhyde'] = int(row['adelhyde']) if row['adelhyde'] else 0
-        drink['bronsonExtract'] = int(row['bronson_extract']) if row['bronson_extract'] else 0
-        drink['powderedDelta'] = int(row['powdered_delta']) if row['powdered_delta'] else 0
-        drink['flanergide'] = int(row['flanergide']) if row['flanergide'] else 0
-        drink['karmotrine'] = int(row['karmotrine']) if row['karmotrine'] else 0
+        drink['adelhyde'] = int(row['adelhyde'])
+        drink['bronsonExtract'] = int(row['bronson_extract'])
+        drink['powderedDelta'] = int(row['powdered_delta'])
+        drink['flanergide'] = int(row['flanergide'])
+        drink['karmotrine'] = int(row['karmotrine'])
         drink['addIce'] = row['add_ice'] == 'Y'
         drink['age'] = row['age'] == 'Y'
         drink['wait'] = row['wait'] == 'Y'
