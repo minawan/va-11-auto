@@ -23,7 +23,7 @@ with open(input_filename, 'r') as csv_file:
         drink['bronsonExtract'] = int(row['bronson_extract']) if row['bronson_extract'] else 0
         drink['powderedDelta'] = int(row['powdered_delta']) if row['powdered_delta'] else 0
         drink['flanergide'] = int(row['flanergide']) if row['flanergide'] else 0
-        drink['karmotrine'] = -1 if row['karmotrine'] == 'opt' else int(row['karmotrine']) if row['karmotrine'] else 0
+        drink['karmotrine'] = int(row['karmotrine']) if row['karmotrine'] else 0
         drink['addIce'] = row['add_ice'] == 'Y'
         drink['age'] = row['age'] == 'Y'
         drink['wait'] = row['wait'] == 'Y'
