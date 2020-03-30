@@ -5,7 +5,7 @@ export output_directory := output
 
 all: build
 
-build: server
+build: client server
 
 thrift:
 	$(MAKE) -C thrift
@@ -13,6 +13,9 @@ thrift:
 data: $(input_directory)/DrinkRecipe.ods $(input_directory)/ScreenElement.ods
 	mkdir -p $(output_directory)
 	$(MAKE) -C script
+
+client: thrift
+	$(MAKE) -C client
 
 server: thrift
 	$(MAKE) -C server
