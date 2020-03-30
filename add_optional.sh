@@ -16,6 +16,7 @@ SELECT
 	add_ice,
 	age,
 	wait
-FROM DrinkRecipe;
+FROM DrinkRecipe
+ORDER BY name;
 
 " DrinkRecipe.csv | csvlook
