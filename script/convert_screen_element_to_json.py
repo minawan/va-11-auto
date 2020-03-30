@@ -19,6 +19,7 @@ with open(input_filename, 'r') as csv_file:
     reader = csv.DictReader(csv_file)
     for row in reader:
         elem = dict()
+        elem['category'] = row['category']
         elem['xCoord'] = int(row['xCoord'])
         elem['yCoord'] = int(row['yCoord'])
         elem['shortcut'] = int(row['shortcut'])

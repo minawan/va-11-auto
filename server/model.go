@@ -1,6 +1,6 @@
 package main
 
-type DrinkRecipe struct {
+type RecipeInfo struct {
 	Adelhyde       int64
 	BronsonExtract int64
 	PowderedDelta  int64
@@ -11,18 +11,28 @@ type DrinkRecipe struct {
 	Wait           bool
 }
 
+type DrinkRecipe struct {
+	Flavor string
+	Kind   string
+	Trait  string
+	Price  int
+	Recipe RecipeInfo
+}
+
 type ScreenElement struct {
 	Name     string
+	Category string
 	XCoord   int32
 	YCoord   int32
 	Shortcut int32
 }
 
 func (drinkRecipe *DrinkRecipe) IsBig() bool {
-	acc := drinkRecipe.Adelhyde
-	acc += drinkRecipe.BronsonExtract
-	acc += drinkRecipe.PowderedDelta
-	acc += drinkRecipe.Flanergide
-	acc += drinkRecipe.Karmotrine
+	recipeInfo := drinkRecipe.Recipe
+	acc := recipeInfo.Adelhyde
+	acc += recipeInfo.BronsonExtract
+	acc += recipeInfo.PowderedDelta
+	acc += recipeInfo.Flanergide
+	acc += recipeInfo.Karmotrine
 	return acc > 10
 }

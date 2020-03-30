@@ -48,7 +48,7 @@ func main() {
 	json.Unmarshal(recipeContent, &recipes)
 
 	for k, v := range recipes {
-		redisClient.HSet("recipe:"+k, "adelhyde", strconv.FormatInt(int64(v.Adelhyde), 10), "bronson_extract", strconv.FormatInt(int64(v.BronsonExtract), 10), "powdered_delta", strconv.FormatInt(int64(v.PowderedDelta), 10), "flanergide", strconv.FormatInt(int64(v.Flanergide), 10), "karmotrine", strconv.FormatInt(int64(v.Karmotrine), 10), "add_ice", strconv.FormatBool(v.AddIce), "age", strconv.FormatBool(v.Age), "wait", strconv.FormatBool(v.Wait))
+		redisClient.HSet("recipe:"+k, "adelhyde", strconv.FormatInt(int64(v.Recipe.Adelhyde), 10), "bronson_extract", strconv.FormatInt(int64(v.Recipe.BronsonExtract), 10), "powdered_delta", strconv.FormatInt(int64(v.Recipe.PowderedDelta), 10), "flanergide", strconv.FormatInt(int64(v.Recipe.Flanergide), 10), "karmotrine", strconv.FormatInt(int64(v.Recipe.Karmotrine), 10), "add_ice", strconv.FormatBool(v.Recipe.AddIce), "age", strconv.FormatBool(v.Recipe.Age), "wait", strconv.FormatBool(v.Recipe.Wait))
 	}
 
 	fmt.Println("Reading screen element from", *screenElementPath)

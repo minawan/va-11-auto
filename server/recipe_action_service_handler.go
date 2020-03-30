@@ -78,7 +78,7 @@ func getFlagFromDrinkRecipeMap(drinkRecipeMap map[string]string, flagName string
 	return false, errors.New(fmt.Sprintf("Flag %s not found.", flagName))
 }
 
-func (handler *RecipeActionServiceHandler) loadDrinkRecipe(transactionId int64) (*DrinkRecipe, error) {
+func (handler *RecipeActionServiceHandler) loadDrinkRecipe(transactionId int64) (*RecipeInfo, error) {
 	key := fmt.Sprintf("recipe:%d", transactionId)
 	drinkRecipeMap := handler.RedisClient.HGetAll(key).Val()
 	adelhyde, err := getIngredientFromDrinkRecipeMap(drinkRecipeMap, "adelhyde")
@@ -113,7 +113,7 @@ func (handler *RecipeActionServiceHandler) loadDrinkRecipe(transactionId int64) 
 	if err != nil {
 		return nil, err
 	}
-	return &DrinkRecipe{Adelhyde: adelhyde, BronsonExtract: bronsonExtract, PowderedDelta: powderedDelta, Flanergide: flanergide, Karmotrine: karmotrine, AddIce: addIce, Age: age, Wait: wait}, nil
+	return &RecipeInfo{Adelhyde: adelhyde, BronsonExtract: bronsonExtract, PowderedDelta: powderedDelta, Flanergide: flanergide, Karmotrine: karmotrine, AddIce: addIce, Age: age, Wait: wait}, nil
 }
 
 func (handler *RecipeActionServiceHandler) receiveDrinkRecipe() (*recipeActionSpec, error) {
@@ -161,12 +161,12 @@ func (handler *RecipeActionServiceHandler) getRecipeActions() (int64, error) {
 	useShortcut := spec.useShortcut
 
 	key := fmt.Sprintf("actions:%d", transactionId)
-	drinkRecipe, err := handler.loadDrinkRecipe(transactionId)
+	recipeInfo, err := handler.loadDrinkRecipe(transactionId)
 	if err != nil {
 		fmt.Println(err)
 		return 0, err
 	}
-	fmt.Println(drinkRecipe)
+	fmt.Println(recipeInfo)
 
 	handler.RedisClient.Del(key)
 	if reset {
@@ -175,21 +175,21 @@ func (handler *RecipeActionServiceHandler) getRecipeActions() (int64, error) {
 
 	handler.emitSelectSlotAction(key, slot)
 
-	handler.emitAddIngredientAction(key, shared.ScreenElementType_ADELHYDE, drinkRecipe.Adelhyde)
-	handler.emitAddIngredientAction(key, shared.ScreenElementType_BRONSON_EXTRACT, drinkRecipe.BronsonExtract)
-	handler.emitAddIngredientAction(key, shared.ScreenElementType_POWDERED_DELTA, drinkRecipe.PowderedDelta)
-	handler.emitAddIngredientAction(key, shared.ScreenElementType_FLANERGIDE, drinkRecipe.Flanergide)
-	handler.emitAddIngredientAction(key, shared.ScreenElementType_KARMOTRINE, drinkRecipe.Karmotrine)
+	handler.emitAddIngredientAction(key, shared.ScreenElementType_ADELHYDE, recipeInfo.Adelhyde)
+	handler.emitAddIngredientAction(key, shared.ScreenElementType_BRONSON_EXTRACT, recipeInfo.BronsonExtract)
+	handler.emitAddIngredientAction(key, shared.ScreenElementType_POWDERED_DELTA, recipeInfo.PowderedDelta)
+	handler.emitAddIngredientAction(key, shared.ScreenElementType_FLANERGIDE, recipeInfo.Flanergide)
+	handler.emitAddIngredientAction(key, shared.ScreenElementType_KARMOTRINE, recipeInfo.Karmotrine)
 
-	if drinkRecipe.AddIce {
+	if recipeInfo.AddIce {
 		handler.emitAddIceAction(key)
 	}
 
-	if drinkRecipe.Age {
+	if recipeInfo.Age {
 		handler.emitAgeAction(key)
 	}
 
-	handler.emitMixAction(key, drinkRecipe.Wait)
+	handler.emitMixAction(key, recipeInfo.Wait)
 
 	if serve {
 		handler.emitServeAction(key)

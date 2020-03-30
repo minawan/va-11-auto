@@ -41,31 +41,31 @@ func (handler *DrinkRecipeServiceHandler) find(name shared.DrinkName) (*DrinkRec
 	}
 
 	if adelhydeValue, ok := drinkRecipeMap["adelhyde"]; ok {
-		drinkRecipe.Adelhyde, err = strconv.ParseInt(adelhydeValue, 10, 64)
+		drinkRecipe.Recipe.Adelhyde, err = strconv.ParseInt(adelhydeValue, 10, 64)
 		if err != nil {
 			return nil, err
 		}
 	}
 	if bronsonExtractValue, ok := drinkRecipeMap["bronson_extract"]; ok {
-		drinkRecipe.BronsonExtract, err = strconv.ParseInt(bronsonExtractValue, 10, 64)
+		drinkRecipe.Recipe.BronsonExtract, err = strconv.ParseInt(bronsonExtractValue, 10, 64)
 		if err != nil {
 			return nil, err
 		}
 	}
 	if powderedDeltaValue, ok := drinkRecipeMap["powdered_delta"]; ok {
-		drinkRecipe.PowderedDelta, err = strconv.ParseInt(powderedDeltaValue, 10, 64)
+		drinkRecipe.Recipe.PowderedDelta, err = strconv.ParseInt(powderedDeltaValue, 10, 64)
 		if err != nil {
 			return nil, err
 		}
 	}
 	if flanergideValue, ok := drinkRecipeMap["flanergide"]; ok {
-		drinkRecipe.Flanergide, err = strconv.ParseInt(flanergideValue, 10, 64)
+		drinkRecipe.Recipe.Flanergide, err = strconv.ParseInt(flanergideValue, 10, 64)
 		if err != nil {
 			return nil, err
 		}
 	}
 	if karmotrineValue, ok := drinkRecipeMap["karmotrine"]; ok {
-		drinkRecipe.Karmotrine, err = strconv.ParseInt(karmotrineValue, 10, 64)
+		drinkRecipe.Recipe.Karmotrine, err = strconv.ParseInt(karmotrineValue, 10, 64)
 		if err != nil {
 			return nil, err
 		}
@@ -75,38 +75,38 @@ func (handler *DrinkRecipeServiceHandler) find(name shared.DrinkName) (*DrinkRec
 		if err != nil {
 			return nil, err
 		}
-		drinkRecipe.AddIce = addIce
+		drinkRecipe.Recipe.AddIce = addIce
 	}
 	if ageValue, ok := drinkRecipeMap["age"]; ok {
 		age, err := strconv.ParseBool(ageValue)
 		if err != nil {
 			return nil, err
 		}
-		drinkRecipe.Age = age
+		drinkRecipe.Recipe.Age = age
 	}
 	if waitValue, ok := drinkRecipeMap["wait"]; ok {
 		wait, err := strconv.ParseBool(waitValue)
 		if err != nil {
 			return nil, err
 		}
-		drinkRecipe.Wait = wait
+		drinkRecipe.Recipe.Wait = wait
 	}
 
 	return &drinkRecipe, nil
 }
 
-func (handler *DrinkRecipeServiceHandler) emitDrinkRecipe(key string, drinkRecipe *DrinkRecipe) {
+func (handler *DrinkRecipeServiceHandler) emitRecipeInfo(key string, recipeInfo *RecipeInfo) {
 	handler.RedisClient.Del(key)
 	handler.RedisClient.HSet(
 		key,
-		"adelhyde", strconv.FormatInt(drinkRecipe.Adelhyde, 10),
-		"bronson_extract", strconv.FormatInt(drinkRecipe.BronsonExtract, 10),
-		"powdered_delta", strconv.FormatInt(drinkRecipe.PowderedDelta, 10),
-		"flanergide", strconv.FormatInt(drinkRecipe.Flanergide, 10),
-		"karmotrine", strconv.FormatInt(drinkRecipe.Karmotrine, 10),
-		"add_ice", strconv.FormatBool(drinkRecipe.AddIce),
-		"age", strconv.FormatBool(drinkRecipe.Age),
-		"wait", strconv.FormatBool(drinkRecipe.Wait))
+		"adelhyde", strconv.FormatInt(recipeInfo.Adelhyde, 10),
+		"bronson_extract", strconv.FormatInt(recipeInfo.BronsonExtract, 10),
+		"powdered_delta", strconv.FormatInt(recipeInfo.PowderedDelta, 10),
+		"flanergide", strconv.FormatInt(recipeInfo.Flanergide, 10),
+		"karmotrine", strconv.FormatInt(recipeInfo.Karmotrine, 10),
+		"add_ice", strconv.FormatBool(recipeInfo.AddIce),
+		"age", strconv.FormatBool(recipeInfo.Age),
+		"wait", strconv.FormatBool(recipeInfo.Wait))
 }
 
 func (handler *DrinkRecipeServiceHandler) receiveDrinkRecipeRequest() (*drinkRecipeSpec, error) {
@@ -189,19 +189,21 @@ func (handler *DrinkRecipeServiceHandler) getDrinkRecipe() (int64, error) {
 		return 0, err
 	}
 
+	recipeInfo := drinkRecipe.Recipe
+
 	if bigSize && !drinkRecipe.IsBig() {
-		drinkRecipe.Adelhyde *= 2
-		drinkRecipe.BronsonExtract *= 2
-		drinkRecipe.PowderedDelta *= 2
-		drinkRecipe.Flanergide *= 2
-		drinkRecipe.Karmotrine *= 2
+		recipeInfo.Adelhyde *= 2
+		recipeInfo.BronsonExtract *= 2
+		recipeInfo.PowderedDelta *= 2
+		recipeInfo.Flanergide *= 2
+		recipeInfo.Karmotrine *= 2
 	}
 
-	if drinkRecipe.Karmotrine < 0 && addKarmotrine {
-		drinkRecipe.Karmotrine = 1
+	if recipeInfo.Karmotrine < 0 && addKarmotrine {
+		recipeInfo.Karmotrine = 1
 	}
 
-	handler.emitDrinkRecipe(key, drinkRecipe)
+	handler.emitRecipeInfo(key, &recipeInfo)
 
 	err = handler.RedisClient.Publish("recipe.queue", fmt.Sprintf("%d %s %d %s %s", transactionId, strconv.FormatBool(reset), slot, strconv.FormatBool(serve), strconv.FormatBool(useShortcut))).Err()
 	if err != nil {

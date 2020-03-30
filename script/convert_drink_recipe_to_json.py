@@ -19,14 +19,20 @@ with open(input_filename, 'r') as csv_file:
     reader = csv.DictReader(csv_file)
     for row in reader:
         drink = dict()
-        drink['adelhyde'] = int(row['adelhyde'])
-        drink['bronsonExtract'] = int(row['bronson_extract'])
-        drink['powderedDelta'] = int(row['powdered_delta'])
-        drink['flanergide'] = int(row['flanergide'])
-        drink['karmotrine'] = int(row['karmotrine'])
-        drink['addIce'] = row['add_ice'] == 'Y'
-        drink['age'] = row['age'] == 'Y'
-        drink['wait'] = row['wait'] == 'Y'
+        drink['flavor'] = row['flavor']
+        drink['kind'] = row['kind']
+        drink['trait'] = row['trait']
+        drink['price'] = int(row['price'])
+        recipe = dict()
+        recipe['adelhyde'] = int(row['adelhyde'])
+        recipe['bronsonExtract'] = int(row['bronson_extract'])
+        recipe['powderedDelta'] = int(row['powdered_delta'])
+        recipe['flanergide'] = int(row['flanergide'])
+        recipe['karmotrine'] = int(row['karmotrine'])
+        recipe['addIce'] = row['add_ice'] == 'Y'
+        recipe['age'] = row['age'] == 'Y'
+        recipe['wait'] = row['wait'] == 'Y'
+        drink['recipe'] = recipe
         items[row['name']] = drink
 
 with open(output_filename, 'w') as output_file:
