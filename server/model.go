@@ -1,11 +1,11 @@
 package main
 
 type RecipeInfo struct {
-	Adelhyde       int32
-	BronsonExtract int32
-	PowderedDelta  int32
-	Flanergide     int32
-	Karmotrine     int32
+	Adelhyde       int64
+	BronsonExtract int64
+	PowderedDelta  int64
+	Flanergide     int64
+	Karmotrine     int64
 	AddIce         bool
 	Age            bool
 	Wait           bool
@@ -15,7 +15,7 @@ type DrinkRecipe struct {
 	Flavor string
 	Kind   string
 	Trait  string
-	Price  int32
+	Price  int
 	Recipe RecipeInfo
 }
 

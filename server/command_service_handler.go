@@ -7,7 +7,6 @@ import (
 	"github.com/go-redis/redis/v7"
 	"github.com/minawan/va-11-auto/thrift/gen-go/action"
 	"github.com/minawan/va-11-auto/thrift/gen-go/command"
-	"github.com/minawan/va-11-auto/thrift/gen-go/recipe"
 	"github.com/minawan/va-11-auto/thrift/gen-go/shared"
 	"strconv"
 	"strings"
@@ -163,7 +162,7 @@ func (handler *CommandServiceHandler) receiveRecipeActions(actionsQueue <-chan *
 	}
 }
 
-func (handler *CommandServiceHandler) GetCommands(ctx context.Context, drinkName recipe.DrinkName, addKarmotrine bool, bigSize bool, reset bool, slot shared.ScreenElementType, serve bool, useShortcut bool) ([]*command.Command, error) {
+func (handler *CommandServiceHandler) GetCommands(ctx context.Context, drinkName shared.DrinkName, addKarmotrine bool, bigSize bool, reset bool, slot shared.ScreenElementType, serve bool, useShortcut bool) ([]*command.Command, error) {
 	transactionId := handler.getNextTransactionId()
 	actionsQueue := handler.redisClient.Subscribe(fmt.Sprintf("actions.queue.%d", transactionId)).Channel()
 	err := handler.redisClient.Publish("request.queue", fmt.Sprintf("%d %d %s %s %s %d %s %s", transactionId, drinkName, strconv.FormatBool(addKarmotrine), strconv.FormatBool(bigSize), strconv.FormatBool(reset), slot, strconv.FormatBool(serve), strconv.FormatBool(useShortcut))).Err()

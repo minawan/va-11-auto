@@ -4,8 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-redis/redis/v7"
-	"github.com/minawan/va-11-auto/thrift/gen-go/action"
-	"github.com/minawan/va-11-auto/thrift/gen-go/recipe"
 	"github.com/minawan/va-11-auto/thrift/gen-go/shared"
 	"strconv"
 	"strings"
@@ -24,7 +22,7 @@ type recipeActionSpec struct {
 	useShortcut   bool
 }
 
-func NewRecipeActionServiceHandler(redisClient *redis.Client) action.RecipeActionService {
+func NewRecipeActionServiceHandler(redisClient *redis.Client) *RecipeActionServiceHandler {
 	handler := RecipeActionServiceHandler{RedisClient: redisClient, recipeQueue: redisClient.Subscribe("recipe.queue").Channel()}
 	go handler.run()
 	return &handler
@@ -38,7 +36,7 @@ func (handler *RecipeActionServiceHandler) emitSelectSlotAction(key string, slot
 	handler.RedisClient.LPush(key, fmt.Sprintf("SELECT_SLOT %d", slot))
 }
 
-func (handler *RecipeActionServiceHandler) emitAddIngredientAction(key string, ingredient shared.ScreenElementType, quantity int32) {
+func (handler *RecipeActionServiceHandler) emitAddIngredientAction(key string, ingredient shared.ScreenElementType, quantity int64) {
 	handler.RedisClient.LPush(key, fmt.Sprintf("ADD_INGREDIENT %d %d", ingredient, quantity))
 }
 
@@ -62,13 +60,13 @@ func (handler *RecipeActionServiceHandler) emitServeAction(key string) {
 	handler.RedisClient.LPush(key, "SERVE")
 }
 
-func getIngredientFromDrinkRecipeMap(drinkRecipeMap map[string]string, ingredientName string) (int32, error) {
+func getIngredientFromDrinkRecipeMap(drinkRecipeMap map[string]string, ingredientName string) (int64, error) {
 	if ingredientValue, ok := drinkRecipeMap[ingredientName]; ok {
 		ingredientCount, err := strconv.ParseInt(ingredientValue, 10, 32)
 		if err != nil {
 			return 0, err
 		}
-		return int32(ingredientCount), nil
+		return ingredientCount, nil
 	}
 	return 0, errors.New(fmt.Sprintf("Ingredient %s not found.", ingredientName))
 }
@@ -80,44 +78,42 @@ func getFlagFromDrinkRecipeMap(drinkRecipeMap map[string]string, flagName string
 	return false, errors.New(fmt.Sprintf("Flag %s not found.", flagName))
 }
 
-func (handler *RecipeActionServiceHandler) loadDrinkRecipe(transactionId int64) (drinkRecipe *recipe.DrinkRecipe, err error) {
-	drinkRecipe = recipe.NewDrinkRecipe()
-	drinkRecipe.Quantity = make(map[shared.ScreenElementType]int32)
+func (handler *RecipeActionServiceHandler) loadDrinkRecipe(transactionId int64) (*RecipeInfo, error) {
 	key := fmt.Sprintf("recipe:%d", transactionId)
 	drinkRecipeMap := handler.RedisClient.HGetAll(key).Val()
-	drinkRecipe.Quantity[shared.ScreenElementType_ADELHYDE], err = getIngredientFromDrinkRecipeMap(drinkRecipeMap, "adelhyde")
+	adelhyde, err := getIngredientFromDrinkRecipeMap(drinkRecipeMap, "adelhyde")
 	if err != nil {
 		return nil, err
 	}
-	drinkRecipe.Quantity[shared.ScreenElementType_BRONSON_EXTRACT], err = getIngredientFromDrinkRecipeMap(drinkRecipeMap, "bronson_extract")
+	bronsonExtract, err := getIngredientFromDrinkRecipeMap(drinkRecipeMap, "bronson_extract")
 	if err != nil {
 		return nil, err
 	}
-	drinkRecipe.Quantity[shared.ScreenElementType_POWDERED_DELTA], err = getIngredientFromDrinkRecipeMap(drinkRecipeMap, "powdered_delta")
+	powderedDelta, err := getIngredientFromDrinkRecipeMap(drinkRecipeMap, "powdered_delta")
 	if err != nil {
 		return nil, err
 	}
-	drinkRecipe.Quantity[shared.ScreenElementType_FLANERGIDE], err = getIngredientFromDrinkRecipeMap(drinkRecipeMap, "flanergide")
+	flanergide, err := getIngredientFromDrinkRecipeMap(drinkRecipeMap, "flanergide")
 	if err != nil {
 		return nil, err
 	}
-	drinkRecipe.Quantity[shared.ScreenElementType_KARMOTRINE], err = getIngredientFromDrinkRecipeMap(drinkRecipeMap, "karmotrine")
+	karmotrine, err := getIngredientFromDrinkRecipeMap(drinkRecipeMap, "karmotrine")
 	if err != nil {
 		return nil, err
 	}
-	drinkRecipe.AddIce, err = getFlagFromDrinkRecipeMap(drinkRecipeMap, "add_ice")
+	addIce, err := getFlagFromDrinkRecipeMap(drinkRecipeMap, "add_ice")
 	if err != nil {
 		return nil, err
 	}
-	drinkRecipe.Age, err = getFlagFromDrinkRecipeMap(drinkRecipeMap, "age")
+	age, err := getFlagFromDrinkRecipeMap(drinkRecipeMap, "age")
 	if err != nil {
 		return nil, err
 	}
-	drinkRecipe.Blend, err = getFlagFromDrinkRecipeMap(drinkRecipeMap, "wait")
+	wait, err := getFlagFromDrinkRecipeMap(drinkRecipeMap, "wait")
 	if err != nil {
 		return nil, err
 	}
-	return drinkRecipe, nil
+	return &RecipeInfo{Adelhyde: adelhyde, BronsonExtract: bronsonExtract, PowderedDelta: powderedDelta, Flanergide: flanergide, Karmotrine: karmotrine, AddIce: addIce, Age: age, Wait: wait}, nil
 }
 
 func (handler *RecipeActionServiceHandler) receiveDrinkRecipe() (*recipeActionSpec, error) {
@@ -165,12 +161,12 @@ func (handler *RecipeActionServiceHandler) getRecipeActions() (int64, error) {
 	useShortcut := spec.useShortcut
 
 	key := fmt.Sprintf("actions:%d", transactionId)
-	drinkRecipe, err := handler.loadDrinkRecipe(transactionId)
+	recipeInfo, err := handler.loadDrinkRecipe(transactionId)
 	if err != nil {
 		fmt.Println(err)
 		return 0, err
 	}
-	fmt.Println(drinkRecipe)
+	fmt.Println(recipeInfo)
 
 	handler.RedisClient.Del(key)
 	if reset {
@@ -179,19 +175,21 @@ func (handler *RecipeActionServiceHandler) getRecipeActions() (int64, error) {
 
 	handler.emitSelectSlotAction(key, slot)
 
-	for ingredient, quantity := range drinkRecipe.Quantity {
-		handler.emitAddIngredientAction(key, ingredient, quantity)
-	}
+	handler.emitAddIngredientAction(key, shared.ScreenElementType_ADELHYDE, recipeInfo.Adelhyde)
+	handler.emitAddIngredientAction(key, shared.ScreenElementType_BRONSON_EXTRACT, recipeInfo.BronsonExtract)
+	handler.emitAddIngredientAction(key, shared.ScreenElementType_POWDERED_DELTA, recipeInfo.PowderedDelta)
+	handler.emitAddIngredientAction(key, shared.ScreenElementType_FLANERGIDE, recipeInfo.Flanergide)
+	handler.emitAddIngredientAction(key, shared.ScreenElementType_KARMOTRINE, recipeInfo.Karmotrine)
 
-	if drinkRecipe.AddIce {
+	if recipeInfo.AddIce {
 		handler.emitAddIceAction(key)
 	}
 
-	if drinkRecipe.Age {
+	if recipeInfo.Age {
 		handler.emitAgeAction(key)
 	}
 
-	handler.emitMixAction(key, drinkRecipe.Blend)
+	handler.emitMixAction(key, recipeInfo.Wait)
 
 	if serve {
 		handler.emitServeAction(key)
