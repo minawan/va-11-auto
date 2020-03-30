@@ -1,5 +1,3 @@
-include "action.thrift"
-include "recipe.thrift"
 include "shared.thrift"
 
 struct ClickCommand {
@@ -28,7 +26,7 @@ union Command {
 
 service CommandService {
   list<Command> getCommands(
-    1: recipe.DrinkName drinkName,
+    1: shared.DrinkName drinkName,
     2: bool addKarmotrine,
     3: bool bigSize,
     4: bool reset,

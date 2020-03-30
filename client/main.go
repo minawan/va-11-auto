@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/apache/thrift/lib/go/thrift"
 	"github.com/minawan/va-11-auto/thrift/gen-go/command"
-	"github.com/minawan/va-11-auto/thrift/gen-go/recipe"
 	"github.com/minawan/va-11-auto/thrift/gen-go/shared"
 	"log"
 	"os"
@@ -38,31 +37,31 @@ func main() {
 	reset := true
 	//reset := false
 
-	//drinkName := recipe.DrinkName_BAD_TOUCH
-	drinkName := recipe.DrinkName_BEER
-	//drinkName := recipe.DrinkName_BLEEDING_JANE
-	//drinkName := recipe.DrinkName_BLOOM_LIGHT
-	//drinkName := recipe.DrinkName_BLUE_FAIRY
-	//drinkName := recipe.DrinkName_BRANDTINI
-	//drinkName := recipe.DrinkName_COBALT_VELVET
-	//drinkName := recipe.DrinkName_CREVICE_SPIKE
-	//drinkName := recipe.DrinkName_FLUFFY_DREAM
-	//drinkName := recipe.DrinkName_FRINGE_WEAVER
-	//drinkName := recipe.DrinkName_FROTHY_WATER
-	//drinkName := recipe.DrinkName_GRIZZLY_TEMPLE
-	//drinkName := recipe.DrinkName_GUT_PUNCH
-	//drinkName := recipe.DrinkName_MARSBLAST
-	//drinkName := recipe.DrinkName_MERCURYBLAST
-	//drinkName := recipe.DrinkName_MOONBLAST
-	//drinkName := recipe.DrinkName_PIANO_MAN
-	//drinkName := recipe.DrinkName_PIANO_WOMAN
-	//drinkName := recipe.DrinkName_PILEDRIVER
-	//drinkName := recipe.DrinkName_SPARKLE_STAR
-	//drinkName := recipe.DrinkName_SUGAR_RUSH
-	//drinkName := recipe.DrinkName_SUNSHINE_CLOUD
-	//drinkName := recipe.DrinkName_SUPLEX
-	//drinkName := recipe.DrinkName_ZEN_STAR
-	//drinkName := recipe.DrinkName_FLAMING_MOAI
+	//drinkName := shared.DrinkName_BAD_TOUCH
+	drinkName := shared.DrinkName_BEER
+	//drinkName := shared.DrinkName_BLEEDING_JANE
+	//drinkName := shared.DrinkName_BLOOM_LIGHT
+	//drinkName := shared.DrinkName_BLUE_FAIRY
+	//drinkName := shared.DrinkName_BRANDTINI
+	//drinkName := shared.DrinkName_COBALT_VELVET
+	//drinkName := shared.DrinkName_CREVICE_SPIKE
+	//drinkName := shared.DrinkName_FLUFFY_DREAM
+	//drinkName := shared.DrinkName_FRINGE_WEAVER
+	//drinkName := shared.DrinkName_FROTHY_WATER
+	//drinkName := shared.DrinkName_GRIZZLY_TEMPLE
+	//drinkName := shared.DrinkName_GUT_PUNCH
+	//drinkName := shared.DrinkName_MARSBLAST
+	//drinkName := shared.DrinkName_MERCURYBLAST
+	//drinkName := shared.DrinkName_MOONBLAST
+	//drinkName := shared.DrinkName_PIANO_MAN
+	//drinkName := shared.DrinkName_PIANO_WOMAN
+	//drinkName := shared.DrinkName_PILEDRIVER
+	//drinkName := shared.DrinkName_SPARKLE_STAR
+	//drinkName := shared.DrinkName_SUGAR_RUSH
+	//drinkName := shared.DrinkName_SUNSHINE_CLOUD
+	//drinkName := shared.DrinkName_SUPLEX
+	//drinkName := shared.DrinkName_ZEN_STAR
+	//drinkName := shared.DrinkName_FLAMING_MOAI
 
 	transportFactory := thrift.NewTBufferedTransportFactory(bufferSize)
 	protocolFactory := thrift.NewTBinaryProtocolFactoryDefault()

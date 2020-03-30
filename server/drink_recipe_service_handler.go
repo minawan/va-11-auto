@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"github.com/go-redis/redis/v7"
-	"github.com/minawan/va-11-auto/thrift/gen-go/recipe"
 	"github.com/minawan/va-11-auto/thrift/gen-go/shared"
 	"strconv"
 	"strings"
@@ -16,7 +15,7 @@ type DrinkRecipeServiceHandler struct {
 
 type drinkRecipeSpec struct {
 	transactionId int64
-	drinkName     recipe.DrinkName
+	drinkName     shared.DrinkName
 	addKarmotrine bool
 	bigSize       bool
 	reset         bool
@@ -34,7 +33,7 @@ func NewDrinkRecipeServiceHandler(redisClient *redis.Client) *DrinkRecipeService
 	return &handler
 }
 
-func (handler *DrinkRecipeServiceHandler) find(name recipe.DrinkName) (*DrinkRecipe, error) {
+func (handler *DrinkRecipeServiceHandler) find(name shared.DrinkName) (*DrinkRecipe, error) {
 	var drinkRecipe DrinkRecipe
 	drinkRecipeMap, err := handler.RedisClient.HGetAll("recipe:" + name.String()).Result()
 	if err != nil {
@@ -42,39 +41,34 @@ func (handler *DrinkRecipeServiceHandler) find(name recipe.DrinkName) (*DrinkRec
 	}
 
 	if adelhydeValue, ok := drinkRecipeMap["adelhyde"]; ok {
-		adelhyde, err := strconv.ParseInt(adelhydeValue, 10, 32)
+		drinkRecipe.Recipe.Adelhyde, err = strconv.ParseInt(adelhydeValue, 10, 32)
 		if err != nil {
 			return nil, err
 		}
-		drinkRecipe.Recipe.Adelhyde = int32(adelhyde)
 	}
 	if bronsonExtractValue, ok := drinkRecipeMap["bronson_extract"]; ok {
-		bronsonExtract, err := strconv.ParseInt(bronsonExtractValue, 10, 32)
+		drinkRecipe.Recipe.BronsonExtract, err = strconv.ParseInt(bronsonExtractValue, 10, 32)
 		if err != nil {
 			return nil, err
 		}
-		drinkRecipe.Recipe.BronsonExtract = int32(bronsonExtract)
 	}
 	if powderedDeltaValue, ok := drinkRecipeMap["powdered_delta"]; ok {
-		powderedDelta, err := strconv.ParseInt(powderedDeltaValue, 10, 32)
+		drinkRecipe.Recipe.PowderedDelta, err = strconv.ParseInt(powderedDeltaValue, 10, 32)
 		if err != nil {
 			return nil, err
 		}
-		drinkRecipe.Recipe.PowderedDelta = int32(powderedDelta)
 	}
 	if flanergideValue, ok := drinkRecipeMap["flanergide"]; ok {
-		flanergide, err := strconv.ParseInt(flanergideValue, 10, 32)
+		drinkRecipe.Recipe.Flanergide, err = strconv.ParseInt(flanergideValue, 10, 32)
 		if err != nil {
 			return nil, err
 		}
-		drinkRecipe.Recipe.Flanergide = int32(flanergide)
 	}
 	if karmotrineValue, ok := drinkRecipeMap["karmotrine"]; ok {
-		karmotrine, err := strconv.ParseInt(karmotrineValue, 10, 32)
+		drinkRecipe.Recipe.Karmotrine, err = strconv.ParseInt(karmotrineValue, 10, 32)
 		if err != nil {
 			return nil, err
 		}
-		drinkRecipe.Recipe.Karmotrine = int32(karmotrine)
 	}
 	if addIceValue, ok := drinkRecipeMap["add_ice"]; ok {
 		addIce, err := strconv.ParseBool(addIceValue)
@@ -101,19 +95,15 @@ func (handler *DrinkRecipeServiceHandler) find(name recipe.DrinkName) (*DrinkRec
 	return &drinkRecipe, nil
 }
 
-func convertInt32ToString(value int32) string {
-	return strconv.FormatInt(int64(value), 10)
-}
-
 func (handler *DrinkRecipeServiceHandler) emitRecipeInfo(key string, recipeInfo *RecipeInfo) {
 	handler.RedisClient.Del(key)
 	handler.RedisClient.HSet(
 		key,
-		"adelhyde", convertInt32ToString(recipeInfo.Adelhyde),
-		"bronson_extract", convertInt32ToString(recipeInfo.BronsonExtract),
-		"powdered_delta", convertInt32ToString(recipeInfo.PowderedDelta),
-		"flanergide", convertInt32ToString(recipeInfo.Flanergide),
-		"karmotrine", convertInt32ToString(recipeInfo.Karmotrine),
+		"adelhyde", strconv.FormatInt(recipeInfo.Adelhyde, 10),
+		"bronson_extract", strconv.FormatInt(recipeInfo.BronsonExtract, 10),
+		"powdered_delta", strconv.FormatInt(recipeInfo.PowderedDelta, 10),
+		"flanergide", strconv.FormatInt(recipeInfo.Flanergide, 10),
+		"karmotrine", strconv.FormatInt(recipeInfo.Karmotrine, 10),
 		"add_ice", strconv.FormatBool(recipeInfo.AddIce),
 		"age", strconv.FormatBool(recipeInfo.Age),
 		"wait", strconv.FormatBool(recipeInfo.Wait))
@@ -161,7 +151,7 @@ func (handler *DrinkRecipeServiceHandler) receiveDrinkRecipeRequest() (*drinkRec
 	}
 	return &drinkRecipeSpec{
 		transactionId: transactionId,
-		drinkName:     recipe.DrinkName(drinkName),
+		drinkName:     shared.DrinkName(drinkName),
 		addKarmotrine: addKarmotrine,
 		bigSize:       bigSize,
 		reset:         reset,
@@ -190,7 +180,7 @@ func (handler *DrinkRecipeServiceHandler) getDrinkRecipe() (int64, error) {
 	fmt.Println(drinkName.String())
 	key := fmt.Sprintf("recipe:%d", transactionId)
 
-	if bigSize && drinkName == recipe.DrinkName_CREVICE_SPIKE {
+	if bigSize && drinkName == shared.DrinkName_CREVICE_SPIKE {
 		addKarmotrine = true
 	}
 
