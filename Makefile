@@ -1,7 +1,7 @@
 export input_directory := data
 export output_directory := output
 
-.PHONY: all thrift clean
+.PHONY: all thrift clean data
 
 all: build
 
@@ -10,7 +10,7 @@ build: client server
 thrift:
 	$(MAKE) -C thrift
 
-data: $(input_directory)/DrinkRecipe.ods $(input_directory)/ScreenElement.ods
+data: $(input_directory)/DrinkRecipe.csv $(input_directory)/ScreenElement.csv
 	mkdir -p $(output_directory)
 	$(MAKE) -C script
 
