@@ -19,9 +19,53 @@ WITH RefinedInput AS (
 	SELECT 'RESET' AS action
 	FROM RefinedInput
 	WHERE reset
+), BaseDrinkRow AS (
+	SELECT
+		adelhyde,
+		bronson_extract,
+		powdered_delta,
+		flanergide,
+		karmotrine,
+		add_ice,
+		age,
+		wait,
+		CASE
+			WHEN adelhyde + bronson_extract + powdered_delta + flanergide + karmotrine <= 10 THEN double
+			ELSE 0
+		END AS double,
+		add_opt
+	FROM RefinedInput
+	JOIN DrinkRecipe
+	ON drink_name = name
+), BigDrinkRow AS (
+	SELECT
+		CASE
+			WHEN double THEN 2 * adelhyde
+			ELSE adelhyde
+		END AS adelhyde,
+		CASE
+			WHEN double THEN 2 * bronson_extract
+			ELSE bronson_extract
+		END AS bronson_extract,
+		CASE
+			WHEN double THEN 2 * powdered_delta
+			ELSE powdered_delta
+		END AS powdered_delta,
+		CASE
+			WHEN double THEN 2 * flanergide
+			ELSE flanergide
+		END AS flanergide,
+		CASE
+			WHEN double AND karmotrine != -1 THEN 2 * karmotrine
+			ELSE karmotrine
+		END AS karmotrine,
+		add_ice,
+		age,
+		wait,
+		add_opt
+	FROM BaseDrinkRow
 ), DrinkRow AS (
 	SELECT
-		name,
 		adelhyde,
 		bronson_extract,
 		powdered_delta,
@@ -34,9 +78,7 @@ WITH RefinedInput AS (
 		add_ice,
 		age,
 		wait
-	FROM RefinedInput
-	JOIN DrinkRecipe
-	ON drink_name = name
+	FROM BigDrinkRow
 ), AdelhydeCount(n) AS (
 	SELECT 1
 	FROM DrinkRow
