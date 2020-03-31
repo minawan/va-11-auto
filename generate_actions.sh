@@ -152,6 +152,8 @@ WITH RefinedInput AS (
 	CROSS JOIN (
 		SELECT 'KARMOTRINE' AS action
 	)
+), ServeAction AS (
+	SELECT 'MIX' AS action
 ), RecipeActions AS (
 	SELECT action
 	FROM ResetAction
@@ -161,6 +163,9 @@ WITH RefinedInput AS (
 	UNION ALL
 	SELECT action
 	FROM IngredientActions
+	UNION ALL
+	SELECT action
+	FROM ServeAction
 )
 SELECT action, xCoord, yCoord, shortcut
 FROM RecipeActions
