@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+OUTPUT_FILENAME=output.txt
+
 csvsql --query "
 
 WITH RefinedInput AS (
@@ -237,4 +239,6 @@ SELECT
 	END AS getmouselocation
 FROM Targets
 
-" Input.csv DrinkRecipe.csv ScreenElement.csv
+" Input.csv DrinkRecipe.csv ScreenElement.csv > ${OUTPUT_FILENAME}
+
+xdotool ${OUTPUT_FILENAME}
