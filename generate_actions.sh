@@ -160,6 +160,17 @@ WITH RefinedInput AS (
 	SELECT 'AGE' AS action
 	FROM RefinedDrinkRecipe
 	WHERE age
+), MixAction AS (
+	SELECT 'MIX' AS action
+	UNION ALL
+	SELECT
+		CASE
+			WHEN wait THEN 'LONG_WAIT'
+			ELSE 'SHORT_WAIT'
+		END AS action
+	FROM RefinedDrinkRecipe
+	UNION ALL
+	SELECT 'MIX' AS action
 ), ServeAction AS (
 	SELECT 'MIX' AS action
 	FROM RefinedInput
@@ -179,6 +190,9 @@ WITH RefinedInput AS (
 	UNION ALL
 	SELECT action
 	FROM AgeAction
+	UNION ALL
+	SELECT action
+	FROM MixAction
 	UNION ALL
 	SELECT action
 	FROM ServeAction
