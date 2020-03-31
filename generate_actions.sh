@@ -12,8 +12,7 @@ WITH RefinedInput AS (
 			WHEN drink_name = 'CREVICE_SPIKE' AND double THEN 1
 			ELSE add_opt
 		END AS add_opt,
-		serve,
-		use_shortcut
+		serve
 	FROM Input
 ), ResetAction AS (
 	SELECT 'RESET' AS action
@@ -210,21 +209,32 @@ WITH RefinedInput AS (
 		action AS src,
 		action AS dst
 	FROM ServeAction
+), Targets AS (
+	SELECT
+		src AS target,
+		Source.xCoord AS src_x,
+		Source.yCoord AS src_y,
+		Destination.xCoord AS dst_x,
+		Destination.yCoord AS dst_y,
+		Source.shortcut
+	FROM RecipeActions
+	LEFT JOIN
+	ScreenElement Source
+	ON src = Source.name
+	LEFT JOIN
+	ScreenElement Destination
+	ON dst = Destination.name
 )
 SELECT
-	src AS action,
-	Source.xCoord AS src_x,
-	Source.yCoord AS src_y,
-	Destination.xCoord AS dst_x,
-	Destination.yCoord AS dst_y,
-	Source.shortcut
-FROM RecipeActions
-LEFT JOIN
-ScreenElement Source
-ON src = Source.name
-LEFT JOIN
-ScreenElement Destination
-ON dst = Destination.name
-;
+	CASE
+		WHEN shortcut IS NULL THEN
+			CASE target
+				WHEN 'SHORT_WAIT' THEN 'sleep 1'
+				WHEN 'LONG_WAIT' THEN 'sleep 5'
+				ELSE PRINTF('mousemove %d %d sleep 0.5 mousedown 1 mousemove %d %d sleep 0.5 mouseup 1', src_x, src_y, dst_x, dst_y)
+			END
+		ELSE PRINTF('key --delay 100 %s', shortcut)
+	END AS getmouselocation
+FROM Targets
 
-" Input.csv DrinkRecipe.csv ScreenElement.csv | csvlook
+" Input.csv DrinkRecipe.csv ScreenElement.csv

@@ -1,2 +1,2 @@
-drink_name,reset,slot,double,add_opt,serve,use_shortcut
-SUNSHINE_CLOUD,Y,LEFT_SLOT,N,N,N,N
+drink_name,reset,slot,double,add_opt,serve
+BEER,Y,LEFT_SLOT,N,N,N
