@@ -19,6 +19,9 @@ WITH RefinedInput AS (
 	SELECT 'RESET' AS action
 	FROM RefinedInput
 	WHERE reset
+), SelectSlotAction AS (
+	SELECT slot AS action
+	FROM RefinedInput
 ), BaseDrinkRow AS (
 	SELECT
 		adelhyde,
@@ -152,6 +155,9 @@ WITH RefinedInput AS (
 ), RecipeActions AS (
 	SELECT action
 	FROM ResetAction
+	UNION ALL
+	SELECT action
+	FROM SelectSlotAction
 	UNION ALL
 	SELECT action
 	FROM IngredientActions
