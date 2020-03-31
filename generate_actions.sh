@@ -2,9 +2,22 @@
 
 csvsql --query "
 
-WITH ResetAction AS (
-	SELECT 'RESET' AS action
+WITH RefinedInput AS (
+	SELECT
+		drink_name,
+		reset,
+		slot,
+		double,
+		CASE
+			WHEN drink_name = 'CREVICE_SPIKE' AND double THEN 1
+			ELSE add_opt
+		END AS add_opt,
+		serve,
+		use_shortcut
 	FROM Input
+), ResetAction AS (
+	SELECT 'RESET' AS action
+	FROM RefinedInput
 	WHERE reset
 ), DrinkRow AS (
 	SELECT
@@ -14,14 +27,14 @@ WITH ResetAction AS (
 		powdered_delta,
 		flanergide,
 		CASE
-			WHEN add_opt THEN 1
+			WHEN add_opt AND karmotrine = -1 THEN 1
 			WHEN karmotrine = -1 THEN 0
 			ELSE karmotrine
 		END AS karmotrine,
 		add_ice,
 		age,
 		wait
-	FROM Input
+	FROM RefinedInput
 	JOIN DrinkRecipe
 	ON drink_name = name
 ), AdelhydeCount(n) AS (
