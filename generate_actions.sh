@@ -22,7 +22,7 @@ WITH RefinedInput AS (
 ), SelectSlotAction AS (
 	SELECT slot AS action
 	FROM RefinedInput
-), BaseDrinkRow AS (
+), BaseDrinkRecipe AS (
 	SELECT
 		adelhyde,
 		bronson_extract,
@@ -40,7 +40,7 @@ WITH RefinedInput AS (
 	FROM RefinedInput
 	JOIN DrinkRecipe
 	ON drink_name = name
-), BigDrinkRow AS (
+), BigDrinkRecipe AS (
 	SELECT
 		CASE
 			WHEN double THEN 2 * adelhyde
@@ -66,8 +66,8 @@ WITH RefinedInput AS (
 		age,
 		wait,
 		add_opt
-	FROM BaseDrinkRow
-), DrinkRow AS (
+	FROM BaseDrinkRecipe
+), RefinedDrinkRecipe AS (
 	SELECT
 		adelhyde,
 		bronson_extract,
@@ -81,47 +81,47 @@ WITH RefinedInput AS (
 		add_ice,
 		age,
 		wait
-	FROM BigDrinkRow
+	FROM BigDrinkRecipe
 ), AdelhydeCount(n) AS (
 	SELECT 1
-	FROM DrinkRow
-	WHERE DrinkRow.adelhyde != 0
+	FROM RefinedDrinkRecipe
+	WHERE RefinedDrinkRecipe.adelhyde != 0
 	UNION ALL
 	SELECT n + 1
-	FROM AdelhydeCount, DrinkRow
-	WHERE n < DrinkRow.adelhyde
+	FROM AdelhydeCount, RefinedDrinkRecipe
+	WHERE n < RefinedDrinkRecipe.adelhyde
 ), BronsonExtractCount(n) AS (
 	SELECT 1
-	FROM DrinkRow
-	WHERE DrinkRow.bronson_extract != 0
+	FROM RefinedDrinkRecipe
+	WHERE RefinedDrinkRecipe.bronson_extract != 0
 	UNION ALL
 	SELECT n + 1
-	FROM BronsonExtractCount, DrinkRow
-	WHERE n < DrinkRow.bronson_extract
+	FROM BronsonExtractCount, RefinedDrinkRecipe
+	WHERE n < RefinedDrinkRecipe.bronson_extract
 ), PowderedDeltaCount(n) AS (
 	SELECT 1
-	FROM DrinkRow
-	WHERE DrinkRow.powdered_delta != 0
+	FROM RefinedDrinkRecipe
+	WHERE RefinedDrinkRecipe.powdered_delta != 0
 	UNION ALL
 	SELECT n + 1
-	FROM PowderedDeltaCount, DrinkRow
-	WHERE n < DrinkRow.powdered_delta
+	FROM PowderedDeltaCount, RefinedDrinkRecipe
+	WHERE n < RefinedDrinkRecipe.powdered_delta
 ), FlanergideCount(n) AS (
 	SELECT 1
-	FROM DrinkRow
-	WHERE DrinkRow.flanergide != 0
+	FROM RefinedDrinkRecipe
+	WHERE RefinedDrinkRecipe.flanergide != 0
 	UNION ALL
 	SELECT n + 1
-	FROM FlanergideCount, DrinkRow
-	WHERE n < DrinkRow.flanergide
+	FROM FlanergideCount, RefinedDrinkRecipe
+	WHERE n < RefinedDrinkRecipe.flanergide
 ), KarmotrineCount(n) AS (
 	SELECT 1
-	FROM DrinkRow
-	WHERE DrinkRow.karmotrine != 0
+	FROM RefinedDrinkRecipe
+	WHERE RefinedDrinkRecipe.karmotrine != 0
 	UNION ALL
 	SELECT n + 1
-	FROM KarmotrineCount, DrinkRow
-	WHERE n < DrinkRow.karmotrine
+	FROM KarmotrineCount, RefinedDrinkRecipe
+	WHERE n < RefinedDrinkRecipe.karmotrine
 ), IngredientActions AS (
 	SELECT action
 	FROM AdelhydeCount
@@ -152,8 +152,14 @@ WITH RefinedInput AS (
 	CROSS JOIN (
 		SELECT 'KARMOTRINE' AS action
 	)
+), AddIceAction AS (
+	SELECT 'ADD_ICE' AS action
+	FROM RefinedDrinkRecipe
+	WHERE add_ice
 ), ServeAction AS (
 	SELECT 'MIX' AS action
+	FROM RefinedInput
+	WHERE serve
 ), RecipeActions AS (
 	SELECT action
 	FROM ResetAction
@@ -163,6 +169,9 @@ WITH RefinedInput AS (
 	UNION ALL
 	SELECT action
 	FROM IngredientActions
+	UNION ALL
+	SELECT action
+	FROM AddIceAction
 	UNION ALL
 	SELECT action
 	FROM ServeAction
