@@ -176,32 +176,55 @@ WITH RefinedInput AS (
 	FROM RefinedInput
 	WHERE serve
 ), RecipeActions AS (
-	SELECT action
+	SELECT
+		action AS src,
+		action AS dst
 	FROM ResetAction
 	UNION ALL
-	SELECT action
+	SELECT
+		action AS src,
+		action AS dst
 	FROM SelectSlotAction
 	UNION ALL
-	SELECT action
+	SELECT
+		action AS src,
+		'BLENDER' AS dst
 	FROM IngredientActions
 	UNION ALL
-	SELECT action
+	SELECT
+		action AS src,
+		action AS dst
 	FROM AddIceAction
 	UNION ALL
-	SELECT action
+	SELECT
+		action AS src,
+		action AS dst
 	FROM AgeAction
 	UNION ALL
-	SELECT action
+	SELECT
+		action AS src,
+		action AS dst
 	FROM MixAction
 	UNION ALL
-	SELECT action
+	SELECT
+		action AS src,
+		action AS dst
 	FROM ServeAction
 )
-SELECT action, xCoord, yCoord, shortcut
+SELECT
+	src AS action,
+	Source.xCoord AS src_x,
+	Source.yCoord AS src_y,
+	Destination.xCoord AS dst_x,
+	Destination.yCoord AS dst_y,
+	Source.shortcut
 FROM RecipeActions
 LEFT JOIN
-ScreenElement
-ON action = name 
+ScreenElement Source
+ON src = Source.name
+LEFT JOIN
+ScreenElement Destination
+ON dst = Destination.name
 ;
 
 " Input.csv DrinkRecipe.csv ScreenElement.csv | csvlook
