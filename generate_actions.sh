@@ -2,7 +2,11 @@
 
 csvsql --query "
 
-WITH DrinkRow AS (
+WITH ResetAction AS (
+	SELECT 'RESET' AS action
+	FROM Input
+	WHERE reset
+), DrinkRow AS (
 	SELECT
 		name,
 		adelhyde,
@@ -90,9 +94,15 @@ WITH DrinkRow AS (
 	CROSS JOIN (
 		SELECT 'KARMOTRINE' AS action
 	)
+), RecipeActions AS (
+	SELECT action
+	FROM ResetAction
+	UNION ALL
+	SELECT action
+	FROM IngredientActions
 )
 SELECT action, xCoord, yCoord, shortcut
-FROM IngredientActions
+FROM RecipeActions
 LEFT JOIN
 ScreenElement
 ON action = name 
