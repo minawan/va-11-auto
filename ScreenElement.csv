@@ -1,0 +1,13 @@
+name,category,xCoord,yCoord,shortcut
+ADD_ICE,Button,759,340,a
+AGE,Button,760,473,s
+LEFT_SLOT,Button,1026,242,
+RIGHT_SLOT,Button,1177,244,
+RESET,Button,875,541,
+MIX,Button,1180,542,space
+ADELHYDE,Ingredient,834,345,q
+BRONSON_EXTRACT,Ingredient,984,345,w
+POWDERED_DELTA,Ingredient,1133,345,e
+FLANERGIDE,Ingredient,835,467,r
+KARMOTRINE,Ingredient,1135,466,t
+BLENDER,Other,1026,458,
