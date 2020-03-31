@@ -156,6 +156,10 @@ WITH RefinedInput AS (
 	SELECT 'ADD_ICE' AS action
 	FROM RefinedDrinkRecipe
 	WHERE add_ice
+), AgeAction AS (
+	SELECT 'AGE' AS action
+	FROM RefinedDrinkRecipe
+	WHERE age
 ), ServeAction AS (
 	SELECT 'MIX' AS action
 	FROM RefinedInput
@@ -172,6 +176,9 @@ WITH RefinedInput AS (
 	UNION ALL
 	SELECT action
 	FROM AddIceAction
+	UNION ALL
+	SELECT action
+	FROM AgeAction
 	UNION ALL
 	SELECT action
 	FROM ServeAction
