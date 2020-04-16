@@ -8,7 +8,7 @@ read USERNAME
 echo -n "Password: "
 read PASSWORD
 
-time sql2csv --db "mysql://$USERNAME:$PASSWORD@localhost/va11auto" --query "
+sql2csv --db "mysql://$USERNAME:$PASSWORD@localhost/va11auto" --query "
 
 WITH RECURSIVE RefinedInput AS (
 SELECT
@@ -239,12 +239,12 @@ WHEN shortcut IS NULL THEN
 CASE target
 WHEN 'SHORT_WAIT' THEN 'sleep 1'
 WHEN 'LONG_WAIT' THEN 'sleep 5'
-ELSE CONCAT('mousemove ', src_x, src_y, ' sleep 0.5 mousedown 1 mousemove ', dst_x, dst_y, ' sleep 0.5 mouseup 1')
+ELSE CONCAT('mousemove ', src_x, ' ', src_y, ' sleep 0.5 mousedown 1 mousemove ', dst_x, ' ', dst_y, ' sleep 0.5 mouseup 1')
 END
 ELSE CONCAT('key --delay 100 ', shortcut)
 END AS getmouselocation
 FROM Targets;
 
-" > ${OUTPUT_FILENAME}
+" | tee ${OUTPUT_FILENAME}
 
 #xdotool ${OUTPUT_FILENAME}
