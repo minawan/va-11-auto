@@ -8,7 +8,8 @@ read USERNAME
 echo -n "Password: "
 read PASSWORD
 
-sql2csv --db "mysql://$USERNAME:$PASSWORD@localhost/va11auto" --query "
+csvsql --db "mysql://${USERNAME}:${PASSWORD}@localhost/va11auto" --insert --overwrite Input.csv
+sql2csv --db "mysql://${USERNAME}:${PASSWORD}@localhost/va11auto" --query "
 
 WITH RECURSIVE RefinedInput AS (
 SELECT
