@@ -14,51 +14,38 @@ slot_selection = ['LEFT_SLOT', 'RIGHT_SLOT']
 label_width = 10
 label_height = 2
 
-window = tk.Tk()
-for text in label_texts:
-  label = tk.Label(text=text, width=label_width, height=label_height)
-  label.grid()
+def initOptionMenu(selection, window, row):
+  var = tk.StringVar()
+  var.set(selection[0])
+  dropdown = tk.OptionMenu(window, var, *selection)
+  dropdown.grid(row=row, column=1)
+  return var
 
-drink_name = tk.StringVar()
-drink_name.set(drink_selection[0])
-drink_name_dropdown = tk.OptionMenu(window, drink_name, *drink_selection)
-drink_name_dropdown.grid(row=0, column=1)
+class App():
+  def __init__(self):
+    self.window = tk.Tk()
+    for text in label_texts:
+      label = tk.Label(text=text, width=label_width, height=label_height)
+      label.grid()
+    self.drink_name = initOptionMenu(drink_selection, self.window, 0)
+    self.reset = initOptionMenu(boolean_selection, self.window, 1)
+    self.slot = initOptionMenu(slot_selection, self.window, 2)
+    self.double = initOptionMenu(boolean_selection, self.window, 3)
+    self.add_opt = initOptionMenu(boolean_selection, self.window, 4)
+    self.serve = initOptionMenu(boolean_selection, self.window, 5)
+    run_button = tk.Button(text='Run')
+    run_button.grid()
+    run_button.bind('<Button-1>', self.handle_click)
 
-reset = tk.StringVar()
-reset.set(boolean_selection[0])
-reset_dropdown = tk.OptionMenu(window, reset, *boolean_selection)
-reset_dropdown.grid(row=1, column=1)
+  def handle_click(self, event):
+    with open('Input.csv', 'w') as config:
+      config.write('drink_name,reset,slot,double,add_opt,serve\n')
+      config.write(','.join([self.drink_name.get(), self.reset.get(), self.slot.get(), self.double.get(), self.add_opt.get(), self.serve.get()]) + '\n')
+    os.system('./run.sh')
 
-slot = tk.StringVar()
-slot.set(slot_selection[0])
-slot_dropdown = tk.OptionMenu(window, slot, *slot_selection)
-slot_dropdown.grid(row=2, column=1)
+  def mainloop(self):
+    self.window.mainloop()
 
-double = tk.StringVar()
-double.set(boolean_selection[0])
-double_dropdown = tk.OptionMenu(window, double, *boolean_selection)
-double_dropdown.grid(row=3, column=1)
-
-add_opt = tk.StringVar()
-add_opt.set(boolean_selection[0])
-add_opt_dropdown = tk.OptionMenu(window, add_opt, *boolean_selection)
-add_opt_dropdown.grid(row=4, column=1)
-
-serve = tk.StringVar()
-serve.set(boolean_selection[0])
-serve_dropdown = tk.OptionMenu(window, serve, *boolean_selection)
-serve_dropdown.grid(row=5, column=1)
-
-run_button = tk.Button(text='Run')
-run_button.grid()
-
-def handle_click(event):
-  global drink_name, reset, slot, double, add_opt, serve
-  with open('Input.csv', 'w') as config:
-    config.write('drink_name,reset,slot,double,add_opt,serve\n')
-    config.write(','.join([drink_name.get(), reset.get(), slot.get(), double.get(), add_opt.get(), serve.get()]) + '\n')
-  os.system('./run.sh')
-
-run_button.bind('<Button-1>', handle_click)
-
-window.mainloop()
+if __name__ == "__main__":
+  app = App()
+  app.mainloop()
