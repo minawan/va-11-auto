@@ -1,9 +1,17 @@
 package main
 
 import (
-	codes "google.golang.org/genproto/googleapis/rpc/codes"
+  "context"
+  "flag"
+  "fmt"
+  "log"
+  "net"
+
+  "google.golang.org/grpc"
+
+	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/genproto/googleapis/rpc/status"
-  pb "./va11auto"
+  pb "va-11-auto/va11auto"
 )
 
 var (
@@ -14,8 +22,8 @@ type drinkMakerServer struct {
   pb.UnimplementedDrinkMakerServer
 }
 
-func (s *drinkMakerServer) MakeDrink(_ pb.DrinkSpec) {
-  return status.New(codes.OK, "Success")
+func (s *drinkMakerServer) MakeDrink(context.Context, *pb.DrinkSpec) (*status.Status, error) {
+  return &status.Status{Code: int32(codes.OK), Message: "Success"}, nil
 }
 
 func newServer() *drinkMakerServer {
