@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+option go_package = "./va11auto";
+
+package va11auto;
+
+import "google/rpc/status.proto";
+
+service DrinkMaker {
+  rpc MakeDrink(DrinkSpec) returns (google.rpc.Status) {}
+}
+
+message DrinkSpec {
+  enum DrinkName {
+    INVAILD = 0;
+    BAD_TOUCH = 1;
+    BEER = 2;
+    BLEEDING_JANE = 3;
+    BLOOM_LIGHT = 4;
+    BLUE_FAIRY = 5;
+    BRANDTINI = 6;
+    COBALT_VELVET = 7;
+    CREVICE_SPIKE = 8;
+    FLAMING_MOAI = 9;
+    FLUFFY_DREAM = 10;
+    FRINGE_WEAVER = 11;
+    FROTHY_WATER = 12;
+    GRIZZLY_TEMPLE = 13;
+    GUT_PUNCH = 14;
+    MARSBLAST = 15;
+    MERCURYBLAST = 16;
+    MOONBLAST = 17;
+    PIANO_MAN = 18;
+    PIANO_WOMAN = 19;
+    PILEDRIVER = 20;
+    SPARKLE_STAR = 21;
+    SUGAR_RUSH = 22;
+    SUNSHINE_CLOUD = 23;
+    SUPLEX = 24;
+    ZEN_STAR = 25;
+  }
+  DrinkName drink_name = 1;
+  bool reset = 2;
+  enum Slot {
+    INVALID = 0;
+    LEFT_SLOT = 1;
+    RIGHT_SLOT = 2;
+  }
+  Slot slot = 3;
+  bool isBig = 4;
+  bool add_opt = 5;
+  bool serve = 6;
+}
