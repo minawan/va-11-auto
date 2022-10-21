@@ -38,6 +38,7 @@ message DrinkSpec {
     SUNSHINE_CLOUD = 23;
     SUPLEX = 24;
     ZEN_STAR = 25;
+    MAX_DRINK_NAME = 26;
   }
   DrinkName drink_name = 1;
   bool reset = 2;
@@ -47,7 +48,7 @@ message DrinkSpec {
     RIGHT_SLOT = 2;
   }
   Slot slot = 3;
-  bool isBig = 4;
+  bool is_big = 4;
   bool add_opt = 5;
   bool serve = 6;
 }

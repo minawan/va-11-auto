@@ -1,6 +1,9 @@
 import csv
+import grpc
 import tkinter as tk
 import os
+import va_11_auto_pb2
+import va_11_auto_pb2_grpc
 
 label_width = 10
 label_height = 2
@@ -48,6 +51,10 @@ class App():
       config.write('drink_name,reset,slot,double,add_opt,serve\n')
       config.write(','.join([self.drink_name.value(), self.reset.value(), self.slot.value(), self.double.value(), self.add_opt.value(), self.serve.value()]) + '\n')
     os.system('./run.sh')
+    with grpc.insecure_channel('localhost:50051') as channel:
+      stub = va_11_auto_pb2_grpc.DrinkMakerStub(channel)
+      status = stub.MakeDrink(va_11_auto_pb2.DrinkSpec(drink_name=va_11_auto_pb2.DrinkSpec.ZEN_STAR, reset=False, slot=va_11_auto_pb2.DrinkSpec.LEFT_SLOT, is_big=False, add_opt=False, serve=False))
+      print(status)
 
   def run(self):
     self.window.mainloop()
