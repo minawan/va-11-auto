@@ -6,6 +6,7 @@ import (
   "fmt"
   "log"
   "net"
+  "strconv"
 
   "google.golang.org/grpc"
 
@@ -22,7 +23,13 @@ type drinkMakerServer struct {
   pb.UnimplementedDrinkMakerServer
 }
 
-func (s *drinkMakerServer) MakeDrink(context.Context, *pb.DrinkSpec) (*status.Status, error) {
+func (s *drinkMakerServer) MakeDrink(_ context.Context, spec *pb.DrinkSpec) (*status.Status, error) {
+  fmt.Println("DrinkName: " + spec.DrinkName.String())
+  fmt.Println("Reset: " + strconv.FormatBool(spec.Reset_))
+  fmt.Println("Slot: " + spec.Slot.String())
+  fmt.Println("IsBig: " + strconv.FormatBool(spec.IsBig))
+  fmt.Println("AddOpt: " + strconv.FormatBool(spec.AddOpt))
+  fmt.Println("Serve: " + strconv.FormatBool(spec.Serve))
   return &status.Status{Code: int32(codes.OK), Message: "Success"}, nil
 }
 

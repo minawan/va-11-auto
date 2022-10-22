@@ -46,14 +46,58 @@ class App():
     run_button.bind('<Button-1>', self.handle_click)
     self.window = window
 
+  @property
+  def drink_name(self):
+    return va_11_auto_pb2.DrinkSpec.DrinkName.Value(self._drink_name.value())
+
+  @drink_name.setter
+  def drink_name(self, value):
+    self._drink_name = value
+
+  @property
+  def reset(self):
+    return self._reset.value() == 'Y'
+
+  @reset.setter
+  def reset(self, value):
+    self._reset = value
+
+  @property
+  def slot(self):
+    return va_11_auto_pb2.DrinkSpec.Slot.Value(self._slot.value())
+
+  @slot.setter
+  def slot(self, value):
+    self._slot = value
+
+  @property
+  def double(self):
+    return self._double.value() == 'Y'
+
+  @double.setter
+  def double(self, value):
+    self._double = value
+
+  @property
+  def add_opt(self):
+    return self._add_opt.value() == 'Y'
+
+  @add_opt.setter
+  def add_opt(self, value):
+    self._add_opt = value
+
+  @property
+  def serve(self):
+    return self._serve.value() == 'Y'
+
+  @serve.setter
+  def serve(self, value):
+    self._serve = value
+
   def handle_click(self, event):
-    with open('Input.csv', 'w') as config:
-      config.write('drink_name,reset,slot,double,add_opt,serve\n')
-      config.write(','.join([self.drink_name.value(), self.reset.value(), self.slot.value(), self.double.value(), self.add_opt.value(), self.serve.value()]) + '\n')
-    os.system('./run.sh')
     with grpc.insecure_channel('localhost:50051') as channel:
       stub = va_11_auto_pb2_grpc.DrinkMakerStub(channel)
-      status = stub.MakeDrink(va_11_auto_pb2.DrinkSpec(drink_name=va_11_auto_pb2.DrinkSpec.ZEN_STAR, reset=False, slot=va_11_auto_pb2.DrinkSpec.LEFT_SLOT, is_big=False, add_opt=False, serve=False))
+      status = stub.MakeDrink(va_11_auto_pb2.DrinkSpec(drink_name=self.drink_name, reset=self.reset, slot=self.slot, is_big=self.double, add_opt=self.add_opt, serve=self.serve))
       print(status)
 
   def run(self):
