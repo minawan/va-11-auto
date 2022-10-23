@@ -2,6 +2,7 @@ package main
 
 import (
   "context"
+  "os/exec"
   "flag"
   "fmt"
   "log"
@@ -44,6 +45,10 @@ func (s *drinkMakerServer) MakeDrink(_ context.Context, spec *pb.DrinkSpec) (*st
   fmt.Println("Serve: " + serve)
   config := []byte(fmt.Sprintf("drink_name,reset,slot,double,add_opt,serve\n%s,%s,%s,%s,%s,%s\n", drinkName, reset, slot, isBig, addOpt, serve))
   if err := os.WriteFile("Input.csv", config, 0644); err != nil {
+    return &status.Status{Code: int32(codes.Internal), Message: err.Error()}, err
+  }
+  cmd := exec.Command("./run.sh")
+  if err := cmd.Run(); err != nil {
     return &status.Status{Code: int32(codes.Internal), Message: err.Error()}, err
   }
   return &status.Status{Code: int32(codes.OK), Message: "Success"}, nil
