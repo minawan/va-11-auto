@@ -5,8 +5,8 @@ import (
   "flag"
   "fmt"
   "log"
+  "os"
   "net"
-  "strconv"
 
   "google.golang.org/grpc"
 
@@ -24,12 +24,28 @@ type drinkMakerServer struct {
 }
 
 func (s *drinkMakerServer) MakeDrink(_ context.Context, spec *pb.DrinkSpec) (*status.Status, error) {
-  fmt.Println("DrinkName: " + spec.DrinkName.String())
-  fmt.Println("Reset: " + strconv.FormatBool(spec.Reset_))
-  fmt.Println("Slot: " + spec.Slot.String())
-  fmt.Println("IsBig: " + strconv.FormatBool(spec.IsBig))
-  fmt.Println("AddOpt: " + strconv.FormatBool(spec.AddOpt))
-  fmt.Println("Serve: " + strconv.FormatBool(spec.Serve))
+  format_bool := func(value bool) string {
+    if value {
+      return "Y"
+    }
+    return "N"
+  }
+  drinkName := spec.DrinkName.String()
+  reset := format_bool(spec.Reset_)
+  slot := spec.Slot.String()
+  isBig := format_bool(spec.IsBig)
+  addOpt := format_bool(spec.AddOpt)
+  serve := format_bool(spec.Serve)
+  fmt.Println("DrinkName: " + drinkName)
+  fmt.Println("Reset: " + reset)
+  fmt.Println("Slot: " + slot)
+  fmt.Println("IsBig: " + isBig)
+  fmt.Println("AddOpt: " + addOpt)
+  fmt.Println("Serve: " + serve)
+  config := []byte(fmt.Sprintf("drink_name,reset,slot,double,add_opt,serve\n%s,%s,%s,%s,%s,%s\n", drinkName, reset, slot, isBig, addOpt, serve))
+  if err := os.WriteFile("Input.csv", config, 0644); err != nil {
+    return &status.Status{Code: int32(codes.Internal), Message: err.Error()}, err
+  }
   return &status.Status{Code: int32(codes.OK), Message: "Success"}, nil
 }
 
