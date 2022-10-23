@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-OUTPUT_FILENAME=output.txt
+OUTPUT_FILENAME=$1
 
 csvsql --query "
 

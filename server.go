@@ -2,6 +2,7 @@ package main
 
 import (
   "context"
+  "io/ioutil"
   "os/exec"
   "flag"
   "fmt"
@@ -47,7 +48,13 @@ func (s *drinkMakerServer) MakeDrink(_ context.Context, spec *pb.DrinkSpec) (*st
   if err := os.WriteFile("Input.csv", config, 0644); err != nil {
     return &status.Status{Code: int32(codes.Internal), Message: err.Error()}, err
   }
-  cmd := exec.Command("./run.sh")
+  file, err := ioutil.TempFile("/tmp", "va-11-auto-")
+  if err != nil {
+    return &status.Status{Code: int32(codes.Internal), Message: err.Error()}, err
+  }
+  filename := file.Name()
+  defer os.Remove(filename)
+  cmd := exec.Command("./run.sh", filename)
   if err := cmd.Run(); err != nil {
     return &status.Status{Code: int32(codes.Internal), Message: err.Error()}, err
   }
