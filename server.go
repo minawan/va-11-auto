@@ -12,8 +12,8 @@ import (
 
   "google.golang.org/grpc"
 
-	codes "google.golang.org/grpc/codes"
-	status "google.golang.org/genproto/googleapis/rpc/status"
+  codes "google.golang.org/grpc/codes"
+  status "google.golang.org/genproto/googleapis/rpc/status"
   pb "va-11-auto/va11auto"
 )
 
